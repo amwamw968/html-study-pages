@@ -1,0 +1,3012 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="artifact-type" content="dashboard">
+<meta name="design-style" content="bauhaus">
+<title>Lesson 3 进位制 · 知识点与题库复习工作台</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+
+  /* 1. Bauhaus surfaces & ink */
+  --background: #f5f0e8;
+  --surface-container-low: #f2ede5;
+  --surface-container: #eee9e0;
+  --surface-container-high: #e8e3da;
+  --surface-white: #ffffff;
+
+  --on-surface: #1a1a1a;
+  --on-surface-variant: #4a4a4a;
+
+  --outline: #1a1a1a;
+  --outline-variant: #d0cbc3;
+
+  --primary: #1a1a1a;
+  --on-primary: #ffffff;
+  --primary-container: #ffcc00;
+  --on-primary-container: #1a1a1a;
+  --secondary: #e63b2e;
+  --on-secondary: #ffffff;
+  --tertiary: #0055ff;
+  --on-tertiary: #ffffff;
+  --error: #cc0000;
+  --on-error: #ffffff;
+
+  /* Data series */
+  --data-1: #e63b2e;
+  --data-2: #0055ff;
+  --data-3: #1a1a1a;
+  --data-4: #9a7300;
+  --data-context: #b5afa5;
+
+  /* Fonts (Noto Sans SC listed first for CJK) */
+  --font-headline: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+  --font-body: 'Noto Sans SC', 'Inter', sans-serif;
+  --font-label: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+
+  /* Shape */
+  --rounded: 0.125rem;
+  --rounded-lg: 0.25rem;
+  --rounded-full: 0.75rem;
+
+  /* Style effects */
+  --border-thick: 3px solid var(--outline);
+  --border-medium: 2px solid var(--outline);
+  --offset-shadow: 5px 5px 0 var(--outline);
+  --offset-shadow-sm: 3px 3px 0 var(--outline);
+  --rule-heavy: 6px solid var(--outline);
+
+  /* 2. Shared semantic & scale tokens */
+  --positive: #156d3f;
+  --on-positive: #ffffff;
+  --positive-container: #d8efe0;
+  --on-positive-container: #114b2c;
+  --warning: #8f5800;
+  --warning-container: #fff3c4;
+  --focus: #0055ff;
+
+  /* Type scale (Dashboard / Tool tighter ratio) */
+  --display-size: clamp(1.85rem, 1.4rem + 1.8vw, 2.75rem);
+  --headline-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.2rem);
+  --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+  --label-size: 0.75rem;
+
+  /* Spacing scale (4pt base) */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+}
+
+/* Base reset */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; margin: 0; padding: 0; }
+header { position: static !important; }
+
+body {
+  background-color: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.page-grid {
+  display: grid;
+  gap: var(--space-xl);
+  padding: var(--space-lg);
+  max-width: 1240px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.page-grid * { min-width: 0; }
+
+/* Masthead / Header */
+.masthead {
+  border-top: var(--rule-heavy);
+  border-bottom: var(--border-thick);
+  padding: var(--space-lg) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: end;
+}
+
+.kicker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.kicker-block {
+  display: inline-block;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  background: var(--primary);
+  color: var(--on-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-medium);
+}
+
+.kicker-block--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.kicker-block--yellow {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.kicker-block--red {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+
+.flag-trio {
+  display: inline-flex;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.flag-swatch {
+  width: 14px;
+  height: 18px;
+  border: var(--border-medium);
+  display: inline-block;
+}
+.flag-swatch--red { background: var(--secondary); }
+.flag-swatch--yellow { background: var(--primary-container); }
+.flag-swatch--blue { background: var(--tertiary); }
+
+.title {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: var(--display-size);
+  line-height: 1.12;
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--on-surface);
+}
+
+.title mark {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: 0 var(--space-xs);
+  box-decoration-break: clone;
+}
+
+.lede {
+  margin: 0;
+  color: var(--on-surface-variant);
+  max-width: 66ch;
+}
+
+.quick-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.quick-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--space-sm);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  color: var(--on-surface);
+  text-decoration: none;
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.quick-nav-link:hover {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.quick-nav-link:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.source-pill-box {
+  background: var(--surface-container-low);
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  padding: var(--space-md);
+}
+
+.source-pill-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.source-pill-title {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  margin: 0;
+  color: var(--on-surface);
+}
+
+.sync-badge {
+  font-family: var(--font-label);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border: 1.5px solid var(--outline);
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+}
+
+.source-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+}
+
+/* KPI Summary Row */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+
+.kpi-block {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container-low);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.kpi-block--highlight {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.kpi-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+}
+
+.kpi-block--highlight .kpi-label {
+  color: var(--on-primary-container);
+}
+
+.kpi-value {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-sub {
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+.kpi-block--highlight .kpi-sub {
+  color: var(--on-primary-container);
+}
+
+.kpi-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.progress-track {
+  width: 100%;
+  height: 12px;
+  border: var(--border-medium);
+  background: var(--surface-white);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--tertiary);
+  transition: width var(--dur-short) var(--ease-out);
+}
+
+/* Section Openings (One-accent rule) */
+.section-open {
+  border-top: var(--space-sm) solid var(--section-accent, var(--tertiary));
+  padding-top: var(--space-lg);
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.section-open--blue { --section-accent: var(--tertiary); }
+.section-open--red { --section-accent: var(--secondary); }
+.section-open--yellow { --section-accent: var(--primary-container); }
+.section-open--black { --section-accent: var(--primary); }
+
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-md);
+}
+
+.section-heading {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--headline-size);
+  line-height: 1.2;
+  margin: var(--space-xs) 0 0 0;
+}
+
+.section-desc {
+  margin: var(--space-xs) 0 0 0;
+  color: var(--on-surface-variant);
+  max-width: 68ch;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--background);
+  color: var(--on-surface);
+  cursor: pointer;
+  transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+
+.btn:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+.btn--primary {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.btn--primary:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.btn--blue:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn--danger {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+
+.btn--small {
+  min-height: 36px;
+  padding: 0 var(--space-sm);
+  font-size: 0.8125rem;
+}
+
+/* Comparison Tabs & Panel */
+.tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.tab-btn {
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  cursor: pointer;
+  box-shadow: var(--offset-shadow-sm);
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.tab-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.tab-btn.is-active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.comparison-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.panel-block {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container-low);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.panel-intro {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  border-left: 6px solid var(--tertiary);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.panel-intro h3 {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+}
+
+.panel-intro p {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--on-surface-variant);
+}
+
+/* Interactive Step-by-Step Demo Box */
+.sim-box {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.sim-stage {
+  border: var(--border-medium);
+  background: var(--background);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.demo-steps {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.demo-step-row {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--surface-white);
+  border: 1.5px solid var(--outline-variant);
+  border-left: 4px solid var(--outline-variant);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+
+.demo-step-row.is-done {
+  border-left-color: var(--positive);
+}
+
+.demo-step-row.is-current {
+  border: 2px solid var(--outline);
+  border-left: 6px solid var(--tertiary);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  font-weight: 700;
+}
+
+.demo-step-row.is-locked {
+  opacity: 0.45;
+  background: var(--surface-container);
+}
+
+.demo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* Math inline formatting */
+.math-inline, .math-expr {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  display: inline;
+  background: var(--surface-container);
+  border: 1px solid var(--outline-variant);
+  padding: 0 5px;
+  border-radius: var(--rounded);
+  line-height: 1.35;
+}
+
+.math-inline sub, .math-inline sup {
+  font-size: 0.72em;
+  line-height: 0;
+}
+
+.overline {
+  text-decoration: overline;
+}
+
+.not-mentioned {
+  display: inline-block;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border: 1.5px solid var(--warning);
+  background: var(--warning-container);
+  color: var(--warning);
+}
+
+/* Search & Filter Toolbar */
+.toolbar-panel {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.toolbar-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: var(--space-md);
+  align-items: end;
+}
+
+.field-group {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.field-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--on-surface);
+}
+
+.input-control, .select-control {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-sm);
+  border: 0;
+  border-bottom: var(--border-thick);
+  background: var(--surface-white);
+  font-size: var(--body-size);
+  border-radius: 0;
+}
+
+.select-control {
+  padding-right: var(--space-lg);
+  cursor: pointer;
+}
+
+.input-control:focus-visible, .select-control:focus-visible {
+  border-bottom-color: var(--tertiary);
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.filter-rows-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.pill-btn {
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  background: var(--surface-white);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.pill-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.pill-btn.is-active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  box-shadow: var(--offset-shadow-sm);
+}
+
+.results-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  border-top: 1px solid var(--outline-variant);
+  padding-top: var(--space-sm);
+}
+
+/* Problem Cards Grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.problem-card {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.problem-card.is-mastered {
+  background: var(--surface-container-low);
+}
+
+.card-accent-bar {
+  height: 8px;
+  width: 100%;
+  border-bottom: var(--border-medium);
+}
+.card-accent-bar--blue { background: var(--tertiary); }
+.card-accent-bar--red { background: var(--secondary); }
+.card-accent-bar--yellow { background: var(--primary-container); }
+.card-accent-bar--black { background: var(--primary); }
+
+.card-body {
+  padding: var(--space-md) var(--space-lg);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.card-top-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.tag {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  border: var(--border-medium);
+  padding: 2px 7px;
+  border-radius: var(--rounded);
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+.tag--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.tag--red {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+
+.tag--yellow {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.tag--black {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.tag--subtle {
+  border: 1px solid var(--outline-variant);
+  background: var(--surface-container-low);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+}
+
+.mastery-btn {
+  min-height: 38px;
+  padding: 0 var(--space-sm);
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  background: var(--surface-white);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mastery-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.mastery-btn.is-done {
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+}
+
+.card-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+  line-height: 1.3;
+}
+
+.card-prompt {
+  margin: 0;
+  color: var(--on-surface);
+  font-size: 0.94rem;
+  line-height: 1.65;
+  overflow-wrap: break-word;
+}
+
+/* Accordion inside card */
+.accordion-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-xs);
+}
+
+.accordion-trigger {
+  width: 100%;
+  min-height: 40px;
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-medium);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--dur-micro) var(--ease-out);
+}
+
+.accordion-trigger:hover,
+.accordion-trigger[aria-expanded="true"] {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.accordion-panel {
+  border: var(--border-medium);
+  background: var(--background);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.accordion-panel[hidden] {
+  display: none;
+}
+
+.answer-callout {
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+  border: 1.5px solid var(--positive);
+  padding: var(--space-sm);
+  font-size: 0.91rem;
+  line-height: 1.6;
+}
+
+.quote-box {
+  background: var(--surface-container);
+  border-left: 4px solid var(--primary);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.82rem;
+  color: var(--on-surface-variant);
+}
+
+.quote-text {
+  margin: 4px 0 0 0;
+  font-family: var(--font-label);
+  font-size: 0.82rem;
+  color: var(--on-surface);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.card-footer {
+  border-top: var(--border-medium);
+  background: var(--surface-container);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.78rem;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+}
+
+/* Empty State */
+.empty-state {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-xl);
+  display: none;
+  gap: var(--space-md);
+  justify-items: start;
+}
+
+.empty-state.is-visible {
+  display: grid;
+}
+
+/* SOP & Formula Strip */
+.sop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.sop-card {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-xs);
+  align-content: start;
+}
+
+.sop-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.sop-title {
+  margin: var(--space-xs) 0 0 0;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.mantra-banner {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: var(--space-lg);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.mantra-quote {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.45rem);
+  line-height: 1.45;
+}
+
+.formula-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-xs);
+  font-size: 0.88rem;
+}
+
+.formula-list li {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  padding: var(--space-xs) var(--space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Tables */
+.table-wrap {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  overflow-x: auto;
+}
+
+.variant-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.variant-table thead th {
+  background: var(--surface-container-high);
+  border-bottom: var(--border-thick);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  white-space: nowrap;
+}
+
+.variant-table tbody td {
+  border-bottom: 1px solid var(--outline-variant);
+  padding: var(--space-sm) var(--space-md);
+  vertical-align: top;
+}
+
+.variant-table tbody td.num {
+  font-family: var(--font-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.variant-table tbody tr:hover {
+  background: var(--surface-container-low);
+}
+
+/* Quiz Generator */
+.quiz-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-md);
+  align-items: end;
+}
+
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--outline-variant);
+}
+
+.toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 40px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.check-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--tertiary);
+  cursor: pointer;
+}
+
+.inline-notice {
+  border: var(--border-medium);
+  border-left: 8px solid var(--tertiary);
+  background: var(--surface-white);
+  padding: var(--space-sm) var(--space-md);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.inline-notice.is-warn {
+  border-left-color: var(--secondary);
+  background: var(--warning-container);
+  color: var(--warning);
+}
+
+.quiz-sheet {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.quiz-question {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.quiz-q-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  border-bottom: var(--border-medium);
+  padding-bottom: var(--space-xs);
+}
+
+.quiz-scratch-line {
+  border-bottom: 2px dashed var(--outline-variant);
+  height: 2.25rem;
+}
+
+/* Footer */
+.site-footer {
+  border-top: var(--rule-heavy);
+  padding: var(--space-lg) 0 var(--space-xl) 0;
+  display: grid;
+  gap: var(--space-sm);
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 960px) {
+  .masthead { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .comparison-shell { grid-template-columns: 1fr; }
+  .sop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mantra-banner { grid-template-columns: 1fr; }
+  .toolbar-inputs { grid-template-columns: 1fr; }
+  .filter-rows-split { grid-template-columns: 1fr; }
+  .quiz-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .page-grid {
+    grid-template-columns: 1fr;
+    padding: var(--space-md);
+    gap: var(--space-lg);
+  }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .sop-grid { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: 1fr; }
+  .quiz-fields { grid-template-columns: 1fr; }
+  .accordion-actions { grid-template-columns: 1fr; }
+}
+
+@media print {
+  body { background: #ffffff; }
+  .masthead,
+  .kpi-grid,
+  .quick-nav,
+  .toolbar-panel,
+  .no-print,
+  #sec-compare,
+  #sec-library,
+  #sec-sop,
+  .site-footer {
+    display: none !important;
+  }
+  .page-grid {
+    max-width: 100%;
+    padding: 0;
+    gap: 1rem;
+  }
+  .section-open {
+    border-top: none;
+    padding-top: 0;
+  }
+  .quiz-question {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="page-grid">
+
+  <!-- Masthead -->
+  <header class="masthead">
+    <div>
+      <div class="kicker-row">
+        <span class="kicker-block">Lesson 3 · 第 4 讲</span>
+        <span class="kicker-block kicker-block--blue">进位制专题</span>
+        <span class="flag-trio" aria-hidden="true">
+          <span class="flag-swatch flag-swatch--red"></span>
+          <span class="flag-swatch flag-swatch--yellow"></span>
+          <span class="flag-swatch flag-swatch--blue"></span>
+        </span>
+      </div>
+      <h1 class="title">进位制：<mark>知识点与题库</mark>复习工作台</h1>
+      <p class="lede">整合课堂讲义《Lesson 3-进位制.pdf》与配套练习《Lesson 3-进位制-练习册.pdf》全部核心规则、例题、练习、挑战与拓展题目。支持按模块、进制、难度与题型精确检索，切换对比转化与运算规则，展开原件摘录对照，本地记录复习打卡，并一键随机组卷与导出打印。</p>
+      <nav class="quick-nav" aria-label="工作台板块跳转">
+        <a class="quick-nav-link" href="#sec-compare">01 规则与算法对比</a>
+        <a class="quick-nav-link" href="#sec-library">02 知识点与原题检索库</a>
+        <a class="quick-nav-link" href="#sec-sop">03 核心 SOP 与口诀</a>
+        <a class="quick-nav-link" href="#sec-quiz">04 本地自动组卷器</a>
+      </nav>
+    </div>
+
+    <div class="source-pill-box">
+      <div class="source-pill-head">
+        <p class="source-pill-title">本工作台唯一内容来源</p>
+        <span class="sync-badge">进度自动保存</span>
+      </div>
+      <ul class="source-list">
+        <li>《Lesson 3-进位制.pdf》（第4讲 进位制I：Key Points / Module 1–3）</li>
+        <li>《Lesson 3-进位制-练习册.pdf》（Practice / Challenge / Extension 原题与解析）</li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- KPI Summary Row -->
+  <section class="kpi-grid" aria-label="复习概览指标">
+    <div class="kpi-block kpi-block--highlight">
+      <span class="kpi-label">当前复习进度</span>
+      <div class="kpi-value" id="kpi-reviewed">0 / 44 条</div>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="kpi-progress-bar"></div>
+      </div>
+      <div class="kpi-footer-row">
+        <span class="kpi-sub" id="kpi-progress-pct">已复习 0%</span>
+        <button type="button" class="btn btn--small" id="btn-reset-progress" onclick="handleResetProgress(this)">重置复习打卡</button>
+      </div>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">收录来源总条目</span>
+      <div class="kpi-value" id="kpi-total">44 条</div>
+      <span class="kpi-sub">讲义核心要点、例题与练习册原题（无编造数据）</span>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">覆盖进制范围</span>
+      <div class="kpi-value" id="kpi-bases">2–20 进制</div>
+      <span class="kpi-sub">含 2/3/4/5/6/7/8/9/10/12/14/16/20 及 n 进制</span>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">当前筛选命中条目</span>
+      <div class="kpi-value" id="kpi-matched">44 条</div>
+      <span class="kpi-sub">随下方搜索与多维筛选标签实时更新</span>
+    </div>
+  </section>
+
+  <!-- Section 1: Switchable Comparison Tabs & Interactive Step Walkthrough -->
+  <section class="section-open section-open--blue" id="sec-compare" aria-labelledby="sec-compare-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--blue">核心规则对比台</span>
+        <h2 class="section-heading" id="sec-compare-title">进制转化与运算规则对比（五大算法 + 分步拆解演示）</h2>
+        <p class="section-desc">切换下方标签对比讲义中的五大核心规则与计算方法，明确各进制适用边界；右侧支持逐步点击演练讲义原题拆解过程；资料未覆盖的进制均标明「来源未提及」。</p>
+      </div>
+    </div>
+
+    <div class="tab-bar" role="tablist" aria-label="算法与规则对比选项卡">
+      <button type="button" class="tab-btn is-active" role="tab" id="tab-btn-power" aria-selected="true" onclick="switchCompareTab('power')">1. 按权展开法 (n→10)</button>
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-short" aria-selected="false" onclick="switchCompareTab('short')">2. 短除法与乘n取整 (10→n)</button>
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-bridge" aria-selected="false" onclick="switchCompareTab('bridge')">3. 搭桥与乘方分组 (m↔n)</button>
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-calc" aria-selected="false" onclick="switchCompareTab('calc')">4. 四则运算与凑整巧算</button>
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-judge" aria-selected="false" onclick="switchCompareTab('judge')">5. 计数桥梁与判断进制</button>
+    </div>
+
+    <div id="compare-tabpanel" class="comparison-shell" role="tabpanel" aria-live="polite">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- Section 2: Searchable & Filterable Knowledge/Problem Explorer -->
+  <section class="section-open section-open--red" id="sec-library" aria-labelledby="sec-library-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block">题型检索与复习打卡</span>
+        <h2 class="section-heading" id="sec-library-title">知识点与原题检索库（44 条全收录）</h2>
+        <p class="section-desc">每张题卡按板块配色并标注进制、难度、题型与来源文件；支持关键词搜索与多维标签筛选，点击展开答案解析与原文摘录，并打卡复习状态。</p>
+      </div>
+    </div>
+
+    <div class="toolbar-panel">
+      <div class="toolbar-inputs">
+        <div class="field-group">
+          <label class="field-label" for="search-input">关键词检索（支持题干、进制、方法或数字，如：短除法、按权、八卦制、2017、凑整、20进制、年龄）</label>
+          <input type="search" id="search-input" class="input-control" placeholder="输入关键词，如：短除法、按权、八卦制、2017、凑整、20进制、年龄..." oninput="handleSearchInput(this.value)">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="status-filter">按复习状态筛选</label>
+          <select id="status-filter" class="select-control" onchange="setStatusFilter(this.value)">
+            <option value="全部">全部状态</option>
+            <option value="待复习">仅看「待复习」</option>
+            <option value="已复习">仅看「已复习」</option>
+          </select>
+        </div>
+        <div>
+          <button type="button" class="btn" onclick="resetAllFilters()">清空全部筛选</button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <span class="field-label">知识板块筛选</span>
+        <div class="filter-pills" id="pills-section"></div>
+      </div>
+
+      <div class="field-group">
+        <span class="field-label">进制类型筛选</span>
+        <div class="filter-pills" id="pills-base"></div>
+      </div>
+
+      <div class="filter-rows-split">
+        <div class="field-group">
+          <span class="field-label">难度等级筛选</span>
+          <div class="filter-pills" id="pills-difficulty"></div>
+        </div>
+        <div class="field-group">
+          <span class="field-label">题型分类筛选</span>
+          <div class="filter-pills" id="pills-qtype"></div>
+        </div>
+      </div>
+
+      <div class="results-meta">
+        <span id="results-count-text">正在加载条目…</span>
+        <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+          <button type="button" class="btn btn--small" onclick="expandAllVisible()">全部展开解析</button>
+          <button type="button" class="btn btn--small" onclick="collapseAllVisible()">全部收起面板</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="empty-state" role="status">
+      <h3 style="margin:0; font-size:var(--subhead-size);">当前筛选条件下未匹配到条目（或该内容「来源未提及」）</h3>
+      <p style="margin:0; color:var(--on-surface-variant);">上传的《Lesson 3-进位制.pdf》与《Lesson 3-进位制-练习册.pdf》中暂无同时满足当前搜索词与多维条件的条目。</p>
+      <button type="button" class="btn btn--primary" onclick="resetAllFilters()">重置全部筛选条件</button>
+    </div>
+
+    <div id="entries-container" class="card-grid"></div>
+  </section>
+
+  <!-- Section 3: 4-Step Core SOP & Mantra -->
+  <section class="section-open section-open--yellow" id="sec-sop" aria-labelledby="sec-sop-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--yellow">核心方法与口诀总览</span>
+        <h2 class="section-heading" id="sec-sop-title">进位制 4 步解题 SOP 与必背核心法则</h2>
+        <p class="section-desc">严格提炼自讲义 Key Points（KP-01 至 KP-08），覆盖数码合法性检查、互化路径选择、四则凑整与未知进制判定。</p>
+      </div>
+    </div>
+
+    <div class="sop-grid">
+      <article class="sop-card">
+        <span class="sop-num">01</span>
+        <h3 class="sop-title">认底数 · 明数码</h3>
+        <p style="margin:0; font-size:0.9rem;">n 进制数码只能是 <span class="math-inline">0 ~ (n-1)</span>，不存在 1 进制；大于 10 进制时 10→A、11→B、12→C、13→D。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>避坑：</strong>如八进制中出现 8 或 9 必不合法。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">02</span>
+        <h3 class="sop-title">选路径 · 巧互化</h3>
+        <p style="margin:0; font-size:0.9rem;">n→10 用<strong>按权相加</strong>；10→n 整数用<strong>短除倒取余</strong>、小数<strong>乘 n 取整正序排</strong>；有乘方关系用<strong>分段法</strong>。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>提速：</strong>如 3²=9 两两分段，2³=8 三三分段。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">03</span>
+        <h3 class="sop-title">满 n 进 1 · 凑整算</h3>
+        <p style="margin:0; font-size:0.9rem;">四则运算严格「逢 n 进 1，借 1 当 n」；加减巧算用「个位凑 n、高位凑 (n-1)」，复杂乘除可转十进制再转回。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>原理：</strong>运算优先级与十进制完全一致。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">04</span>
+        <h3 class="sop-title">三步法 · 判进制</h3>
+        <p style="margin:0; font-size:0.9rem;">未知进制题依次做：① 看最大数码定下限；② 看个位差求因数（或列方程）；③ 与十进制真值比大小定范围。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>桥梁：</strong>计数排位题以「0 是桥梁」映射为 n 进制。</p>
+      </article>
+    </div>
+
+    <div class="mantra-banner">
+      <div>
+        <span class="kicker-block" style="margin-bottom:var(--space-sm);">讲义核心速记口诀</span>
+        <p class="mantra-quote">“满 n 进一，借一当 n；<br>n 转十按权加，十转 n 短除倒取余；<br>判进制三步走：看最大、看个位、比十大小。”</p>
+      </div>
+      <ul class="formula-list">
+        <li>
+          <span><strong>n 进制 → 十进制（KP-02）</strong></span>
+          <span class="math-inline">(324)<sub>5</sub> = 4×1 + 2×5 + 3×25 = 89</span>
+        </li>
+        <li>
+          <span><strong>十进制 → n 进制（KP-03）</strong></span>
+          <span class="math-inline">除 n 到商为 0，余数从下往上倒排</span>
+        </li>
+        <li>
+          <span><strong>乘方分组速换（KP-04）</strong></span>
+          <span class="math-inline">a<sup>m</sup> = b ⇒ 从右往左 m 位一段直换</span>
+        </li>
+        <li>
+          <span><strong>小数互化口诀（KP-05）</strong></span>
+          <span class="math-inline">n→10 乘 n<sup>-k</sup>；10→n 连续乘 n 取整正排</span>
+        </li>
+        <li>
+          <span><strong>加减凑整巧算（KP-07）</strong></span>
+          <span class="math-inline">个位凑 n，其余高位凑 (n - 1)</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 4: Client-Side Auto-Quiz Generator -->
+  <section class="section-open section-open--black" id="sec-quiz" aria-labelledby="sec-quiz-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block">原题抽测与打印导出</span>
+        <h2 class="section-heading" id="sec-quiz-title">本地自动组卷生成器</h2>
+        <p class="section-desc">完全在浏览器本地运行：按指定知识模块、难度、题型与题量，严格从《Lesson 3-进位制.pdf》与《Lesson 3-进位制-练习册.pdf》原题库随机抽取组卷，绝不编造新题。</p>
+      </div>
+    </div>
+
+    <div class="toolbar-panel no-print">
+      <div class="quiz-fields">
+        <div class="field-group">
+          <label class="field-label" for="quiz-section">知识模块</label>
+          <select id="quiz-section" class="select-control" onchange="updateQuizConfig()">
+            <option value="全部">全部模块</option>
+            <option value="模块一：进制认识与转化">模块一：进制认识与转化</option>
+            <option value="模块二：进制的计算">模块二：进制的计算</option>
+            <option value="模块三：进制综合应用">模块三：进制综合应用</option>
+            <option value="练习册：Practice 基础">练习册：Practice 基础</option>
+            <option value="练习册：Challenge &amp; Extension">练习册：Challenge &amp; Extension</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="quiz-difficulty">难度等级</label>
+          <select id="quiz-difficulty" class="select-control" onchange="updateQuizConfig()">
+            <option value="全部">全部难度</option>
+            <option value="基础入门">基础入门</option>
+            <option value="进阶探索">进阶探索</option>
+            <option value="挑战拓展">挑战拓展</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="quiz-qtype">题型范围</label>
+          <select id="quiz-qtype" class="select-control" onchange="updateQuizConfig()">
+            <option value="全部">全部题型</option>
+            <option value="进制互化">进制互化</option>
+            <option value="四则计算">四则计算</option>
+            <option value="计数排位">计数排位</option>
+            <option value="判断进制">判断进制</option>
+            <option value="综合与小数">综合与小数</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="quiz-count">期望抽取题量</label>
+          <select id="quiz-count" class="select-control" onchange="updateQuizConfig()">
+            <option value="3">3 题</option>
+            <option value="5" selected>5 题</option>
+            <option value="8">8 题</option>
+            <option value="10">10 题</option>
+            <option value="15">15 题</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+        <div class="toggle-group">
+          <label class="check-label">
+            <input type="checkbox" id="quiz-show-answers" onchange="toggleQuizDisplay()">
+            <span>显示参考答案与解析</span>
+          </label>
+          <label class="check-label">
+            <input type="checkbox" id="quiz-show-source" checked onchange="toggleQuizDisplay()">
+            <span>显示来源文件名与原文</span>
+          </label>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
+          <button type="button" class="btn btn--primary" onclick="generateQuiz()">随机生成试卷</button>
+          <button type="button" class="btn btn--blue" onclick="printQuiz()">打印试卷</button>
+          <button type="button" class="btn" onclick="exportQuizTxt()">导出试卷 (.txt)</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="quiz-status-banner" class="inline-notice" hidden></div>
+    <div id="quiz-output" class="quiz-sheet"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div><strong>来源边界声明：</strong>本工具展示的所有数字、公式、法则与例题均严格取材于上传文件《Lesson 3-进位制.pdf》与《Lesson 3-进位制-练习册.pdf》。未在资料中出现的进制、规则或题型均已显式标注「来源未提及」，不作任何外部增补或编造。</div>
+    <div>注：针对原始 PDF 扫描识别中的个别印刷/识别模糊处（如《Lesson 3-进位制-练习册.pdf》Practice 第 2(3) 题短除竖式明确得余数 1、4、0、3、4 即 (43041)<sub>5</sub>，以及 Challenge 第 3(1) 题竖式结果为 (23445)<sub>9</sub>），均已在解析与原文对照中如实说明。</div>
+  </footer>
+
+</div>
+
+<api-shim></api-shim>
+<script>
+    const STUDY_ITEMS = [
+      {
+        id: `KP-01`,
+        title: `n进制基本定义、数字组成与读写规则`,
+        section: `核心要点`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`n进制通则`, `8进制`, `12/14进制`],
+        difficulty: `基础入门`,
+        qtype: `概念规则`,
+        isQuizEligible: false,
+        stemHtml: `n进制的核心规则是「满n进1，借1当n」（不存在1进制）。数字由 <span class="math-inline">0, 1, 2, 3, ..., (n-1)</span> 组成；当进制 <span class="math-inline">n &gt; 10</span> 时，大于 9 的数码按顺序使用大写字母（10→A，11→B，12→C，13→D…），字母不够时使用「字母+角标」。书写记作 <span class="math-inline">(数)<sub>n</sub></span>，如 <span class="math-inline">(132)<sub>8</sub></span> 读作「八进制数132」（只读数字）。`,
+        answerHtml: `常见易错点：八进制只能包含 0~7，因此 <span class="math-inline">(139)<sub>8</sub></span> 和 <span class="math-inline">(138)<sub>8</sub></span> 均不合法；不存在「一进制」。`,
+        quote: `一、n进制：\n1.满n进1，借1当n\n2.数字组成：0,1,2,3,......,(n-1)\n②n进制：满几进1（不存在1进制）\n读写：( )_n  e.g. (132)_8 八进制数132（只读数字）\n(139)_8 ×  (138)_8 ×\n②大进制(>10)：大写字母按顺序使用\n③字母不够：字母+角标`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Key Points · 一、n进制`
+      },
+      {
+        id: `KP-02`,
+        title: `n进制转化为十进制：位值原理，按权相加`,
+        section: `核心要点`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`n进制通则`, `5进制`, `10进制`],
+        difficulty: `基础入门`,
+        qtype: `概念规则`,
+        isQuizEligible: false,
+        stemHtml: `将 n进制数转化为十进制数，采用「位值原理，按权相加」。从个位起向左各数位的位权依次为 <span class="math-inline">n<sup>0</sup>(=1), n<sup>1</sup>, n<sup>2</sup>, n<sup>3</sup>...</span>。讲义示例：<span class="math-inline">(324)<sub>5</sub> = 4×1 + 2×5 + 3×25 = 89</span>（即 3 个 25、2 个 5、4 个 1）。`,
+        answerHtml: `核心步骤：写出每位数字对应 <span class="math-inline">n</span> 的幂次（权），再相乘求和。`,
+        quote: `二、进制的互化：\n1.n进制转化为十进制：位值原理，按权相加\n(324)_5 = 4×1 + 2×5 + 3×25 = 89\n3个25  2个5  4个1\n5^2    5^1    5^0`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Key Points · 二、进制的互化 (1)`
+      },
+      {
+        id: `KP-03`,
+        title: `十进制转化为n进制：短除法与倒取余数`,
+        section: `核心要点`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`n进制通则`, `10进制`, `5进制`, `3进制`],
+        difficulty: `基础入门`,
+        qtype: `概念规则`,
+        isQuizEligible: false,
+        stemHtml: `将十进制数转化为 n进制数分两步：第一步「短除法，除 n（除到商为 0 为止）」；第二步「倒取余数」。讲义示例：<span class="math-inline">1234</span> 化为五进制，连续除以 5 得余数 4、1、4、4、1，倒取余数得 <span class="math-inline">(14414)<sub>5</sub></span>；另附 <span class="math-inline">123</span> 除 3 短除式（余数 0、2、1、1、1，即 <span class="math-inline">(11120)<sub>3</sub></span>）。`,
+        answerHtml: `务必除到商为 0 为止，且余数必须「从下往上」倒序排列。`,
+        quote: `2.十进制转化为n进制\n第一步：短除法，除n(除到商为0为止)\n第二步：倒取余数\n例：123=(11120)_3 [注：原短除竖式为除3]\n1234 → 五进制：5|1234 → 246..4 → 49..1 → 9..4 → 1..4 → 0..1 → (14414)_5`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Key Points · 二、进制的互化 (2)`
+      },
+      {
+        id: `KP-04`,
+        title: `m进制转n进制：十进制搭桥与乘方分组法`,
+        section: `核心要点`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`n进制通则`, `3进制`, `9进制`],
+        difficulty: `进阶探索`,
+        qtype: `概念规则`,
+        isQuizEligible: false,
+        stemHtml: `任意两个非十进制互化有两种方法：①「十进制搭桥」：先按权展开化为十进制，再用短除法化为目标进制；②「乘方分组法」：当底数存在乘方关系 <span class="math-inline">a<sup>m</sup> = b</span> 时，从右到左「m位一段」（讲义记作 a位一段），每段算出其值直接对应转化。示例：<span class="math-inline">(478)<sub>9</sub> = (112122)<sub>3</sub></span>。`,
+        answerHtml: `9进制与3进制对照（<span class="math-inline">3<sup>2</sup>=9</span>，每2位三进制对应1位九进制）：0→00，1→01，2→02，3→10，4→11，5→12，6→20，7→21，8→22。`,
+        quote: `3.n进制转化为m进制：十进制搭桥，可先转化为十进制。\n4.n进制转n^a进制：a位一段，每段算出其值，对应转化即可。\n乘方关系(右→左) 列表：0 1 2 3 4 5 6 7 8 -> 00 01 02 10 11 12 20 21 22\n(478)_9 = (112122)_3`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Key Points · 二、进制的互化 (3)(4)`
+      },
+      {
+        id: `KP-05`,
+        title: `小数进制互化规律与讲义示例`,
+        section: `核心要点`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`n进制通则`, `4进制`, `5进制`, `10进制`],
+        difficulty: `进阶探索`,
+        qtype: `概念规则`,
+        isQuizEligible: false,
+        stemHtml: `小数部分互化规则：① <span class="math-inline">n→10</span>：小数点后第 k 位乘以 <span class="math-inline">n<sup>-k</sup></span>（如 <span class="math-inline">1/5, 1/4, 1/16</span>）再相加（如 <span class="math-inline">(231.21)<sub>4</sub></span>）；② <span class="math-inline">10→n</span>：小数部分连续乘 n 取整数部分，顺序排列。示例：<span class="math-inline">0.84</span> 化五进制：<span class="math-inline">0.84×5=4.2</span>（取4），<span class="math-inline">0.2×5=1</span>（取1）。`,
+        answerHtml: `整数部分「短除倒取余」，小数部分「乘n取整正序排」。`,
+        quote: `④小数\n(1) n→10  (231.21)_4\n(2) 10→n  123.84 → (...4)_5\n0.84×5=4.2\n0.2×5=1`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Key Points · ④小数`
+      },
+      {
+        id: `KP-06`,
+        title: `计数排位问题：0是桥梁映射为n进制`,
+        section: `核心要点`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`n进制通则`, `4进制`],
+        difficulty: `进阶探索`,
+        qtype: `概念规则`,
+        isQuizEligible: false,
+        stemHtml: `用给定若干数字组成自然数并从小到大排列，判断某个数是第几个时，「0是桥梁」。例如用 <span class="math-inline">0, 1, 5, 6</span> 组数，本质与用 <span class="math-inline">0, 1, 2, 3</span> 组数完全同构，即在做四进制计数。示例：<span class="math-inline">(1320)<sub>4</sub> = 120</span>。`,
+        answerHtml: `关键检查序列是否包含 0（从 0 开始还是从 1 开始），注意题目问「第几个正整数」还是「第几个自然数（含0）」。`,
+        quote: `题型2：计数→进制(0是桥梁)\n0,1,2,3组数，1320是第几个？ 改：0,1,5,6 也为四进制\n0、1、2、3、10、11、12……就是在做四进制\n(1320)_4 = 120`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Key Points · 题型2 计数→进制`
+      },
+      {
+        id: `KP-07`,
+        title: `n进制计算法则与凑整巧算技巧`,
+        section: `核心要点`,
+        quizSection: `模块二：进制的计算`,
+        bases: [`n进制通则`],
+        difficulty: `基础入门`,
+        qtype: `概念规则`,
+        isQuizEligible: false,
+        stemHtml: `n进制四则运算遵循「逢n进一，借一当n」，运算顺序与十进制相同（先乘除后加减、有括号先算括号）。加减巧算可采用「凑整法」：个位凑 n、高位凑 (n-1)；乘除法复杂时也可先化为十进制算完再转回。`,
+        answerHtml: `进位/退位时务必牢记当前进制底数 n，而非习惯性的 10。`,
+        quote: `三、进制的运算\n1. n进制：逢n进一，借一当n\n2. 运算顺序与十进制相同\n题型3.计算 +-：直接算 满n进1；凑整、个位凑n、高位凑(n-1)`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Key Points · 三、进制的运算 & 题型3`
+      },
+      {
+        id: `KP-08`,
+        title: `判断未知进制三步法`,
+        section: `核心要点`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`n进制通则`, `10进制`],
+        difficulty: `进阶探索`,
+        qtype: `概念规则`,
+        isQuizEligible: false,
+        stemHtml: `已知等式反推是几进制的常用步骤：①「看数字」确定下限（进制必须大于算式中出现的最大数字）；②「看个位」个位运算差值必为进制的倍数（求因数），或设未知数 k 化十进制求解；③「比10大小」若算式右侧在十进制下的真值小于未知进制写出的数，则进制 &lt; 10（反之 &gt; 10）。`,
+        answerHtml: `示例要点：<span class="math-inline">(24)<sub>m</sub> × (25)<sub>n</sub> → (782)<sub>p</sub></span>（同进制十进制乘积 <span class="math-inline">24×25=600 &lt; 782</span>，说明进制比 10 小）。`,
+        quote: `题型4：判断进制\n①看数字（下限）\n②直接算：化10 / 看个位（不受进制影响）差了多少（因数）\n③比10 (>10, <10)\n(24)×(25)→(782) 600<782 进制比10小`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Key Points · 题型4 判断进制`
+      },
+      {
+        id: `M1-WU1`,
+        title: `Warm Up 1：卡牌集换规则（四进制导入）`,
+        section: `模块一：进制认识与转化`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`4进制`, `10进制`],
+        difficulty: `基础入门`,
+        qtype: `综合与小数`,
+        isQuizEligible: true,
+        stemHtml: `某卡牌集换规则规定：每获得 1 张普通卡（R）可积 1 分；4 张 R 可兑换 1 张稀有卡（SR），4 张 SR 可兑换 1 张超稀有卡（SSR），4 张 SSR 可兑换 1 张彩虹卡（顶级卡）。<br>(1) 这一集换规则使用的是几进制？<br>(2) 1 张 SSR 等于多少张 R？1 张彩虹卡等于多少张 R？<br>(3) 集齐 1 张 SSR、2 张 SR、1 张 R 是「收藏几级」？集齐 2 张彩虹卡、1 张 SR 是「收藏几级」？<br>(4) 将四进制数 <span class="math-inline">(121)<sub>4</sub></span>、<span class="math-inline">(2010)<sub>4</sub></span> 和 <span class="math-inline">(321)<sub>4</sub></span> 转化成十进制。`,
+        answerHtml: `(1) <strong>四进制</strong>；<br>(2) 1 张 SSR = <span class="math-inline">4<sup>2</sup> = 16</span> 张 R，1 张彩虹卡 = <span class="math-inline">4<sup>3</sup> = 64</span> 张 R；<br>(3) <span class="math-inline">4<sup>2</sup> + 2×4 + 1 = 25</span> 级；<span class="math-inline">2×4<sup>3</sup> + 4 = 132</span> 级；<br>(4) <span class="math-inline">(121)<sub>4</sub> = 25</span>，<span class="math-inline">(2010)<sub>4</sub> = 132</span>，<span class="math-inline">(321)<sub>4</sub> = 3×16 + 2×4 + 1×1 = (57)<sub>10</sub></span>。`,
+        quote: `Warm Up 1: 每获得1张普通卡(R)可积1分；4张R可兑换1张稀有卡(SR)，4张SR可兑换1张超稀有卡(SSR)，4张SSR可兑换1张彩虹卡。\n(1)这一集换规则使用的是 4 进制；(2)1 SSR = 16 R，1彩虹卡 = 64 R；\n(3)收藏 25 级，收藏 132 级；(4)(121)_4=25，(2010)_4=132；(5)(321)_4 = 3×16+2×4+1×1 = (57)_10`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 1 · Warm Up 1`
+      },
+      {
+        id: `M1-EX1a`,
+        title: `Exploration 1(1)：十进制 567 转八、五、二进制`,
+        section: `模块一：进制认识与转化`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`10进制`, `8进制`, `5进制`, `2进制`],
+        difficulty: `基础入门`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `计算：<span class="math-inline">(567)<sub>10</sub> = (____)<sub>8</sub> = (____)<sub>5</sub> = (____)<sub>2</sub></span>。`,
+        answerHtml: `<span class="math-inline">(1067)<sub>8</sub> = (4232)<sub>5</sub> = (1000110111)<sub>2</sub></span>。<br>短除法过程：除 8 得余数 7, 6, 0, 1 → 1067；除 5 得余数 2, 3, 2, 4 → 4232；或由八进制每位拆 3 位二进制：1→1, 0→000, 6→110, 7→111 得 1000110111。`,
+        quote: `Exploration 1: 计算：(567)_10 = (1067)_8 = (4232)_5 = (1000110111)_2\n8|567 -> 70..7 -> 8..6 -> 1..0 -> 0..1\n5|567 -> 113..2 -> 22..3 -> 4..2 -> 0..4`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 1 · Exploration 1`
+      },
+      {
+        id: `M1-EX1b`,
+        title: `Exploration 1(2)(3)：十进制转十二、十四进制（含字母）`,
+        section: `模块一：进制认识与转化`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`10进制`, `12/14进制`],
+        difficulty: `进阶探索`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `计算：<br>(1) <span class="math-inline">(1444)<sub>10</sub> = (____)<sub>12</sub></span>；<br>(2) <span class="math-inline">(188)<sub>10</sub> = (____)<sub>14</sub></span>。`,
+        answerHtml: `(1) <span class="math-inline">(A04)<sub>12</sub></span>（1444÷12=120余4，120÷12=10余0，10用字母 A 表示）；<br>(2) <span class="math-inline">(D6)<sub>14</sub></span>（188÷14=13余6，13用字母 D 表示，注：10→A, 11→B, 12→C, 13→D）。`,
+        quote: `Exploration 1:\n计算：(1444)_10 = (A04)_12。 12|1444 -> 120..4 -> 10..0 -> 10→A\n计算：(188)_10 = (D6)_14。 14|188 -> 13..6 -> 0..13(D)  字母：10 A, 11 B, 12 C, 13 D`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 1 · Exploration 1`
+      },
+      {
+        id: `M1-EX1d`,
+        title: `Exploration 1(4)(5)：五进制与三进制转十进制`,
+        section: `模块一：进制认识与转化`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`5进制`, `3进制`, `10进制`],
+        difficulty: `基础入门`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `计算：<br>(1) <span class="math-inline">(1431)<sub>5</sub> = (____)<sub>10</sub></span>；<br>(2) <span class="math-inline">(10111)<sub>3</sub> = (____)<sub>10</sub></span>。`,
+        answerHtml: `(1) <span class="math-inline">(241)<sub>10</sub></span>（<span class="math-inline">1×1 + 3×5 + 4×25 + 1×125 = 241</span>）；<br>(2) <span class="math-inline">(94)<sub>10</sub></span>（<span class="math-inline">1×1 + 1×3 + 1×9 + 0×27 + 1×81 = 94</span>）。`,
+        quote: `Exploration 1:\n计算：(1431)_5 = (241)_10。 1×1 + 3×5 + 4×25 + 1×125 = 241\n计算：(10111)_3 = (94)_10。 1×1 + 1×3 + 1×9 + 0×27 + 1×81 = 94`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 1 · Exploration 1`
+      },
+      {
+        id: `M1-EX2a`,
+        title: `Exploration 2：五星制（5进制）与八卦制（8进制）卡牌兑换`,
+        section: `模块一：进制认识与转化`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`5进制`, `8进制`, `10进制`],
+        difficulty: `进阶探索`,
+        qtype: `综合与小数`,
+        isQuizEligible: true,
+        stemHtml: `「五星制」（5进制）：1 张 UR = 5 张 SSR，1 张 SSR = 5 张 SR；「八卦制」（8进制）：1 张 VR = 8 张 TTR，1 张 TTR = 8 张 SR。<br>(1) 1 张 UR 最多换多少张 SR？<br>(2) 小华有 3 张 UR、2 张 SSR、4 张 SR，全部兑换成八卦制后，VR、TTR、SR 各是多少张？<br>(3) 计算：<span class="math-inline">(423)<sub>5</sub> = (____)<sub>8</sub></span>；(4) <span class="math-inline">(1042)<sub>5</sub> = (____)<sub>8</sub></span>。`,
+        answerHtml: `(1) <span class="math-inline">5<sup>2</sup> = 25</span> 张 SR；<br>(2) <span class="math-inline">(324)<sub>5</sub> = 4×1 + 2×5 + 3×25 = (89)<sub>10</sub> = (131)<sub>8</sub></span>，即 1 张 VR、3 张 TTR、1 张 SR；<br>(3) <span class="math-inline">(423)<sub>5</sub> = (113)<sub>10</sub> = (161)<sub>8</sub></span>；<br>(4) <span class="math-inline">(1042)<sub>5</sub> = (147)<sub>10</sub> = (223)<sub>8</sub></span>。`,
+        quote: `Exploration 2: “五星制”标准(5进制)和“八卦制”标准(8进制)\n(1) 5^2 = 25\n(2) (324)_5 = (89)_10 = (131)_8\n(3) (423)_5 = (113)_10 = (161)_8\n(4) (1042)_5 = (147)_10 = (223)_8`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 1 · Exploration 2`
+      },
+      {
+        id: `M1-EX2b`,
+        title: `Exploration 2 II：九进制转四进制、五进制转七进制（搭桥）`,
+        section: `模块一：进制认识与转化`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`9进制`, `4进制`, `5进制`, `7进制`, `10进制`],
+        difficulty: `进阶探索`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `计算：<br>(1) <span class="math-inline">(618)<sub>9</sub> = (____)<sub>4</sub></span>；<br>(2) <span class="math-inline">(1111)<sub>5</sub> = (____)<sub>7</sub></span>。`,
+        answerHtml: `(1) 十进制搭桥：<span class="math-inline">8×1 + 1×9 + 6×81 = 503</span>，除 4 短除得 <span class="math-inline">(13313)<sub>4</sub></span>；<br>(2) 十进制搭桥：<span class="math-inline">1×1 + 1×5 + 1×25 + 1×125 = 156</span>，除 7 短除得 <span class="math-inline">(312)<sub>7</sub></span>。`,
+        quote: `Exploration 2 II:\n计算：(618)_9 = (13313)_4，(503)_10，4短除余数3,1,3,3,1\n计算：(1111)_5 = (312)_7，(156)_10，7短除余数2,1,3`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 1 · Exploration 2 II`
+      },
+      {
+        id: `M1-EX3`,
+        title: `Exploration 2/3：二、四、八进制互化（分段法）`,
+        section: `模块一：进制认识与转化`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`2进制`, `4进制`, `8进制`],
+        difficulty: `进阶探索`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `计算：<br>(1) <span class="math-inline">(110101)<sub>2</sub> = (____)<sub>4</sub> = (____)<sub>8</sub></span>；<br>(2) <span class="math-inline">(325)<sub>8</sub> = (____)<sub>2</sub></span>；<br>(3) <span class="math-inline">(132321)<sub>4</sub> = (____)<sub>8</sub></span>。`,
+        answerHtml: `(1) 2位一段：<span class="math-inline">11|01|01 → (311)<sub>4</sub></span>；3位一段：<span class="math-inline">110|101 → (65)<sub>8</sub></span>；<br>(2) 1位拆3位：<span class="math-inline">3→011, 2→010, 5→101 → (11010101)<sub>2</sub></span>；<br>(3) 先拆2位二进制得 <span class="math-inline">(11110111001)<sub>2</sub></span>，再3位一段得 <span class="math-inline">(3671)<sub>8</sub></span>。`,
+        quote: `Exploration 一段/3位一段: (110101)_2 = (311)_4 = (65)_8\nExploration 3: (325)_8 = (11010101)_2\nExploration 3: (132321)_4 = (11110111001)_2 = (3671)_8`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 1 · Exploration 3`
+      },
+      {
+        id: `M1-ST1`,
+        title: `Showtime 1 & Extension：进制转化巩固`,
+        section: `模块一：进制认识与转化`,
+        quizSection: `模块一：进制认识与转化`,
+        bases: [`10进制`, `7进制`, `6进制`, `9进制`, `2进制`, `8进制`, `3进制`],
+        difficulty: `进阶探索`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `计算：<br>(1) <span class="math-inline">(2017)<sub>10</sub> = (____)<sub>7</sub></span>；<br>(2) <span class="math-inline">(152)<sub>6</sub> = (____)<sub>9</sub></span>；<br>(3) <span class="math-inline">(1111101)<sub>2</sub> = (____)<sub>8</sub></span>；<br>(4) <span class="math-inline">(20011221)<sub>3</sub> = (____)<sub>9</sub></span>（注：讲义此处原串对应九进制结果为 <span class="math-inline">6157</span>）。`,
+        answerHtml: `(1) 除7短除得 <span class="math-inline">(5611)<sub>7</sub></span>；<br>(2) <span class="math-inline">(152)<sub>6</sub> = 2+30+36 = (68)<sub>10</sub> = (75)<sub>9</sub></span>；<br>(3) 3位一段 <span class="math-inline">001|111|101 → (175)<sub>8</sub></span>；<br>(4) 2位一段 <span class="math-inline">20|01|12|21 → (6157)<sub>9</sub></span>。`,
+        quote: `Showtime 1: (2017)_10 = (5611)_7; (152)_6 = (68)_10 = (75)_9; (1111101)_2 = (175)_8\nExtension: (120011221)_3 [20 01 12 21] = (6157)_9`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 1 · Showtime 1 & Extension`
+      },
+      {
+        id: `M1-EX4`,
+        title: `Exploration 4：故障打印机数字排位（2进制与3进制映射）`,
+        section: `模块一：进制认识与转化`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`2进制`, `3进制`, `10进制`],
+        difficulty: `进阶探索`,
+        qtype: `计数排位`,
+        isQuizEligible: true,
+        stemHtml: `(1) 某打印社打印机只能打印 0 和 1，打印非零自然数为 <span class="math-inline">1, 10, 11, 100, 101...</span>，那么第 100 个数是多少？<br>(2) 若打印机只能打印 0、3 和 7，打印非零自然数为 <span class="math-inline">3, 7, 30, 33, 37...</span>，那么第 100 个数是多少？`,
+        answerHtml: `(1) 直接对应二进制：<span class="math-inline">(100)<sub>10</sub> = (1100100)<sub>2</sub></span>，第 100 个数是 <strong>1100100</strong>；<br>(2) 对应三进制映射（0→0，1→3，2→7）：<span class="math-inline">(100)<sub>10</sub> = (10201)<sub>3</sub></span>，替换为 0,3,7 得 <strong>30703</strong>。`,
+        quote: `Exploration 4(1): 只能打印0和1，非零自然数1,10,11,100,101……，第100个数是 1100100。\nExploration 4(2): 只能打印0,3和7，非零自然数3,7,30,33,37……，第100个数是 30703。10201 → 30703`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 1 · Exploration 4`
+      },
+      {
+        id: `M2-WU2`,
+        title: `Warm Up 2：六进制加法竖式（选择题）`,
+        section: `模块二：进制的计算`,
+        quizSection: `模块二：进制的计算`,
+        bases: [`6进制`],
+        difficulty: `基础入门`,
+        qtype: `四则计算`,
+        isQuizEligible: true,
+        stemHtml: `在六进制下进行加法计算：<br>(1) <span class="math-inline">(232)<sub>6</sub> + (313)<sub>6</sub> =</span>（ A.(545)<sub>6</sub>  B.(546)<sub>6</sub>  C.(547)<sub>6</sub>  D.(548)<sub>6</sub> ）<br>(2) <span class="math-inline">(215)<sub>6</sub> + (224)<sub>6</sub> =</span>（ A.(439)<sub>6</sub>  B.(433)<sub>6</sub>  C.(443)<sub>6</sub>  D.(453)<sub>6</sub> ）<br>(3) <span class="math-inline">(5555)<sub>6</sub> + (1)<sub>6</sub> =</span>（ A.(5556)<sub>6</sub>  B.(5560)<sub>6</sub>  C.(5565)<sub>6</sub>  D.(10000)<sub>6</sub> ）`,
+        answerHtml: `(1) <strong>A. (545)<sub>6</sub></strong>（无需进位，且六进制不可能出现 6、7、8）；<br>(2) <strong>C. (443)<sub>6</sub></strong>（5+4=9 满 6 进 1 余 3，1+2+1=4，2+2=4）；<br>(3) <strong>D. (10000)<sub>6</sub></strong>（连续满 6 进 1）。`,
+        quote: `Warm Up 2:\n(1) (232)_6 + (313)_6 = A.(545)_6\n(2) (215)_6 + (224)_6 = C.(443)_6 满6进1\n(3) (5555)_6 + (1)_6 = D.(10000)_6`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 2 · Warm Up 2`
+      },
+      {
+        id: `M2-EX5`,
+        title: `Exploration 5：九进制加法、二进制减法与八进制凑整`,
+        section: `模块二：进制的计算`,
+        quizSection: `模块二：进制的计算`,
+        bases: [`9进制`, `2进制`, `8进制`],
+        difficulty: `进阶探索`,
+        qtype: `四则计算`,
+        isQuizEligible: true,
+        stemHtml: `计算：<br>(1) <span class="math-inline">(178)<sub>9</sub> + (8803)<sub>9</sub> = (____)<sub>9</sub></span>；<br>(2) <span class="math-inline">(101011)<sub>2</sub> - (1110)<sub>2</sub> = (____)<sub>2</sub></span>；<br>(3) <span class="math-inline">(63121)<sub>8</sub> - (1247)<sub>8</sub> - (26531)<sub>8</sub> = (____)<sub>8</sub></span>。`,
+        answerHtml: `(1) <strong>(10082)<sub>9</sub></strong>（满9进1：8+3=11 进1余2，7+1=8，1+8=9 进1余0，8+1=9 进1余0）；<br>(2) <strong>(11101)<sub>2</sub></strong>（借1当2）；<br>(3) <strong>(33121)<sub>8</sub></strong>（巧算凑整：<span class="math-inline">(1247)<sub>8</sub> + (26531)<sub>8</sub> = (30000)<sub>8</sub></span>，个位 7+1=8，高位 4+3=7、2+5=7、1+6=7，再相减得 33121）。`,
+        quote: `Exploration 5:\n(178)_9 + (8803)_9 = (10082)_9 满9进1\n(101011)_2 - (1110)_2 = (11101)_2 借1当2\n(63121)_8 - (1247)_8 - (26531)_8 = (63121)_8 - (30000)_8 = (33121)_8 个位凑8、凑7`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 2 · Exploration 5`
+      },
+      {
+        id: `M2-EX6`,
+        title: `Exploration 6：多进制乘除与十六进制混合运算`,
+        section: `模块二：进制的计算`,
+        quizSection: `模块二：进制的计算`,
+        bases: [`2进制`, `7进制`, `16进制`, `5进制`, `3进制`, `10进制`],
+        difficulty: `进阶探索`,
+        qtype: `四则计算`,
+        isQuizEligible: true,
+        stemHtml: `计算：<br>(1) <span class="math-inline">(11101)<sub>2</sub> × (1011)<sub>2</sub> = (____)<sub>2</sub></span>；<br>(2) <span class="math-inline">(100001)<sub>2</sub> ÷ (11)<sub>2</sub> = (____)<sub>2</sub></span>；<br>(3) <span class="math-inline">(314)<sub>7</sub> × (233)<sub>7</sub> = (____)<sub>7</sub></span>；<br>(4) <span class="math-inline">(A)<sub>16</sub> × (B)<sub>16</sub> - (68)<sub>16</sub> = (____)<sub>16</sub></span>；<br>(5) <span class="math-inline">(343)<sub>5</sub> × (22)<sub>3</sub> ÷ (10)<sub>16</sub> + (51)<sub>10</sub> = (____)<sub>16</sub></span>。`,
+        answerHtml: `(1) <strong>(100111111)<sub>2</sub></strong>；<br>(2) <strong>(1011)<sub>2</sub></strong>（转十进制 <span class="math-inline">33 ÷ 3 = 11 = (1011)<sub>2</sub></span>）；<br>(3) <strong>(110125)<sub>7</sub></strong>（竖式逢7进1）；<br>(4) <strong>(6)<sub>16</sub></strong>（转十进制 <span class="math-inline">10×11 - (6×16+8) = 110 - 104 = 6</span>）；<br>(5) <strong>(64)<sub>16</sub></strong>（全部转十进制：<span class="math-inline">98 × 8 ÷ 16 + 51 = 49 + 51 = 100 = (64)<sub>16</sub></span>）。`,
+        quote: `Exploration 6:\n(11101)_2 × (1011)_2 = (100111111)_2\n(100001)_2 ÷ (11)_2 = (1011)_2 (33÷3=11)\n(314)_7 × (233)_7 = (110125)_7\n(A)_16 × (B)_16 - (68)_16 = (6)_16 (110-104=6)\n(343)_5 × (22)_3 ÷ (10)_16 + (51)_10 = (64)_16 (98×8÷16+51=100)`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 2 · Exploration 6`
+      },
+      {
+        id: `M2-ST2`,
+        title: `Showtime 2：八进制加、六进制减、二进制乘`,
+        section: `模块二：进制的计算`,
+        quizSection: `模块二：进制的计算`,
+        bases: [`8进制`, `6进制`, `2进制`],
+        difficulty: `进阶探索`,
+        qtype: `四则计算`,
+        isQuizEligible: true,
+        stemHtml: `计算：<br>(1) <span class="math-inline">(5467)<sub>8</sub> + (4265)<sub>8</sub> = (____)<sub>8</sub></span>；<br>(2) <span class="math-inline">(12345)<sub>6</sub> - (5432)<sub>6</sub> = (____)<sub>6</sub></span>；<br>(3) <span class="math-inline">(1101)<sub>2</sub> × (101)<sub>2</sub> = (____)<sub>2</sub></span>。`,
+        answerHtml: `(1) <strong>(11754)<sub>8</sub></strong>；<br>(2) <strong>(2513)<sub>6</sub></strong>（借1当6）；<br>(3) <strong>(1000001)<sub>2</sub></strong>。`,
+        quote: `Showtime 2:\n(5467)_8 + (4265)_8 = (11754)_8\n(12345)_6 - (5432)_6 = (2513)_6 借1当6\n(1101)_2 × (101)_2 = (1000001)_2`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 2 · Showtime 2`
+      },
+      {
+        id: `M3-EX7`,
+        title: `Exploration 7：判断 4 × 13 = 100 成立的进制`,
+        section: `模块三：进制综合应用`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`6进制`, `10进制`],
+        difficulty: `基础入门`,
+        qtype: `判断进制`,
+        isQuizEligible: true,
+        stemHtml: `（　）进制下，<span class="math-inline">4 × 13 = 100</span> 成立。<br>A. 五　　B. 六　　C. 七　　D. 十二`,
+        answerHtml: `<strong>B. 六进制</strong>。<br>三步法解析：① 看数字最大为 4 → 至少五进制；② 看个位 <span class="math-inline">4×3 = 12</span> 末位为 0 → 进制为 12 的因数（可能为 6 或 12）；③ 与十进制比较：<span class="math-inline">4×13 = 52 &lt; 100</span>，说明比十进制小 → 选六进制。`,
+        quote: `Exploration 7: ( )进制下，4×13=100成立。A.五 B.六 C.七 D.十二\n①数字：5进制以上 ②个位：4×3 → 6或12进制 ③4×13=52 < 100，比10进制小，为6进制`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 3 · Exploration 7`
+      },
+      {
+        id: `M3-EX8`,
+        title: `Exploration 8：七进制与九进制三位数数字倒置`,
+        section: `模块三：进制综合应用`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`7进制`, `9进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `综合与小数`,
+        isQuizEligible: true,
+        stemHtml: `一个自然数的七进制表达式是一个三位数，它的九进制表达式也是一个三位数，而且这两个三位数的数字顺序恰好相反。那么这个自然数用十进制表示是多少？`,
+        answerHtml: `<strong>248</strong>。<br>解析：设七进制为 <span class="math-inline">(<span class="overline">abc</span>)<sub>7</sub></span>，九进制为 <span class="math-inline">(<span class="overline">cba</span>)<sub>9</sub></span>（七进制数码范围为 0~6，且首位 <span class="math-inline">a, c ≥ 1</span>）。展开得 <span class="math-inline">49a + 7b + c = 81c + 9b + a</span>，化简 <span class="math-inline">48a = 2b + 80c</span> 即 <span class="math-inline">24a = b + 40c</span>。由末位分析 <span class="math-inline">a = 5, b = 0, c = 3</span>，则 <span class="math-inline">(503)<sub>7</sub> = 3×1 + 0×7 + 5×49 = 248</span>。`,
+        quote: `Exploration 8: 一个自然数的七进制表达式是一个三位数，它的九进制表达式也是一个三位数，而且这两个三位数的数字顺序恰好相反。\n(abc)_7 = (cba)_9 -> 48a=2b+80c -> 24a=b+40c -> a=5, b=0, c=3 -> (503)_7 = 248`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 3 · Exploration 8`
+      },
+      {
+        id: `M3-EXT1`,
+        title: `Module 3 Extension 1：小数进制互化四题`,
+        section: `模块三：进制综合应用`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`5进制`, `4进制`, `8进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `综合与小数`,
+        isQuizEligible: true,
+        stemHtml: `填空：<br>(1) <span class="math-inline">(43.2)<sub>5</sub> = (____)<sub>10</sub></span>；<br>(2) <span class="math-inline">(12.21)<sub>4</sub> = (____)<sub>10</sub></span>；<br>(3) <span class="math-inline">(20.25)<sub>10</sub> = (____)<sub>8</sub></span>；<br>(4) <span class="math-inline">(0.856)<sub>10</sub> = (____)<sub>5</sub></span>。`,
+        answerHtml: `(1) <strong>23.4</strong>（<span class="math-inline">4×5 + 3×1 + 2×1/5 = 23.4</span>）；<br>(2) <strong>6.5625</strong>（<span class="math-inline">1×4 + 2×1 + 2×1/4 + 1×1/16 = 6.5625</span>）；<br>(3) <strong>(24.2)<sub>8</sub></strong>（整数 20→24，小数 <span class="math-inline">0.25×8 = 2</span>）；<br>(4) <strong>(0.412)<sub>5</sub></strong>（<span class="math-inline">0.856×5=4.28</span> 取4，<span class="math-inline">0.28×5=1.4</span> 取1，<span class="math-inline">0.4×5=2</span> 取2）。`,
+        quote: `Extension:\n(1)(43.2)_5 = (23.4)_10\n(2)(12.21)_4 = (6.5625)_10\n(3)(20.25)_10 = (24.2)_8 (0.25×8=2)\n(4)(0.856)_10 = (0.412)_5 (0.856×5=4.28, 0.28×5=1.4, 0.4×5=2)`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 3 · Extension`
+      },
+      {
+        id: `M3-EXT2`,
+        title: `Module 3 Extension 2：五进制连续正整数推理`,
+        section: `模块三：进制综合应用`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`5进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `综合与小数`,
+        isQuizEligible: true,
+        stemHtml: `用 a, b, c, d, e 分别代表五进制中五个互不相同的数字，如果 <span class="math-inline">(ade)<sub>5</sub></span>、<span class="math-inline">(adc)<sub>5</sub></span>、<span class="math-inline">(aab)<sub>5</sub></span> 是由小到大排列的连续正整数，那么 <span class="math-inline">(cde)<sub>5</sub></span> 所表示的整数写成十进制的表示是多少？`,
+        answerHtml: `<strong>108</strong>。<br>解析：五进制数字为 0~4。<span class="math-inline">(adc)<sub>5</sub> + 1 = (aab)<sub>5</sub></span> 发生十位进位，故个位 <span class="math-inline">c = 4</span>，进位后 <span class="math-inline">b = 0</span>，<span class="math-inline">e = c - 1 = 3</span>；十位 <span class="math-inline">d + 1 = a</span> 且五字母互异（0,3,4已用），得 <span class="math-inline">d = 1, a = 2</span>。故 <span class="math-inline">(cde)<sub>5</sub> = (413)<sub>5</sub> = 3×1 + 1×5 + 4×25 = 108</span>。`,
+        quote: `Extension: 用a,b,c,d,e分别代表五进制中五个互不相同的数字，如果(ade)_5，(adc)_5，(aab)_5是由小到大排列的连续正整数，那么(cde)_5写成十进制是多少？\nb=0, c=4, e=3, d+1=a -> d=1, a=2 -> (413)_5 = 108`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 3 · Extension`
+      },
+      {
+        id: `M3-EXT3`,
+        title: `Module 3 Extension 3：判断 125 × 125 = 16324 的进制`,
+        section: `模块三：进制综合应用`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`7进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `判断进制`,
+        isQuizEligible: true,
+        stemHtml: `在几进制中有 <span class="math-inline">125 × 125 = 16324</span> ？`,
+        answerHtml: `<strong>七进制</strong>。<br>三步法：① 最大数字为 6 → 至少七进制；② 个位 <span class="math-inline">5×5 = 25</span>，末位为 4，<span class="math-inline">25 - 4 = 21</span>，进制必为 21 的因数（7 或 21）；③ 十进制下 <span class="math-inline">125×125 = 15625 &lt; 16324</span>，进制比 10 小 → 故为七进制。`,
+        quote: `Extension: 在几进制中有 125×125=16324？\n①数字：≥7 ②个位：5×5→4，差21(7,21) ③125×125=15625 < 16324 进制比10小 → 七进制`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 3 · Extension`
+      },
+      {
+        id: `M3-EXT4`,
+        title: `Module 3 Extension 4：六进制与九进制数字倒置`,
+        section: `模块三：进制综合应用`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`6进制`, `9进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `综合与小数`,
+        isQuizEligible: true,
+        stemHtml: `已知六进制的 <span class="math-inline"><span class="overline">abc</span></span> 化为九进制后可以写成 <span class="math-inline"><span class="overline">cba</span></span>，那么这个数写成十进制是多少？`,
+        answerHtml: `<strong>212</strong>。<br>解析：六进制数字 0~5，方程 <span class="math-inline">36a + 6b + c = 81c + 9b + a</span> 化简得 <span class="math-inline">35a = 80c + 3b</span>。因 35a 与 80c 均为 5 的倍数，故 <span class="math-inline">b = 0</span> 或 <span class="math-inline">5</span>。若 <span class="math-inline">b = 0</span> 则 <span class="math-inline">7a = 16c</span> 在 1~5 内无解；故 <span class="math-inline">b = 5</span>，得 <span class="math-inline">7a = 16c + 3</span>，解得 <span class="math-inline">a = 5, c = 2</span>。则 <span class="math-inline">(552)<sub>6</sub> = 2×1 + 5×6 + 5×36 = 212</span>。`,
+        quote: `Extension: 已知六进制的abc化为九进制后可以写成cba，那么这个数写成十进制是多少？\n35a = 80c + 3b -> b=5 -> 7a = 16c + 3 -> a=5, c=2 -> (552)_6 = 212`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 3 · Extension`
+      },
+      {
+        id: `M3-EXT5`,
+        title: `Module 3 Extension 5：0,1,5,8,9 组成数求 988501 排位`,
+        section: `模块三：进制综合应用`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`5进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `计数排位`,
+        isQuizEligible: true,
+        stemHtml: `用数字 <span class="math-inline">0、1、5、8、9</span> 中的一个或几个组成的数，从小到大排列，<span class="math-inline">988501</span> 排在第几个？`,
+        answerHtml: `<strong>第 14802 个</strong>。<br>解析：将 <span class="math-inline">0, 1, 5, 8, 9</span> 一一映射为五进制数字 <span class="math-inline">0, 1, 2, 3, 4</span>，则 <span class="math-inline">988501</span> 对应 <span class="math-inline">(433201)<sub>5</sub> = 1 + 0×5 + 2×25 + 3×125 + 3×625 + 4×3125 = 14801</span>。因数字 0 是第 1 个（对应五进制 0），所以 <span class="math-inline">988501</span> 排在第 <span class="math-inline">14801 + 1 = 14802</span> 个。`,
+        quote: `Extension: 用数字0、1、5、8、9中的一个或几个组成的数，从小到大排列，988501排在第 14802 个。\n(433201)_5 = 1+0×5+2×25+3×125+3×625+4×3125 = 14801，0是第1个，所以为第14802个`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 3 · Extension`
+      },
+      {
+        id: `M3-EXT6`,
+        title: `Module 3 Extension 6：判断 7 × 11 × 13 × 138 = 157586 的进制`,
+        section: `模块三：进制综合应用`,
+        quizSection: `模块三：进制综合应用`,
+        bases: [`9进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `判断进制`,
+        isQuizEligible: true,
+        stemHtml: `<span class="math-inline">7 × 11 × 13 × 138 = 157586</span> 这个算式在多少进制时候成立？<br>A. 7（七进制）　B. 8（八进制）　C. 9（九进制）　D. 10（十进制）`,
+        answerHtml: `<strong>C. 9（九进制）</strong>。<br>解析：① 式中出现数字 8，故进制必 &gt; 8（排除 A、B）；② 十进制下 <span class="math-inline">7×11×13 = 1001</span>，<span class="math-inline">1001×138 = 138138 &lt; 157586</span>，故进制必 &lt; 10 → 选九进制。`,
+        quote: `Extension: 7×11×13×138=157586 这个算式在多少进制时候成立？\n有8(排除7,8)；十进制结果：138138 < 157586，选 C.9(九进制)`,
+        sourceFile: `Lesson 3-进位制.pdf`,
+        sourceSection: `Module 3 · Extension`
+      },
+      {
+        id: `WB-P1`,
+        title: `Practice 1：八进制与七进制转十进制`,
+        section: `练习册：Practice 基础`,
+        quizSection: `练习册：Practice 基础`,
+        bases: [`8进制`, `7进制`, `10进制`],
+        difficulty: `基础入门`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `把下列各数转化为十进制数：<br>(1) <span class="math-inline">(463)<sub>8</sub> = (____)<sub>10</sub></span>；<br>(2) <span class="math-inline">(245)<sub>7</sub> = (____)<sub>10</sub></span>。`,
+        answerHtml: `(1) <strong>(307)<sub>10</sub></strong>（<span class="math-inline">3×8<sup>0</sup> + 6×8<sup>1</sup> + 4×8<sup>2</sup> = 3 + 48 + 256 = 307</span>）；<br>(2) <strong>(131)<sub>10</sub></strong>（<span class="math-inline">5×7<sup>0</sup> + 4×7<sup>1</sup> + 2×7<sup>2</sup> = 5 + 28 + 98 = 131</span>）。`,
+        quote: `Practice: 把下列各数转化为十进制数：\n(1) (463)_8 = (307)_10  (3×8^0 + 6×8^1 + 4×8^2 = 3+48+256=307)\n(2) (245)_7 = (131)_10  (5×7^0 + 4×7^1 + 2×7^2 = 5+28+98=131)`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Practice · 进制转十进制`
+      },
+      {
+        id: `WB-P2`,
+        title: `Practice 2：十进制转二、三、五进制`,
+        section: `练习册：Practice 基础`,
+        quizSection: `练习册：Practice 基础`,
+        bases: [`10进制`, `2进制`, `3进制`, `5进制`],
+        difficulty: `基础入门`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `把下列各数转换进制：<br>(1) <span class="math-inline">(107)<sub>10</sub> = (____)<sub>2</sub></span>；<br>(2) <span class="math-inline">(69)<sub>10</sub> = (____)<sub>3</sub></span>；<br>(3) <span class="math-inline">(2896)<sub>10</sub> = (____)<sub>5</sub></span>。`,
+        answerHtml: `(1) <strong>(1101011)<sub>2</sub></strong>；<br>(2) <strong>(2120)<sub>3</sub></strong>（69÷3=23余0，23÷3=7余2，7÷3=2余1，2÷3=0余2，注：原OCR括号误作2170，短除竖式明确为 2,1,2,0）；<br>(3) <strong>(43041)<sub>5</sub></strong>（短除过程明确得余数 1,4,0,3,4，倒取为 43041，注：原OCR括号漏写了3）。`,
+        quote: `Practice: 把下列各数转换进制：\n(1)(107)_10 = (1101011)_2\n(2)(69)_10 = (2120)_3 [短除：3|69 -> 23..0 -> 7..2 -> 2..1 -> 0..2]\n(3)(2896)_10 = (43041)_5 [短除：5|2896 -> 579..1 -> 115..4 -> 23..0 -> 4..3 -> 0..4]`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Practice · 十进制转n进制`
+      },
+      {
+        id: `WB-P3`,
+        title: `Practice 3：四进制与五进制前五个正整数`,
+        section: `练习册：Practice 基础`,
+        quizSection: `练习册：Practice 基础`,
+        bases: [`4进制`, `5进制`],
+        difficulty: `基础入门`,
+        qtype: `计数排位`,
+        isQuizEligible: true,
+        stemHtml: `填空：<br>(1) 用四进制写出前五个正整数（从小到大写出）：<br><span class="math-inline">(1)<sub>4</sub>, (2)<sub>4</sub>, (____)<sub>4</sub>, (____)<sub>4</sub>, (____)<sub>4</sub></span>。<br>(2) 用五进制写出前五个正整数（从小到大写出）：<br><span class="math-inline">(1)<sub>5</sub>, (2)<sub>5</sub>, (____)<sub>5</sub>, (____)<sub>5</sub>, (____)<sub>5</sub></span>。`,
+        answerHtml: `(1) <strong>(1)<sub>4</sub>, (2)<sub>4</sub>, (3)<sub>4</sub>, (10)<sub>4</sub>, (11)<sub>4</sub></strong>；<br>(2) <strong>(1)<sub>5</sub>, (2)<sub>5</sub>, (3)<sub>5</sub>, (4)<sub>5</sub>, (10)<sub>5</sub></strong>。`,
+        quote: `Practice: 填空.\n(1)用四进制写出前五个正整数(从小到大写出)：(1)_4,(2)_4,(3)_4,(10)_4,(11)_4.\n(2)用五进制写出前五个正整数(从小到大写出)：(1)_5,(2)_5,(3)_5,(4)_5,(10)_5.`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Practice · 填空`
+      },
+      {
+        id: `WB-P4`,
+        title: `Practice 4：比较 (2014)₅ 与 (3321)₄ 的大小`,
+        section: `练习册：Practice 基础`,
+        quizSection: `练习册：Practice 基础`,
+        bases: [`5进制`, `4进制`, `10进制`],
+        difficulty: `基础入门`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `比较 <span class="math-inline">(2014)<sub>5</sub></span> 与 <span class="math-inline">(3321)<sub>4</sub></span>，则（　）。<br>A. <span class="math-inline">(2014)<sub>5</sub> &lt; (3321)<sub>4</sub></span>　　B. <span class="math-inline">(2014)<sub>5</sub> &gt; (3321)<sub>4</sub></span>　　C. <span class="math-inline">(2014)<sub>5</sub> = (3321)<sub>4</sub></span>`,
+        answerHtml: `<strong>B. (2014)<sub>5</sub> &gt; (3321)<sub>4</sub></strong>。<br>解析：化为十进制比较：<span class="math-inline">(2014)<sub>5</sub> = 4+5+0+250 = 259</span>；<span class="math-inline">(3321)<sub>4</sub> = 1+8+48+192 = 249</span>。因 <span class="math-inline">259 &gt; 249</span>，故选 B。`,
+        quote: `Practice: 比较 (2014)_5 与 (3321)_4\n(2014)_5 = 4×5^0 + 1×5^1 + 0×5^2 + 2×5^3 = (259)_10\n(3321)_4 = 1×4^0 + 2×4^1 + 3×4^2 + 3×4^3 = (249)_10\n∴ (2014)_5 > (3321)_4`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Practice · 大小比较`
+      },
+      {
+        id: `WB-P5`,
+        title: `Practice 5：九进制 167 化为八进制`,
+        section: `练习册：Practice 基础`,
+        quizSection: `练习册：Practice 基础`,
+        bases: [`9进制`, `8进制`, `10进制`],
+        difficulty: `基础入门`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `九进制的 <span class="math-inline">167</span> 化成八进制是 <span class="math-inline">(____)<sub>8</sub></span>。`,
+        answerHtml: `<strong>(216)<sub>8</sub></strong>。<br>解析：<span class="math-inline">(167)<sub>9</sub> = 7 + 54 + 81 = (142)<sub>10</sub></span>；再除 8 短除：142÷8=17余6，17÷8=2余1，2÷8=0余2，倒取余数得 <span class="math-inline">(216)<sub>8</sub></span>。`,
+        quote: `Practice: 九进制的167化成八进制是(216)_8。\n(167)_9 = 7×9^0 + 6×9^1 + 1×9^2 = (142)_10\n8|142 -> 17..6 -> 2..1 -> 0..2`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Practice · 十进制搭桥`
+      },
+      {
+        id: `WB-P6`,
+        title: `Practice 6：长串三进制化九进制（2位一段）`,
+        section: `练习册：Practice 基础`,
+        quizSection: `练习册：Practice 基础`,
+        bases: [`3进制`, `9进制`],
+        difficulty: `进阶探索`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `将 <span class="math-inline">(120120021021112001)<sub>3</sub></span> 化成九进制为 <span class="math-inline">(____)<sub>9</sub></span>。`,
+        answerHtml: `<strong>(516237461)<sub>9</sub></strong>。<br>解析：从右向左每 2 位三进制分为一段：<span class="math-inline">12|01|20|02|10|21|11|20|01</span>，查九进制对照表分别对应 5, 1, 6, 2, 3, 7, 4, 6, 1。`,
+        quote: `Practice: 将(120120021021112001)_3 化成九进制为 (516237461)_9。\n列表：0~8 对应 00 01 02 10 11 12 20 21 22`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Practice · 乘方分组转化`
+      },
+      {
+        id: `WB-P7`,
+        title: `Practice 7：四进制 132321 化八进制`,
+        section: `练习册：Practice 基础`,
+        quizSection: `练习册：Practice 基础`,
+        bases: [`4进制`, `2进制`, `8进制`],
+        difficulty: `进阶探索`,
+        qtype: `进制互化`,
+        isQuizEligible: true,
+        stemHtml: `计算：<span class="math-inline">(132321)<sub>4</sub> = (____)<sub>8</sub></span>。`,
+        answerHtml: `<strong>(3671)<sub>8</sub></strong>。<br>解析：先将每位四进制改写为 2 位二进制得 <span class="math-inline">(11110111001)<sub>2</sub></span>（原为 <span class="math-inline">01|11|10|11|10|01</span>），再从右往左 3 位一段得 <span class="math-inline">011|110|111|001 → (3671)<sub>8</sub></span>。`,
+        quote: `Practice: 计算：(132321)_4 = (3671)_8。\n(132321)_4 = (11110111001)_2 = (3671)_8`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Practice · 二进制搭桥分段`
+      },
+      {
+        id: `WB-P8`,
+        title: `Practice 8：二进制加减法`,
+        section: `练习册：Practice 基础`,
+        quizSection: `练习册：Practice 基础`,
+        bases: [`2进制`],
+        difficulty: `基础入门`,
+        qtype: `四则计算`,
+        isQuizEligible: true,
+        stemHtml: `计算：<br>(1) <span class="math-inline">(101101)<sub>2</sub> + (10111)<sub>2</sub> = (____)<sub>2</sub></span>；<br>(2) <span class="math-inline">(101101)<sub>2</sub> - (10111)<sub>2</sub> = (____)<sub>2</sub></span>。`,
+        answerHtml: `(1) <strong>(1000100)<sub>2</sub></strong>（满2进1）；<br>(2) <strong>(10110)<sub>2</sub></strong>（借1当2）。`,
+        quote: `Practice: 计算.\n(1)(101101)_2 + (10111)_2 = (1000100)_2\n(2)(101101)_2 - (10111)_2 = (10110)_2`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Practice · 二进制加减`
+      },
+      {
+        id: `WB-P9`,
+        title: `Practice 9：七/八/九进制巧算与混合进制加法`,
+        section: `练习册：Practice 基础`,
+        quizSection: `练习册：Practice 基础`,
+        bases: [`7进制`, `8进制`, `9进制`, `4进制`, `10进制`],
+        difficulty: `进阶探索`,
+        qtype: `四则计算`,
+        isQuizEligible: true,
+        stemHtml: `回答下列问题：<br>(1) <span class="math-inline">(12)<sub>7</sub> + (65)<sub>7</sub> - (23)<sub>7</sub> = (____)<sub>7</sub></span>；<br>(2) <span class="math-inline">(123456)<sub>8</sub> + (22)<sub>8</sub> + (654322)<sub>8</sub> + (56)<sub>8</sub> = (____)<sub>8</sub></span>；<br>(3) <span class="math-inline">(40000)<sub>9</sub> - (1111)<sub>9</sub> - (2222)<sub>9</sub> - (5556)<sub>9</sub> = (____)<sub>9</sub></span>；<br>(4) <span class="math-inline">(3021)<sub>4</sub> + (605)<sub>7</sub> = (____)<sub>10</sub></span>。`,
+        answerHtml: `(1) <strong>(54)<sub>7</sub></strong>（先算减法 <span class="math-inline">(65)<sub>7</sub>-(23)<sub>7</sub>=(42)<sub>7</sub></span>，再加得 <span class="math-inline">(54)<sub>7</sub></span>）；<br>(2) <strong>(1000100)<sub>8</sub></strong>（凑整：<span class="math-inline">(123456)<sub>8</sub>+(654322)<sub>8</sub>=(1000000)<sub>8</sub></span>，<span class="math-inline">(22)<sub>8</sub>+(56)<sub>8</sub>=(100)<sub>8</sub></span>）；<br>(3) <strong>(30000)<sub>9</sub></strong>（后三项相加凑整得 <span class="math-inline">(10000)<sub>9</sub></span>）；<br>(4) <strong>(500)<sub>10</sub></strong>（<span class="math-inline">(3021)<sub>4</sub>=201</span>，<span class="math-inline">(605)<sub>7</sub>=299</span>，相加得 500）。`,
+        quote: `Practice: 回答下列问题.\n(1) (12)_7 + (65)_7 - (23)_7 = (54)_7\n(2) [(123456)_8+(654322)_8] + [(22)_8+(56)_8] = (1000000)_8 + (100)_8 = (1000100)_8\n(3) (40000)_9 - [(1111)_9+(2222)_9+(5556)_9] = (40000)_9 - (10000)_9 = (30000)_9\n(4) (3021)_4 + (605)_7 = (201)_10 + (299)_10 = (500)_10`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Practice · 进制巧算`
+      },
+      {
+        id: `WB-C1`,
+        title: `Challenge 1：美洲小镇 20 进制读音破译`,
+        section: `练习册：Challenge & Extension`,
+        quizSection: `练习册：Challenge & Extension`,
+        bases: [`20进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `综合与小数`,
+        isQuizEligible: true,
+        stemHtml: `在美洲的一个小镇中，对于 200 以下的数字读法都是采取 20 进制的。如果十进制中的 147 在 20 进制中的读音是「seyth ha seyth ugens」，而十进制中的 49 在 20 进制中的读音是「naw ha dew ugens」，那么 20 进制中读音是「dew ha naw ugens」的数指的是十进制中的哪个数？`,
+        answerHtml: `<strong>182</strong>。<br>解析：<span class="math-inline">(147)<sub>10</sub> = (77)<sub>20</sub></span>，对应「seyth ha seyth ugens」→ 7 读作 seyth；<span class="math-inline">(49)<sub>10</sub> = (29)<sub>20</sub></span>，对应「naw ha dew ugens」→ 个位 9 读作 naw、二十位 2 读作 dew（注意该读法先读个位后读二十位）。故「dew ha naw ugens」为个位 2、二十位 9，即 <span class="math-inline">(92)<sub>20</sub> = 2×20<sup>0</sup> + 9×20<sup>1</sup> = 182</span>。`,
+        quote: `Challenge: 在美洲的一个小镇中，对于200以下的数字读法都是采取20进制的。\n(147)_10 = (77)_20 → "7"="seyth"\n(49)_10 = (29)_20 → "9"="naw", "2"="dew"\n"dew ha naw ugens" = (92)_20 = 2×20^0 + 9×20^1 = (182)_10`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Challenge · 20进制应用`
+      },
+      {
+        id: `WB-C2`,
+        title: `Challenge 2：0~5 组成正整数中 2015 的排位`,
+        section: `练习册：Challenge & Extension`,
+        quizSection: `练习册：Challenge & Extension`,
+        bases: [`6进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `计数排位`,
+        isQuizEligible: true,
+        stemHtml: `用 <span class="math-inline">0、1、2、3、4、5</span> 这六个数码可以组成许多正整数，将它们从小到大排列可得 <span class="math-inline">1、2、3、4、5、10、11、12、13……</span>，那么 <span class="math-inline">2015</span> 是这列数中的第几个数？`,
+        answerHtml: `<strong>第 443 个数</strong>。<br>解析：该数列从 1 开始，恰为六进制正整数顺序。<span class="math-inline">(2015)<sub>6</sub> = 5×6<sup>0</sup> + 1×6<sup>1</sup> + 0×6<sup>2</sup> + 2×6<sup>3</sup> = 5 + 6 + 0 + 432 = 443</span>。`,
+        quote: `Challenge: 用0、1、2、3、4、5这六个数码可以组成许多正整数，从小到大排列可得1、2、3、4、5、10、11、12、13……，那么2015是这列数中的第 443 个数。\n六进制：(2015)_6 = 5 + 6 + 0 + 432 = (443)_10`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Challenge · 计数排位`
+      },
+      {
+        id: `WB-C3`,
+        title: `Challenge 3：九/八/三进制乘除混合运算`,
+        section: `练习册：Challenge & Extension`,
+        quizSection: `练习册：Challenge & Extension`,
+        bases: [`9进制`, `8进制`, `3进制`],
+        difficulty: `挑战拓展`,
+        qtype: `四则计算`,
+        isQuizEligible: true,
+        stemHtml: `计算：<br>(1) <span class="math-inline">(1234)<sub>9</sub> × (18)<sub>9</sub> = (____)<sub>9</sub></span>；<br>(2) <span class="math-inline">(345)<sub>8</sub> × (273)<sub>8</sub> = (____)<sub>8</sub></span>；<br>(3) <span class="math-inline">(1210201)<sub>3</sub> - (21201)<sub>3</sub> ÷ (11)<sub>3</sub> = (____)<sub>3</sub></span>。`,
+        answerHtml: `(1) <strong>(23445)<sub>9</sub></strong>（竖式：<span class="math-inline">11105 + 12340 = 23445</span>，注：原OCR上方填空框误识别为 20445，竖式最终和明确为 <span class="math-inline">(23445)<sub>9</sub></span>）；<br>(2) <strong>(123507)<sub>8</sub></strong>；<br>(3) <strong>(1201210)<sub>3</sub></strong>（先算除法 <span class="math-inline">(21201)<sub>3</sub> ÷ (11)<sub>3</sub> = (1221)<sub>3</sub></span>，再相减得 <span class="math-inline">(1201210)<sub>3</sub></span>）。`,
+        quote: `Challenge: 计算.\n(1) (1234)_9 × (18)_9 = (23445)_9 [竖式：11105 + 12340 = (23445)_9]\n(2) (345)_8 × (273)_8 = (123507)_8\n(3) (1210201)_3 - (21201)_3 ÷ (11)_3 = (1210201)_3 - (1221)_3 = (1201210)_3`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Challenge · 乘除计算`
+      },
+      {
+        id: `WB-E1`,
+        title: `Extension 1：判断 7 × 12 = 106 成立的进制`,
+        section: `练习册：Challenge & Extension`,
+        quizSection: `练习册：Challenge & Extension`,
+        bases: [`8进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `判断进制`,
+        isQuizEligible: true,
+        stemHtml: `____ 进制下，<span class="math-inline">7 × 12 = 106</span> 成立。`,
+        answerHtml: `<strong>八进制</strong>。<br>解析：① 式中最大数字为 7 → 进制 ≥ 8；② 十进制下 <span class="math-inline">7×12 = 84 &lt; 106</span> → 进制 &lt; 10；③ 个位 <span class="math-inline">2×7 = 14</span>，末位为 6，进制为 <span class="math-inline">14 - 6 = 8</span> 的因数且 ≥ 8 → 为八进制。`,
+        quote: `Extension: ____进制下，7×12=106成立。\n①由于最大数字为7，故进制≥8 ②十进制下7×12=84<106，故进制<10 ③进制为2×7-6=8的因数 ∴为八进制`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Extension · 判断进制`
+      },
+      {
+        id: `WB-E2`,
+        title: `Extension 2：未知进制 k 方程求解 (52)_k = 2 × (25)_k`,
+        section: `练习册：Challenge & Extension`,
+        quizSection: `练习册：Challenge & Extension`,
+        bases: [`n进制通则`, `8进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `判断进制`,
+        isQuizEligible: true,
+        stemHtml: `记号 <span class="math-inline">(25)<sub>k</sub></span> 表示 k 进制的数，如果 <span class="math-inline">(52)<sub>k</sub></span> 是 <span class="math-inline">(25)<sub>k</sub></span> 的 2 倍，那么 <span class="math-inline">(123)<sub>k</sub></span> 在十进制中表示的数是多少？`,
+        answerHtml: `<strong>83</strong>。<br>解析：<span class="math-inline">2×k<sup>0</sup> + 5×k<sup>1</sup> = 2×(5×k<sup>0</sup> + 2×k<sup>1</sup>)</span>，解得 <span class="math-inline">5k + 2 = 4k + 10 → k = 8</span>。故 <span class="math-inline">(123)<sub>8</sub> = 3×8<sup>0</sup> + 2×8<sup>1</sup> + 1×8<sup>2</sup> = 3 + 16 + 64 = 83</span>。`,
+        quote: `Extension: 记号(25)_k表示k进制的数，如果(52)_k是(25)_k的2倍，那么(123)_k在十进制中表示的数是 83。\n2+5k = 2×(5+2k) → k=8 → (123)_8 = 3+16+64 = (83)_10`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Extension · 方程求进制`
+      },
+      {
+        id: `WB-E3`,
+        title: `Extension 3：三进制星球年龄（十进制末尾添 0 变三进制）`,
+        section: `练习册：Challenge & Extension`,
+        quizSection: `练习册：Challenge & Extension`,
+        bases: [`3进制`, `10进制`],
+        difficulty: `挑战拓展`,
+        qtype: `综合与小数`,
+        isQuizEligible: true,
+        stemHtml: `在宇宙中有一个使用三进制的星球。小招移居到这个星球后更换身份证，要把年龄从十进制数变为三进制数表示。小招发现，只要在原来十进制年龄末尾添个「0」，就是三进制下的年龄。那么小招今年多少岁？`,
+        answerHtml: `<strong>21 岁</strong>。<br>解析：因三进制仅含数字 0, 1, 2，故原十进制年龄各位数字也必须 &lt; 3。<br>① 若为一位数 <span class="math-inline">A</span>：<span class="math-inline">A = 3A</span> 无正整数解；<br>② 若为两位数 <span class="math-inline"><span class="overline">AB</span></span>：<span class="math-inline">10A + B = 0×3<sup>0</sup> + B×3<sup>1</sup> + A×3<sup>2</sup> = 9A + 3B</span>，得 <span class="math-inline">A = 2B</span>；由 <span class="math-inline">A, B &lt; 3</span> 且 <span class="math-inline">A ≠ 0</span>，得 <span class="math-inline">B = 1, A = 2</span>，即 <span class="math-inline">21</span> 岁（检验：<span class="math-inline">(210)<sub>3</sub> = 2×9 + 1×3 = 21</span>）；<br>③ 若为三位数 <span class="math-inline"><span class="overline">ABC</span></span>：<span class="math-inline">100A + 10B + C = 27A + 9B + 3C → 73A + B = 2C</span>，左 ≥ 73 而右 ≤ 4，无解。`,
+        quote: `Extension: 在宇宙中有一个使用三进制的星球……只要在原来十进制年龄末尾添个“0”，就是三进制下的年龄。\n①设为A岁：A=3A × ②设为AB岁(A,B<3)：10A+B = 3B+9A → A=2B → B=1, A=2, AB=21 ③设为ABC岁：73A+B=2C ×`,
+        sourceFile: `Lesson 3-进位制-练习册.pdf`,
+        sourceSection: `Extension · 位数位值推理`
+      }
+    ];
+
+    const COMPARE_TABS = {
+      power: {
+        title: `按权展开法（n进制 → 十进制）`,
+        summary: `依据位值原理，将每位数字乘以其对应位置上的权值（n 的幂次）后求和。整数部分从右往左权值为 n⁰, n¹, n²…；小数部分从左往右权值为 n⁻¹, n⁻²…。`,
+        rows: [
+          { base: `二进制 (2)`, digits: `0, 1`, integerEx: `(100001)₂ = 1×1 + 1×32 = 33`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制.pdf · Module 2 Exploration 6` },
+          { base: `三进制 (3)`, digits: `0, 1, 2`, integerEx: `(10111)₃ = 1×1 + 1×3 + 1×9 + 0×27 + 1×81 = 94`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制.pdf · Module 1 Exploration 1` },
+          { base: `四进制 (4)`, digits: `0, 1, 2, 3`, integerEx: `(321)₄ = 3×16 + 2×4 + 1×1 = 57；(3321)₄ = 249`, decimalEx: `(12.21)₄ = 4 + 2 + 2×(1/4) + 1×(1/16) = 6.5625`, source: `讲义 Warm Up 1 / Module 3 Extension；练习册 Practice 4` },
+          { base: `五进制 (5)`, digits: `0, 1, 2, 3, 4`, integerEx: `(324)₅ = 4×1 + 2×5 + 3×25 = 89；(2014)₅ = 259`, decimalEx: `(43.2)₅ = 4×5 + 3×1 + 2×(1/5) = 23.4`, source: `讲义 Key Points / Module 3 Extension；练习册 Practice 4` },
+          { base: `七/八/九进制`, digits: `0~(n-1)`, integerEx: `(245)₇ = 131；(463)₈ = 307；(167)₉ = 142`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制-练习册.pdf · Practice 1 & 5` },
+          { base: `二十进制 (20)`, digits: `0~19（小镇读音）`, integerEx: `(92)₂₀ = 2×20⁰ + 9×20¹ = 182`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制-练习册.pdf · Challenge 1` }
+        ],
+        demoTitle: `讲义实例拆解：(324)₅ → (89)₁₀`,
+        demoSteps: [
+          `第 1 步（确定各位权值）：从右往左依次为 5⁰(=1)、5¹(=5)、5²(=25)`,
+          `第 2 步（逐位按权相乘）：百位 3 个 25 (=75)，十位 2 个 5 (=10)，个位 4 个 1 (=4)`,
+          `第 3 步（按权相加）：4×1 + 2×5 + 3×25 = 89，即 (324)₅ = (89)₁₀`
+        ],
+        quote: `1.n进制转化为十进制：位值原理，按权相加\n(324)_5 = 4×1 + 2×5 + 3×25 = 89\n(43.2)_5 = 4×5 + 3×1 + 2×(1/5) = 23.4\n(12.21)_4 = 1×4 + 2×1 + 2×(1/4) + 1×(1/16) = 6.5625`,
+        sourceText: `来源：Lesson 3-进位制.pdf · Key Points / Module 3 Extension & Lesson 3-进位制-练习册.pdf · Practice / Challenge`
+      },
+      short: {
+        title: `短除法与乘n取整（十进制 → n进制）`,
+        summary: `整数部分：反复除以目标进制 n，直到商为 0 为止，将余数「从下往上」倒序排列。大于 10 进制时，余数 10~13 依次用大写字母 A~D 表示。小数部分：反复乘以 n 取整数部分，顺序排列。`,
+        rows: [
+          { base: `二进制 (2)`, rule: `除 2 取余，倒序排列`, integerEx: `(107)₁₀ = (1101011)₂；(100)₁₀ = (1100100)₂`, decimalEx: `「来源未提及」`, source: `讲义 Module 1 Exploration 4；练习册 Practice 2` },
+          { base: `三进制 (3)`, rule: `除 3 取余，倒序排列`, integerEx: `(69)₁₀ = (2120)₃；(100)₁₀ = (10201)₃`, decimalEx: `「来源未提及」`, source: `讲义 Module 1 Exploration 4；练习册 Practice 2` },
+          { base: `五进制 (5)`, rule: `整数除 5 倒取余；小数乘 5 取整正排`, integerEx: `(1234)₁₀ = (14414)₅；(2896)₁₀ = (43041)₅`, decimalEx: `(0.856)₁₀ = (0.412)₅`, source: `讲义 Key Points / Module 3 Extension；练习册 Practice 2` },
+          { base: `八进制 (8)`, rule: `整数除 8 倒取余；小数乘 8 取整正排`, integerEx: `(567)₁₀ = (1067)₈；(142)₁₀ = (216)₈`, decimalEx: `(20.25)₁₀ = (24.2)₈（0.25×8=2）`, source: `讲义 Module 1 & 3；练习册 Practice 5` },
+          { base: `十二进制 (12)`, rule: `除 12 倒取余，10→A`, integerEx: `(1444)₁₀ = (A04)₁₂`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制.pdf · Module 1 Exploration 1` },
+          { base: `十四进制 (14)`, rule: `除 14 倒取余，10→A, 11→B, 12→C, 13→D`, integerEx: `(188)₁₀ = (D6)₁₄`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制.pdf · Module 1 Exploration 1` },
+          { base: `十六进制 (16)`, rule: `除 16 倒取余`, integerEx: `(100)₁₀ = (64)₁₆`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制.pdf · Module 2 Exploration 6` }
+        ],
+        demoTitle: `讲义实例拆解：(1234)₁₀ → (14414)₅（短除法逐行过程）`,
+        demoSteps: [
+          `第 1 步：1234 ÷ 5 = 246 …… 余 4（最低位）`,
+          `第 2 步：246 ÷ 5 = 49 …… 余 1`,
+          `第 3 步：49 ÷ 5 = 9 …… 余 4`,
+          `第 4 步：9 ÷ 5 = 1 …… 余 4`,
+          `第 5 步：1 ÷ 5 = 0 …… 余 1（商为 0 停止）`,
+          `第 6 步（倒取余数）：从最后一次余数往上读得 (14414)₅`
+        ],
+        quote: `第一步：短除法，除n(除到商为0为止) 第二步：倒取余数\n5|1234 -> 246..4 -> 49..1 -> 9..4 -> 1..4 -> 0..1 -> (14414)_5\n14|188 -> 13..6 -> 0..13(D) -> (D6)_14`,
+        sourceText: `来源：Lesson 3-进位制.pdf · Key Points / Module 1 Exploration 1 & Module 3 Extension`
+      },
+      bridge: {
+        title: `搭桥法与乘方分组法（m进制 ↔ n进制）`,
+        summary: `任意两进制互化分两类路径：一般情况用「十进制搭桥」；当两底数满足乘方关系 aᵐ = b 时，可用「a位一段」从右往左分段直接转化（也可借助二进制中转，如四进制↔二进制↔八进制）。`,
+        rows: [
+          { pair: `5进制 ↔ 8进制`, method: `十进制搭桥法`, mapping: `无乘方关系，必须先转十进制再短除`, example: `(324)₅ = (89)₁₀ = (131)₈；(423)₅ = (113)₁₀ = (161)₈`, source: `Lesson 3-进位制.pdf · Module 1 Exploration 2` },
+          { pair: `9进制 ↔ 4进制`, method: `十进制搭桥法`, mapping: `无乘方关系，经十进制中转`, example: `(618)₉ = (503)₁₀ = (13313)₄`, source: `Lesson 3-进位制.pdf · Module 1 Exploration 2 II` },
+          { pair: `6进制 ↔ 9进制`, method: `十进制搭桥法`, mapping: `无乘方关系，经十进制中转`, example: `(152)₆ = (68)₁₀ = (75)₉`, source: `Lesson 3-进位制.pdf · Module 1 Showtime 1` },
+          { pair: `2进制 ↔ 4进制`, method: `2位一段（2²=4）`, mapping: `0→00, 1→01, 2→10, 3→11`, example: `(110101)₂ = 11|01|01 = (311)₄`, source: `Lesson 3-进位制.pdf · Module 1 Exploration` },
+          { pair: `2进制 ↔ 8进制`, method: `3位一段（2³=8）`, mapping: `0~7 对应 000~111`, example: `(1111101)₂ = 001|111|101 = (175)₈；(325)₈ = (11010101)₂`, source: `Lesson 3-进位制.pdf · Module 1 Showtime 1 & Exploration 3` },
+          { pair: `4进制 ↔ 8进制`, method: `二进制中转分段`, mapping: `4进制每位拆2位二进制 → 再3位合并为8进制`, example: `(132321)₄ = (11110111001)₂ = (3671)₈`, source: `讲义 Module 1 Exploration 3 & 练习册 Practice 7` },
+          { pair: `3进制 ↔ 9进制`, method: `2位一段（3²=9）`, mapping: `0~8 对应 00,01,02,10,11,12,20,21,22`, example: `(478)₉ = (112122)₃；(120120021021112001)₃ = (516237461)₉`, source: `讲义 Key Points & 练习册 Practice 6` }
+        ],
+        demoTitle: `讲义与练习册分段实例：(132321)₄ → (3671)₈`,
+        demoSteps: [
+          `第 1 步（4进制拆成2位二进制）：1→01, 3→11, 2→10, 3→11, 2→10, 1→01，连写去掉前导0得 (11110111001)₂`,
+          `第 2 步（从右往左3位一段分组）：011 | 110 | 111 | 001`,
+          `第 3 步（每段转8进制）：011→3，110→6，111→7，001→1，合并得 (3671)₈`
+        ],
+        quote: `3.n进制转化为m进制：十进制搭桥。\n4.n进制转n^a进制：a位一段，每段算出其值，对应转化即可。\n(132321)_4 = (11110111001)_2 = (3671)_8`,
+        sourceText: `来源：Lesson 3-进位制.pdf · Key Points / Module 1 & Lesson 3-进位制-练习册.pdf · Practice 6–7`
+      },
+      calc: {
+        title: `n进制四则运算与巧算对比`,
+        summary: `所有进制均遵循「满 n 进 1，借 1 当 n」，运算顺序与十进制一致。加减法可灵活采用「凑整法（个位凑 n、高位凑 n-1）」；跨进制或复杂乘除法可化为十进制计算后再转回。`,
+        rows: [
+          { op: `加法（满n进1）`, rule: `同位相加，满 n 向高位进 1`, example: `(215)₆+(224)₆=(443)₆；(5555)₆+(1)₆=(10000)₆；(178)₉+(8803)₉=(10082)₉`, source: `讲义 Module 2 Warm Up 2 & Exploration 5` },
+          { op: `减法（借1当n）`, rule: `不够减时向高位借 1 当作 n`, example: `(101011)₂-(1110)₂=(11101)₂；(12345)₆-(5432)₆=(2513)₆`, source: `讲义 Module 2 Exploration 5 & Showtime 2` },
+          { op: `加减凑整巧算`, rule: `个位凑 n，其余高位凑 (n-1)`, example: `(63121)₈-(1247)₈-(26531)₈=(33121)₈；(40000)₉-(1111)₉-(2222)₉-(5556)₉=(30000)₉`, source: `讲义 Exploration 5；练习册 Practice 9` },
+          { op: `乘法（竖式满n进1）`, rule: `按位乘，积满 n 进商余留位`, example: `(11101)₂×(1011)₂=(100111111)₂；(314)₇×(233)₇=(110125)₇；(1234)₉×(18)₉=(23445)₉`, source: `讲义 Exploration 6；练习册 Challenge 3` },
+          { op: `除法（竖式或转十进制）`, rule: `试商后乘除数相减，或转十进制除完再转回`, example: `(100001)₂÷(11)₂=(1011)₂（33÷3=11）；(21201)₃÷(11)₃=(1221)₃`, source: `讲义 Exploration 6；练习册 Challenge 3` },
+          { op: `十二/十四/二十进制四则运算`, rule: `「来源未提及」`, example: `「来源未提及」（资料仅涉及十进制与12/14/20进制的互化或读音，无四则运算例题）`, source: `来源边界说明` }
+        ],
+        demoTitle: `巧算实例拆解：(123456)₈ + (22)₈ + (654322)₈ + (56)₈`,
+        demoSteps: [
+          `第 1 步（分组配对）：[(123456)₈ + (654322)₈] + [(22)₈ + (56)₈]`,
+          `第 2 步（八进制凑整，个位凑8、高位凑7）：6+2=8 进1余0，5+2+1=8 进1余0…得 (1000000)₈；2+6=8 进1余0，2+5+1=8 进1余0 得 (100)₈`,
+          `第 3 步（合并结果）：(1000000)₈ + (100)₈ = (1000100)₈`
+        ],
+        quote: `题型3.计算 +-：直接算 满n进1；凑整、个位凑n、高位凑(n-1)\n(123456)_8+(22)_8+(654322)_8+(56)_8 = (1000000)_8 + (100)_8 = (1000100)_8`,
+        sourceText: `来源：Lesson 3-进位制.pdf · Key Points / Module 2 & Lesson 3-进位制-练习册.pdf · Practice 9 / Challenge 3`
+      },
+      judge: {
+        title: `计数桥梁与判断进制三步法`,
+        summary: `计数类问题以「0」为桥梁将给定有序数字集合映射为 n 进制；未知进制算式反推则用「看最大数字下限 → 看个位差因数 / 列方程 → 比十进制大小」三步定位唯一解。`,
+        rows: [
+          { topic: `计数→进制（含 0 集合）`, method: `最小数对应 0（0是桥梁），直接做 n 进制`, example: `0,3,7 打印第100个非零自然数：(100)₁₀=(10201)₃ → 30703；0,1,5,8,9 中 988501 对应 (433201)₅=14801，加0得第14802个`, source: `讲义 Exploration 4 & Module 3 Extension` },
+          { topic: `计数→进制（正整数起始）`, method: `从 1 开始排列，直接对应 n 进制数值`, example: `0~5 组成正整数 1,2,3,4,5,10... 中 2015 为第 (2015)₆ = 443 个数`, source: `Lesson 3-进位制-练习册.pdf · Challenge 2` },
+          { topic: `判断进制第 1 步：看数字`, method: `进制底数 n 必须严格大于最大数码`, example: `7×11×13×138=157586 中出现 8，排除 7、8 进制；125×125=16324 出现 6，至少 7 进制`, source: `讲义 Module 3 Extension` },
+          { topic: `判断进制第 2 步：看个位`, method: `个位真实积与写出的个位之差，必为进制的倍数`, example: `7×12=106：2×7=14，14-6=8（8的因数）；125×125=16324：5×5=25，25-4=21（7或21）`, source: `讲义 Module 3 Extension；练习册 Extension 1` },
+          { topic: `判断进制第 3 步：比十进制`, method: `写法数值 > 十进制真值 → 进制 < 10（反之 > 10）`, example: `4×13=52 < 100（进制<10→6进制）；125×125=15625 < 16324（进制<10→7进制）`, source: `讲义 Module 3 Exploration 7 & Extension` },
+          { topic: `方程法求未知进制 k`, method: `按权展开化为十进制方程求解 k`, example: `(52)_k = 2×(25)_k → 5k+2 = 4k+10 → k=8 → (123)₈=83`, source: `Lesson 3-进位制-练习册.pdf · Extension 2` }
+        ],
+        demoTitle: `三步法实例拆解：在几进制中有 125 × 125 = 16324？`,
+        demoSteps: [
+          `第 1 步（看数字下限）：算式出现数字 6，因此进制 ≥ 7`,
+          `第 2 步（看个位差因数）：个位 5×5 = 25，积的个位写作 4，差值 25 - 4 = 21，进制必为 21 的因数（只可能为 7 或 21）`,
+          `第 3 步（与十进制比大小）：十进制下 125×125 = 15625 < 16324，说明满得更快、进制比 10 小 → 唯一确定为 七进制`
+        ],
+        quote: `题型4：判断进制\n①看数字（下限） ②看个位差了多少（因数） ③比10(>10, <10)\n在几进制中有 125×125=16324？ ①≥7 ②5×5→4，差21 ③15625<16324 → 七进制`,
+        sourceText: `来源：Lesson 3-进位制.pdf · Key Points / Module 3 & Lesson 3-进位制-练习册.pdf · Challenge 2 / Extension 1–2`
+      }
+    };
+
+    const SECTION_OPTIONS = [
+      `全部`,
+      `核心要点`,
+      `模块一：进制认识与转化`,
+      `模块二：进制的计算`,
+      `模块三：进制综合应用`,
+      `练习册：Practice 基础`,
+      `练习册：Challenge & Extension`
+    ];
+
+    const BASE_OPTIONS = [
+      `全部`, `2进制`, `3进制`, `4进制`, `5进制`, `6进制`, `7进制`,
+      `8进制`, `9进制`, `10进制`, `12/14进制`, `16进制`, `20进制`, `n进制通则`
+    ];
+
+    const DIFFICULTY_OPTIONS = [`全部`, `基础入门`, `进阶探索`, `挑战拓展`];
+    const QTYPE_OPTIONS = [`全部`, `概念规则`, `进制互化`, `四则计算`, `计数排位`, `判断进制`, `综合与小数`];
+
+    const SECTION_ACCENT_MAP = {
+      '核心要点': { bar: `yellow`, tag: `tag--yellow` },
+      '模块一：进制认识与转化': { bar: `blue`, tag: `tag--blue` },
+      '模块二：进制的计算': { bar: `red`, tag: `tag--red` },
+      '模块三：进制综合应用': { bar: `black`, tag: `tag--black` },
+      '练习册：Practice 基础': { bar: `blue`, tag: `tag--blue` },
+      '练习册：Challenge & Extension': { bar: `red`, tag: `tag--red` }
+    };
+
+    let appState = {
+      search: ``,
+      section: `全部`,
+      base: `全部`,
+      difficulty: `全部`,
+      qtype: `全部`,
+      status: `全部`,
+      reviewedIds: [],
+      openAnswerIds: [],
+      openQuoteIds: [],
+      activeCompareTab: `power`,
+      demoStepIndex: 0,
+      quizConfig: {
+        section: `全部`,
+        difficulty: `全部`,
+        qtype: `全部`,
+        count: 5,
+        showAnswers: false,
+        showSource: true
+      },
+      quizIds: [],
+      quizStatusMsg: ``,
+      quizStatusWarn: false
+    };
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, `&amp;`)
+        .replace(/</g, `&lt;`)
+        .replace(/>/g, `&gt;`)
+        .replace(/"/g, `&quot;`);
+    }
+
+    async function persistState() {
+      if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+        try {
+          await window.notebookAppApi.setAppState({
+            reviewedIds: appState.reviewedIds,
+            activeCompareTab: appState.activeCompareTab,
+            quizConfig: appState.quizConfig,
+            quizIds: appState.quizIds
+          });
+        } catch (err) {
+          /* ignore sandbox persistence errors */
+        }
+      }
+    }
+
+    function getFilteredItems() {
+      const q = appState.search.trim().toLowerCase();
+      return STUDY_ITEMS.filter(function(item) {
+        if (appState.section !== `全部` && item.section !== appState.section) return false;
+        if (appState.base !== `全部` && item.bases.indexOf(appState.base) === -1) return false;
+        if (appState.difficulty !== `全部` && item.difficulty !== appState.difficulty) return false;
+        if (appState.qtype !== `全部` && item.qtype !== appState.qtype) return false;
+        const isDone = appState.reviewedIds.indexOf(item.id) !== -1;
+        if (appState.status === `已复习` && !isDone) return false;
+        if (appState.status === `待复习` && isDone) return false;
+        if (q) {
+          const haystack = (
+            item.id + ` ` +
+            item.title + ` ` +
+            item.section + ` ` +
+            item.bases.join(` `) + ` ` +
+            item.stemHtml.replace(/<[^>]+>/g, ``) + ` ` +
+            item.answerHtml.replace(/<[^>]+>/g, ``) + ` ` +
+            item.quote + ` ` +
+            item.sourceFile + ` ` +
+            item.sourceSection
+          ).toLowerCase();
+          if (haystack.indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderFilterPills() {
+      renderPillGroup(`pills-section`, SECTION_OPTIONS, appState.section, `setSectionFilter`);
+      renderPillGroup(`pills-base`, BASE_OPTIONS, appState.base, `setBaseFilter`);
+      renderPillGroup(`pills-difficulty`, DIFFICULTY_OPTIONS, appState.difficulty, `setDifficultyFilter`);
+      renderPillGroup(`pills-qtype`, QTYPE_OPTIONS, appState.qtype, `setQtypeFilter`);
+      const statusEl = document.getElementById(`status-filter`);
+      if (statusEl) statusEl.value = appState.status;
+    }
+
+    function renderPillGroup(containerId, options, activeVal, fnName) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = options.map(function(opt) {
+        const cls = opt === activeVal ? `pill-btn is-active` : `pill-btn`;
+        return `<button type="button" class="${cls}" onclick="${fnName}('${opt}')">${escapeHtml(opt)}</button>`;
+      }).join(``);
+    }
+
+    function setSectionFilter(val) { appState.section = val; renderLibraryView(); }
+    function setBaseFilter(val) { appState.base = val; renderLibraryView(); }
+    function setDifficultyFilter(val) { appState.difficulty = val; renderLibraryView(); }
+    function setQtypeFilter(val) { appState.qtype = val; renderLibraryView(); }
+    function setStatusFilter(val) { appState.status = val || `全部`; renderLibraryView(); }
+
+    function handleSearchInput(val) {
+      appState.search = val || ``;
+      renderEntriesOnly();
+    }
+
+    function resetAllFilters() {
+      appState.search = ``;
+      appState.section = `全部`;
+      appState.base = `全部`;
+      appState.difficulty = `全部`;
+      appState.qtype = `全部`;
+      appState.status = `全部`;
+      const inputEl = document.getElementById(`search-input`);
+      if (inputEl) inputEl.value = ``;
+      renderLibraryView();
+    }
+
+    function toggleReviewStatus(id) {
+      const idx = appState.reviewedIds.indexOf(id);
+      if (idx === -1) {
+        appState.reviewedIds.push(id);
+      } else {
+        appState.reviewedIds.splice(idx, 1);
+      }
+      renderLibraryView();
+      renderQuizOutput();
+      persistState();
+    }
+
+    function toggleAnswerPanel(id) {
+      const idx = appState.openAnswerIds.indexOf(id);
+      if (idx === -1) appState.openAnswerIds.push(id);
+      else appState.openAnswerIds.splice(idx, 1);
+      renderEntriesOnly();
+    }
+
+    function toggleQuotePanel(id) {
+      const idx = appState.openQuoteIds.indexOf(id);
+      if (idx === -1) appState.openQuoteIds.push(id);
+      else appState.openQuoteIds.splice(idx, 1);
+      renderEntriesOnly();
+    }
+
+    function expandAllVisible() {
+      const items = getFilteredItems();
+      items.forEach(function(item) {
+        if (appState.openAnswerIds.indexOf(item.id) === -1) {
+          appState.openAnswerIds.push(item.id);
+        }
+      });
+      renderEntriesOnly();
+    }
+
+    function collapseAllVisible() {
+      appState.openAnswerIds = [];
+      appState.openQuoteIds = [];
+      renderEntriesOnly();
+    }
+
+    function handleResetProgress(btn) {
+      if (!btn) return;
+      if (btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.textContent = `再点一次确认清空`;
+        btn.classList.add(`btn--danger`);
+        return;
+      }
+      btn.dataset.armed = `false`;
+      btn.textContent = `重置复习打卡`;
+      btn.classList.remove(`btn--danger`);
+      appState.reviewedIds = [];
+      renderLibraryView();
+      renderQuizOutput();
+      persistState();
+    }
+
+    function updateKpis(matchedCount) {
+      const total = STUDY_ITEMS.length;
+      const done = appState.reviewedIds.length;
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+      const totalEl = document.getElementById(`kpi-total`);
+      const revEl = document.getElementById(`kpi-reviewed`);
+      const pctEl = document.getElementById(`kpi-progress-pct`);
+      const barEl = document.getElementById(`kpi-progress-bar`);
+      const matchEl = document.getElementById(`kpi-matched`);
+
+      if (totalEl) totalEl.textContent = total + ` 条`;
+      if (revEl) revEl.textContent = done + ` / ` + total + ` 条`;
+      if (pctEl) pctEl.textContent = `已复习 ` + pct + `%`;
+      if (barEl) barEl.style.width = pct + `%`;
+      if (matchEl) matchEl.textContent = matchedCount + ` 条`;
+    }
+
+    function renderEntriesOnly() {
+      const items = getFilteredItems();
+      updateKpis(items.length);
+
+      const countEl = document.getElementById(`results-count-text`);
+      const emptyEl = document.getElementById(`empty-state`);
+      const container = document.getElementById(`entries-container`);
+      if (!container) return;
+
+      if (countEl) {
+        countEl.textContent = `正在显示 ` + items.length + ` / ` + STUDY_ITEMS.length + ` 条来源内容`;
+      }
+
+      if (items.length === 0) {
+        container.innerHTML = ``;
+        if (emptyEl) emptyEl.classList.add(`is-visible`);
+        return;
+      }
+
+      if (emptyEl) emptyEl.classList.remove(`is-visible`);
+
+      container.innerHTML = items.map(function(item) {
+        const isReviewed = appState.reviewedIds.indexOf(item.id) !== -1;
+        const isAnsOpen = appState.openAnswerIds.indexOf(item.id) !== -1;
+        const isQuoteOpen = appState.openQuoteIds.indexOf(item.id) !== -1;
+        const accent = SECTION_ACCENT_MAP[item.section] || { bar: `blue`, tag: `tag--blue` };
+
+        const baseTags = item.bases.map(function(b) {
+          return `<span class="tag tag--subtle">${escapeHtml(b)}</span>`;
+        }).join(``);
+
+        return `
+          <article class="problem-card ${isReviewed ? `is-mastered` : ``}" id="card-${escapeHtml(item.id)}">
+            <div>
+              <div class="card-accent-bar card-accent-bar--${accent.bar}" aria-hidden="true"></div>
+              <div class="card-body">
+                <div class="card-top-row">
+                  <div class="tag-group">
+                    <span class="tag ${accent.tag}">${escapeHtml(item.id)}</span>
+                    <span class="tag tag--yellow">${escapeHtml(item.difficulty)}</span>
+                    <span class="tag">${escapeHtml(item.qtype)}</span>
+                  </div>
+                  <button type="button"
+                    class="mastery-btn ${isReviewed ? `is-done` : ``}"
+                    onclick="toggleReviewStatus('${item.id}')"
+                    aria-pressed="${isReviewed}">
+                    <span>${isReviewed ? `✓ 已复习` : `○ 待复习`}</span>
+                  </button>
+                </div>
+
+                <h3 class="card-title">${escapeHtml(item.title)}</h3>
+
+                <div class="tag-group">
+                  <span class="tag tag--subtle">${escapeHtml(item.section)}</span>
+                  ${baseTags}
+                </div>
+
+                <div class="card-prompt">${item.stemHtml}</div>
+
+                <div class="accordion-actions">
+                  <button type="button" class="accordion-trigger" onclick="toggleAnswerPanel('${item.id}')" aria-expanded="${isAnsOpen}">
+                    <span>${isAnsOpen ? `收起答案与解析` : `展开答案与解析`}</span>
+                    <span aria-hidden="true">${isAnsOpen ? `▲` : `▼`}</span>
+                  </button>
+                  <button type="button" class="accordion-trigger" onclick="toggleQuotePanel('${item.id}')" aria-expanded="${isQuoteOpen}">
+                    <span>${isQuoteOpen ? `收起原文摘录` : `展开原文摘录`}</span>
+                    <span aria-hidden="true">${isQuoteOpen ? `▲` : `▼`}</span>
+                  </button>
+                </div>
+
+                <div class="accordion-panel" ${isAnsOpen ? `` : `hidden`}>
+                  <span class="field-label">答案与解析</span>
+                  <div class="answer-callout">${item.answerHtml}</div>
+                </div>
+
+                <div class="accordion-panel" ${isQuoteOpen ? `` : `hidden`}>
+                  <span class="field-label">来源原文摘录（${escapeHtml(item.sourceFile)}）</span>
+                  <div class="quote-box">
+                    <pre class="quote-text">${escapeHtml(item.quote)}</pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <footer class="card-footer">
+              来源：${escapeHtml(item.sourceFile)} · ${escapeHtml(item.sourceSection)}
+            </footer>
+          </article>
+        `;
+      }).join(``);
+    }
+
+    function renderLibraryView() {
+      renderFilterPills();
+      renderEntriesOnly();
+    }
+
+    function switchCompareTab(tabKey) {
+      if (!COMPARE_TABS[tabKey]) return;
+      appState.activeCompareTab = tabKey;
+      appState.demoStepIndex = 0;
+      renderCompareTab();
+      persistState();
+    }
+
+    function stepDemoNext() {
+      const data = COMPARE_TABS[appState.activeCompareTab];
+      if (!data) return;
+      if (appState.demoStepIndex < data.demoSteps.length - 1) {
+        appState.demoStepIndex += 1;
+      } else {
+        appState.demoStepIndex = 0;
+      }
+      renderCompareTab();
+    }
+
+    function stepDemoShowAll() {
+      const data = COMPARE_TABS[appState.activeCompareTab];
+      if (!data) return;
+      appState.demoStepIndex = data.demoSteps.length - 1;
+      renderCompareTab();
+    }
+
+    function renderCompareTab() {
+      const keys = [`power`, `short`, `bridge`, `calc`, `judge`];
+      keys.forEach(function(k) {
+        const btn = document.getElementById(`tab-btn-` + k);
+        if (btn) {
+          const active = k === appState.activeCompareTab;
+          btn.classList.toggle(`is-active`, active);
+          btn.setAttribute(`aria-selected`, active ? `true` : `false`);
+        }
+      });
+
+      const panel = document.getElementById(`compare-tabpanel`);
+      if (!panel) return;
+      const data = COMPARE_TABS[appState.activeCompareTab];
+      if (!data) return;
+
+      if (appState.demoStepIndex >= data.demoSteps.length) {
+        appState.demoStepIndex = data.demoSteps.length - 1;
+      }
+
+      let tableHeadHtml = ``;
+      let tableBodyHtml = ``;
+
+      if (appState.activeCompareTab === `power`) {
+        tableHeadHtml = `<tr><th>进制</th><th>可用数码</th><th>整数部分实例</th><th>小数部分实例</th><th>来源标注</th></tr>`;
+        tableBodyHtml = data.rows.map(function(r) {
+          const decCell = r.decimalEx === `「来源未提及」` ? `<span class="not-mentioned">来源未提及</span>` : escapeHtml(r.decimalEx);
+          return `<tr><td><strong>${escapeHtml(r.base)}</strong></td><td class="num">${escapeHtml(r.digits)}</td><td class="num">${escapeHtml(r.integerEx)}</td><td class="num">${decCell}</td><td>${escapeHtml(r.source)}</td></tr>`;
+        }).join(``);
+      } else if (appState.activeCompareTab === `short`) {
+        tableHeadHtml = `<tr><th>目标进制</th><th>转化规则</th><th>整数转化实例</th><th>小数转化实例</th><th>来源标注</th></tr>`;
+        tableBodyHtml = data.rows.map(function(r) {
+          const decCell = r.decimalEx === `「来源未提及」` ? `<span class="not-mentioned">来源未提及</span>` : escapeHtml(r.decimalEx);
+          return `<tr><td><strong>${escapeHtml(r.base)}</strong></td><td>${escapeHtml(r.rule)}</td><td class="num">${escapeHtml(r.integerEx)}</td><td class="num">${decCell}</td><td>${escapeHtml(r.source)}</td></tr>`;
+        }).join(``);
+      } else if (appState.activeCompareTab === `bridge`) {
+        tableHeadHtml = `<tr><th>互化组合</th><th>核心方法</th><th>位段 / 中转规则</th><th>来源例题</th><th>来源标注</th></tr>`;
+        tableBodyHtml = data.rows.map(function(r) {
+          return `<tr><td><strong>${escapeHtml(r.pair)}</strong></td><td>${escapeHtml(r.method)}</td><td>${escapeHtml(r.mapping)}</td><td class="num">${escapeHtml(r.example)}</td><td>${escapeHtml(r.source)}</td></tr>`;
+        }).join(``);
+      } else if (appState.activeCompareTab === `calc`) {
+        tableHeadHtml = `<tr><th>运算类型</th><th>核心规则</th><th>讲义 / 练习册实例</th><th>来源标注</th></tr>`;
+        tableBodyHtml = data.rows.map(function(r) {
+          const ruleCell = r.rule === `「来源未提及」` ? `<span class="not-mentioned">来源未提及</span>` : escapeHtml(r.rule);
+          return `<tr><td><strong>${escapeHtml(r.op)}</strong></td><td>${ruleCell}</td><td class="num">${escapeHtml(r.example)}</td><td>${escapeHtml(r.source)}</td></tr>`;
+        }).join(``);
+      } else {
+        tableHeadHtml = `<tr><th>题型分支</th><th>核心判断方法</th><th>讲义 / 练习册实例</th><th>来源标注</th></tr>`;
+        tableBodyHtml = data.rows.map(function(r) {
+          return `<tr><td><strong>${escapeHtml(r.topic)}</strong></td><td>${escapeHtml(r.method)}</td><td class="num">${escapeHtml(r.example)}</td><td>${escapeHtml(r.source)}</td></tr>`;
+        }).join(``);
+      }
+
+      const stepsHtml = data.demoSteps.map(function(s, idx) {
+        let cls = `demo-step-row`;
+        if (idx === appState.demoStepIndex) cls += ` is-current`;
+        else if (idx < appState.demoStepIndex) cls += ` is-done`;
+        else cls += ` is-locked`;
+        return `<div class="${cls}">${escapeHtml(s)}</div>`;
+      }).join(``);
+
+      const isLastStep = appState.demoStepIndex >= data.demoSteps.length - 1;
+
+      panel.innerHTML = `
+        <div class="panel-block">
+          <div class="panel-intro">
+            <h3>${escapeHtml(data.title)}</h3>
+            <p>${escapeHtml(data.summary)}</p>
+          </div>
+          <div class="table-wrap">
+            <table class="variant-table">
+              <thead>${tableHeadHtml}</thead>
+              <tbody>${tableBodyHtml}</tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside class="sim-box" aria-label="讲义原题分步拆解演示">
+          <div class="sim-stage">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-sm); flex-wrap:wrap;">
+              <strong style="font-size:0.95rem;">${escapeHtml(data.demoTitle)}</strong>
+              <span class="tag tag--blue">第 ${appState.demoStepIndex + 1} / ${data.demoSteps.length} 步</span>
+            </div>
+            <div class="demo-steps">${stepsHtml}</div>
+          </div>
+
+          <div class="demo-controls">
+            <button type="button" class="btn btn--primary" onclick="stepDemoNext()">
+              ${isLastStep ? `重新从第 1 步演示` : `下一步拆解 →`}
+            </button>
+            ${isLastStep ? `` : `<button type="button" class="btn btn--small" onclick="stepDemoShowAll()">直达最终结果</button>`}
+          </div>
+
+          <div class="quote-box">
+            <strong>核心法则原文摘录：</strong>
+            <pre class="quote-text">${escapeHtml(data.quote)}</pre>
+          </div>
+
+          <div style="font-size:0.8rem; color:var(--on-surface-variant);">
+            <strong>${escapeHtml(data.sourceText)}</strong>
+          </div>
+        </aside>
+      `;
+    }
+
+    function updateQuizConfig() {
+      const secEl = document.getElementById(`quiz-section`);
+      const difEl = document.getElementById(`quiz-difficulty`);
+      const qtypeEl = document.getElementById(`quiz-qtype`);
+      const cntEl = document.getElementById(`quiz-count`);
+
+      if (secEl) appState.quizConfig.section = secEl.value;
+      if (difEl) appState.quizConfig.difficulty = difEl.value;
+      if (qtypeEl) appState.quizConfig.qtype = qtypeEl.value;
+      if (cntEl) appState.quizConfig.count = parseInt(cntEl.value, 10) || 5;
+      persistState();
+    }
+
+    function toggleQuizDisplay() {
+      const ansEl = document.getElementById(`quiz-show-answers`);
+      const srcEl = document.getElementById(`quiz-show-source`);
+      if (ansEl) appState.quizConfig.showAnswers = ansEl.checked;
+      if (srcEl) appState.quizConfig.showSource = srcEl.checked;
+      renderQuizOutput();
+      persistState();
+    }
+
+    function generateQuiz() {
+      updateQuizConfig();
+      const cfg = appState.quizConfig;
+
+      const pool = STUDY_ITEMS.filter(function(item) {
+        if (!item.isQuizEligible) return false;
+        if (cfg.section !== `全部` && item.quizSection !== cfg.section && item.section !== cfg.section) return false;
+        if (cfg.difficulty !== `全部` && item.difficulty !== cfg.difficulty) return false;
+        if (cfg.qtype !== `全部` && item.qtype !== cfg.qtype) return false;
+        return true;
+      });
+
+      if (pool.length === 0) {
+        appState.quizIds = [];
+        appState.quizStatusMsg = `「来源未提及」：当前条件组合在《Lesson 3-进位制.pdf》与《Lesson 3-进位制-练习册.pdf》中暂无对应原题，请放宽模块、难度或题型条件后重试。`;
+        appState.quizStatusWarn = true;
+        renderQuizOutput();
+        persistState();
+        return;
+      }
+
+      const shuffled = pool.slice();
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = shuffled[i];
+        shuffled[i] = shuffled[j];
+        shuffled[j] = tmp;
+      }
+
+      const selected = shuffled.slice(0, cfg.count);
+      appState.quizIds = selected.map(function(item) { return item.id; });
+
+      if (pool.length < cfg.count) {
+        appState.quizStatusMsg = `当前符合条件的来源原题共 ` + pool.length + ` 道（少于期望的 ` + cfg.count + ` 题），已全部抽取，绝不编造补充题目。`;
+        appState.quizStatusWarn = true;
+      } else {
+        appState.quizStatusMsg = `已从 ` + pool.length + ` 道符合条件的来源原题中随机抽取 ` + selected.length + ` 道组成试卷。`;
+        appState.quizStatusWarn = false;
+      }
+
+      renderQuizOutput();
+      persistState();
+    }
+
+    function renderQuizOutput() {
+      const banner = document.getElementById(`quiz-status-banner`);
+      const out = document.getElementById(`quiz-output`);
+      if (!out) return;
+
+      if (banner) {
+        if (appState.quizStatusMsg) {
+          banner.hidden = false;
+          banner.textContent = appState.quizStatusMsg;
+          banner.className = appState.quizStatusWarn ? `inline-notice is-warn` : `inline-notice`;
+        } else {
+          banner.hidden = true;
+        }
+      }
+
+      if (!appState.quizIds || appState.quizIds.length === 0) {
+        out.innerHTML = `
+          <div class="inline-notice">
+            点击上方「随机生成试卷」按钮，系统将严格从讲义与练习册原题库中随机抽取题目，生成可交互作答或直接打印导出的练习卷。
+          </div>
+        `;
+        return;
+      }
+
+      const items = appState.quizIds.map(function(id) {
+        return STUDY_ITEMS.find(function(x) { return x.id === id; });
+      }).filter(Boolean);
+
+      const showAns = appState.quizConfig.showAnswers;
+      const showSrc = appState.quizConfig.showSource;
+
+      out.innerHTML = items.map(function(item, idx) {
+        const isReviewed = appState.reviewedIds.indexOf(item.id) !== -1;
+
+        return `
+          <article class="quiz-question">
+            <div class="quiz-q-head">
+              <div class="tag-group">
+                <span class="tag tag--black">第 ${idx + 1} 题</span>
+                <span class="tag tag--blue">${escapeHtml(item.id)}</span>
+                <span class="tag tag--yellow">${escapeHtml(item.difficulty)}</span>
+                <span class="tag">${escapeHtml(item.qtype)}</span>
+              </div>
+              <button type="button" class="mastery-btn ${isReviewed ? `is-done` : ``} no-print" onclick="toggleReviewStatus('${item.id}')">
+                <span>${isReviewed ? `✓ 已复习` : `○ 打卡已复习`}</span>
+              </button>
+            </div>
+            <div class="card-prompt">${item.stemHtml}</div>
+            ${showAns ? `
+              <div class="answer-callout">
+                <span class="field-label" style="display:block; margin-bottom:4px; color:var(--on-positive-container);">参考答案与解析</span>
+                <div>${item.answerHtml}</div>
+              </div>
+            ` : `<div class="quiz-scratch-line" aria-hidden="true"></div>`}
+            ${showSrc ? `
+              <div style="font-size:0.8rem; color:var(--on-surface-variant); border-top:1px dashed var(--outline-variant); padding-top:var(--space-xs);">
+                <strong>来源：</strong>${escapeHtml(item.sourceFile)} · ${escapeHtml(item.sourceSection)}
+              </div>
+            ` : ``}
+          </article>
+        `;
+      }).join(``);
+    }
+
+    function printQuiz() {
+      if (!appState.quizIds || appState.quizIds.length === 0) {
+        generateQuiz();
+      }
+      if (typeof window.print === `function`) {
+        window.print();
+      }
+    }
+
+    function exportQuizTxt() {
+      if (!appState.quizIds || appState.quizIds.length === 0) {
+        generateQuiz();
+      }
+      const items = appState.quizIds.map(function(id) {
+        return STUDY_ITEMS.find(function(x) { return x.id === id; });
+      }).filter(Boolean);
+
+      if (items.length === 0) return;
+
+      const stripHtml = function(html) {
+        return html
+          .replace(/<br\s*\/?>/gi, `\n`)
+          .replace(/<sub>(.*?)<\/sub>/gi, `_($1)`)
+          .replace(/<sup>(.*?)<\/sup>/gi, `^$1`)
+          .replace(/<[^>]+>/g, ``)
+          .replace(/&lt;/g, `<`)
+          .replace(/&gt;/g, `>`)
+          .replace(/&amp;/g, `&`);
+      };
+
+      const lines = [
+        `Lesson 3 进位制 · 随机练习卷`,
+        `==================================================`,
+        `来源依据：《Lesson 3-进位制.pdf》《Lesson 3-进位制-练习册.pdf》`,
+        `题量：共 ` + items.length + ` 题`,
+        ``
+      ];
+
+      items.forEach(function(item, idx) {
+        lines.push(`【第 ` + (idx + 1) + ` 题】(` + item.id + ` | ` + item.difficulty + ` | ` + item.qtype + `)`);
+        lines.push(stripHtml(item.stemHtml));
+        if (appState.quizConfig.showAnswers) {
+          lines.push(`参考答案与解析：` + stripHtml(item.answerHtml));
+        }
+        if (appState.quizConfig.showSource) {
+          lines.push(`来源：` + item.sourceFile + ` · ` + item.sourceSection);
+        }
+        lines.push(``);
+      });
+
+      const content = lines.join(`\n`);
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content: content,
+          contentType: `text/plain`,
+          encoding: `UTF-8`,
+          filename: `Lesson3_进位制_随机练习卷.txt`
+        });
+      } else {
+        const blob = new Blob([content], { type: `text/plain;charset=utf-8` });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement(`a`);
+        a.href = url;
+        a.download = `Lesson3_进位制_随机练习卷.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    function syncQuizFormControls() {
+      const secEl = document.getElementById(`quiz-section`);
+      const difEl = document.getElementById(`quiz-difficulty`);
+      const qtypeEl = document.getElementById(`quiz-qtype`);
+      const cntEl = document.getElementById(`quiz-count`);
+      const ansEl = document.getElementById(`quiz-show-answers`);
+      const srcEl = document.getElementById(`quiz-show-source`);
+
+      if (secEl) secEl.value = appState.quizConfig.section || `全部`;
+      if (difEl) difEl.value = appState.quizConfig.difficulty || `全部`;
+      if (qtypeEl) qtypeEl.value = appState.quizConfig.qtype || `全部`;
+      if (cntEl) cntEl.value = String(appState.quizConfig.count || 5);
+      if (ansEl) ansEl.checked = Boolean(appState.quizConfig.showAnswers);
+      if (srcEl) srcEl.checked = appState.quizConfig.showSource !== false;
+    }
+
+    async function initApp() {
+      if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+        try {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && typeof saved === `object`) {
+            if (Array.isArray(saved.reviewedIds)) appState.reviewedIds = saved.reviewedIds;
+            if (saved.activeCompareTab && COMPARE_TABS[saved.activeCompareTab]) {
+              appState.activeCompareTab = saved.activeCompareTab;
+            }
+            if (saved.quizConfig && typeof saved.quizConfig === `object`) {
+              appState.quizConfig = Object.assign(appState.quizConfig, saved.quizConfig);
+            }
+            if (Array.isArray(saved.quizIds)) {
+              appState.quizIds = saved.quizIds;
+            }
+          }
+        } catch (err) {
+          /* ignore sandbox read errors */
+        }
+      }
+
+      syncQuizFormControls();
+      renderLibraryView();
+      renderCompareTab();
+
+      if (appState.quizIds && appState.quizIds.length > 0) {
+        appState.quizStatusMsg = `已恢复上次本地生成的 ` + appState.quizIds.length + ` 道练习题。`;
+        appState.quizStatusWarn = false;
+        renderQuizOutput();
+      } else {
+        generateQuiz();
+      }
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    document.addEventListener(`DOMContentLoaded`, initApp);
+  </script>
+</body>
+</html>

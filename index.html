@@ -53,7 +53,7 @@ body {
 }
 
 .page-grid {
-  max-width: 1120px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: var(--space-xl) var(--space-lg);
   display: grid;
@@ -127,7 +127,7 @@ body {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
   gap: var(--space-lg);
 }
 
@@ -153,6 +153,7 @@ body {
 }
 .accent-bar--blue { background: var(--tertiary); }
 .accent-bar--red { background: var(--secondary); }
+.accent-bar--yellow { background: var(--primary-container); }
 
 .card-body {
   padding: var(--space-lg);
@@ -329,6 +330,29 @@ body {
       <footer class="card-footer">
         <span style="font-size:0.8rem; color:var(--on-surface-variant);">Lesson 9 · 教材 &amp; 练习册</span>
         <a class="open-btn" href="./横式数字谜奥数解析互动学习工作台.html">进入工作台 →</a>
+      </footer>
+    </article>
+
+    <article class="nav-card">
+      <div>
+        <div class="accent-bar accent-bar--yellow" aria-hidden="true"></div>
+        <div class="card-body">
+          <div class="tag-row">
+            <span class="tag tag--yellow">进位制专题</span>
+            <span class="tag tag--blue">44 条全题库</span>
+          </div>
+          <h2 class="card-title">进位制：知识点与题库复习工作台</h2>
+          <p class="card-desc">覆盖 2–20 进制与 n 进制通则，包含按权展开、短除法、乘方分组、四则凑整与判断进制三步法。</p>
+          <ul class="card-features">
+            <li>五大核心规则对比台 + 讲义原题逐步拆解交互演示</li>
+            <li>44 条讲义要点与练习册原题多维筛选与打卡复习</li>
+            <li>内置本地自动组卷器，支持随机抽题、打印与 TXT 导出</li>
+          </ul>
+        </div>
+      </div>
+      <footer class="card-footer">
+        <span style="font-size:0.8rem; color:var(--on-surface-variant);">Lesson 3 · 第 4 讲</span>
+        <a class="open-btn" href="./进位制交互式学习与题库工作台.html">进入工作台 →</a>
       </footer>
     </article>
 
