@@ -1,0 +1,3467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="artifact-type" content="tool">
+<meta name="design-style" content="bauhaus">
+<title>冠军请听题：竞赛巧算原理与交互组卷工作台</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.2/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18.2/dist/katex.min.js"></script>
+<script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  color-scheme: light;
+
+  /* 1. Bauhaus surfaces & ink */
+  --background: #f5f0e8;
+  --surface-container-low: #f2ede5;
+  --surface-container: #eee9e0;
+  --surface-container-high: #e8e3da;
+  --surface-white: #ffffff;
+
+  --on-surface: #1a1a1a;
+  --on-surface-variant: #4a4a4a;
+
+  --outline: #1a1a1a;
+  --outline-variant: #d0cbc3;
+
+  --primary: #1a1a1a;
+  --on-primary: #ffffff;
+  --primary-container: #ffcc00;
+  --on-primary-container: #1a1a1a;
+  --secondary: #e63b2e;
+  --on-secondary: #ffffff;
+  --tertiary: #0055ff;
+  --on-tertiary: #ffffff;
+  --error: #cc0000;
+  --error-container: #fdeceb;
+  --on-error: #ffffff;
+
+  /* Data series */
+  --data-1: #e63b2e;
+  --data-2: #0055ff;
+  --data-3: #1a1a1a;
+  --data-4: #9a7300;
+  --data-context: #b5afa5;
+
+  /* Fonts (Noto Sans SC listed first for CJK) */
+  --font-headline: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+  --font-body: 'Noto Sans SC', 'Inter', sans-serif;
+  --font-label: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+
+  /* Shape */
+  --rounded: 0.125rem;
+  --rounded-lg: 0.25rem;
+  --rounded-full: 0.75rem;
+
+  /* Style effects */
+  --border-thick: 3px solid var(--outline);
+  --border-medium: 2px solid var(--outline);
+  --offset-shadow: 5px 5px 0 var(--outline);
+  --offset-shadow-sm: 3px 3px 0 var(--outline);
+  --rule-heavy: 6px solid var(--outline);
+
+  /* 2. Shared semantic & scale tokens */
+  --positive: #156d3f;
+  --on-positive: #ffffff;
+  --positive-container: #d8efe0;
+  --on-positive-container: #114b2c;
+  --warning: #8f5800;
+  --warning-container: #fff3c4;
+  --focus: #0055ff;
+
+  /* Type scale */
+  --display-size: clamp(1.85rem, 1.4rem + 1.8vw, 2.75rem);
+  --headline-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.2rem);
+  --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+  --label-size: 0.75rem;
+
+  /* Spacing scale (4pt base) */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+}
+
+/* Base reset */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; margin: 0; padding: 0; }
+header { position: static !important; }
+
+body {
+  background-color: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.page-grid {
+  display: grid;
+  gap: var(--space-xl);
+  padding: var(--space-lg);
+  max-width: 1240px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.page-grid * { min-width: 0; }
+
+/* Masthead / Header */
+.masthead {
+  border-top: var(--rule-heavy);
+  border-bottom: var(--border-thick);
+  padding: var(--space-lg) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: end;
+}
+
+.kicker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.kicker-block {
+  display: inline-block;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  background: var(--primary);
+  color: var(--on-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-medium);
+}
+
+.kicker-block--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.kicker-block--yellow {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.kicker-block--red {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+
+.flag-trio {
+  display: inline-flex;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.flag-swatch {
+  width: 14px;
+  height: 18px;
+  border: var(--border-medium);
+  display: inline-block;
+}
+.flag-swatch--red { background: var(--secondary); }
+.flag-swatch--yellow { background: var(--primary-container); }
+.flag-swatch--blue { background: var(--tertiary); }
+
+.title {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: var(--display-size);
+  line-height: 1.12;
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--on-surface);
+}
+
+.title mark {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: 0 var(--space-xs);
+  box-decoration-break: clone;
+}
+
+.lede {
+  margin: 0;
+  color: var(--on-surface-variant);
+  max-width: 66ch;
+}
+
+.quick-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.quick-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 36px;
+  padding: 0 var(--space-sm);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  color: var(--on-surface);
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.quick-nav-link:hover {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.quick-nav-link:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.source-pill-box {
+  background: var(--surface-container-low);
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  padding: var(--space-md);
+}
+
+.source-pill-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.source-pill-title {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  margin: 0;
+  color: var(--on-surface);
+}
+
+.sync-badge {
+  font-family: var(--font-label);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border: 1.5px solid var(--outline);
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+}
+
+.source-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+}
+
+/* KPI Summary Row */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+
+.kpi-block {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container-low);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.kpi-block--highlight {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.kpi-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+}
+
+.kpi-block--highlight .kpi-label {
+  color: var(--on-primary-container);
+}
+
+.kpi-value {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: clamp(1.45rem, 1.2rem + 0.9vw, 1.9rem);
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-sub {
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+.kpi-block--highlight .kpi-sub {
+  color: var(--on-primary-container);
+}
+
+.kpi-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.progress-track {
+  width: 100%;
+  height: 12px;
+  border: var(--border-medium);
+  background: var(--surface-white);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--tertiary);
+  transition: width var(--dur-short) var(--ease-out);
+}
+
+/* Section Openings (One-accent rule) */
+.section-open {
+  border-top: var(--space-sm) solid var(--section-accent, var(--tertiary));
+  padding-top: var(--space-lg);
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.section-open--blue { --section-accent: var(--tertiary); }
+.section-open--red { --section-accent: var(--secondary); }
+.section-open--yellow { --section-accent: var(--primary-container); }
+.section-open--black { --section-accent: var(--primary); }
+
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-md);
+}
+
+.section-heading {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--headline-size);
+  line-height: 1.2;
+  margin: var(--space-xs) 0 0 0;
+}
+
+.section-desc {
+  margin: var(--space-xs) 0 0 0;
+  color: var(--on-surface-variant);
+  max-width: 68ch;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--background);
+  color: var(--on-surface);
+  cursor: pointer;
+  transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+
+.btn:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+.btn--primary {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.btn--primary:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.btn--blue:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn--danger {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+
+.btn--small {
+  min-height: 36px;
+  padding: 0 var(--space-sm);
+  font-size: 0.8125rem;
+}
+
+/* Comparison Tabs & Panel */
+.tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.tab-btn {
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  cursor: pointer;
+  box-shadow: var(--offset-shadow-sm);
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.tab-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.tab-btn.is-active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.panel-block {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container-low);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.compare-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.compare-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.compare-col {
+  border: var(--border-medium);
+  background: var(--surface-white);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+  align-content: start;
+}
+
+.compare-col--accent {
+  background: var(--surface-container);
+}
+
+.compare-col-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--border-medium);
+  padding-bottom: var(--space-xs);
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.formula-banner {
+  background: var(--background);
+  border: var(--border-medium);
+  border-left: 6px solid var(--tertiary);
+  padding: var(--space-sm) var(--space-md);
+  overflow-x: auto;
+}
+
+.lab-strip {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(0, 1.4fr);
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.lab-controls {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.lab-controls input[type="range"] {
+  width: 100%;
+  accent-color: var(--tertiary);
+  cursor: pointer;
+}
+
+.lab-output {
+  border: var(--border-medium);
+  background: var(--background);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.aside-callout {
+  border: var(--border-medium);
+  border-left: 6px solid var(--primary-container);
+  background: var(--surface-white);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-xs);
+}
+
+/* Search & Filter Toolbar */
+.toolbar-panel {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.toolbar-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: var(--space-md);
+  align-items: end;
+}
+
+.field-group {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.field-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--on-surface);
+}
+
+.input-control, .select-control {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-sm);
+  border: 0;
+  border-bottom: var(--border-thick);
+  background: var(--surface-white);
+  font-size: var(--body-size);
+  border-radius: 0;
+}
+
+.select-control {
+  padding-right: var(--space-lg);
+  cursor: pointer;
+}
+
+.input-control:focus-visible, .select-control:focus-visible {
+  border-bottom-color: var(--tertiary);
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: var(--space-xs) var(--space-md);
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  background: var(--surface-white);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.pill-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.pill-btn.is-active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  box-shadow: var(--offset-shadow-sm);
+}
+
+.pill-count {
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+
+.results-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  border-top: 1px solid var(--outline-variant);
+  padding-top: var(--space-sm);
+}
+
+/* Problem Cards List (One problem per row) */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+.problem-card {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.problem-card.is-mastered {
+  background: var(--surface-container-low);
+}
+
+.card-accent-bar {
+  height: 8px;
+  width: 100%;
+  border-bottom: var(--border-medium);
+}
+.card-accent-bar--blue { background: var(--tertiary); }
+.card-accent-bar--red { background: var(--secondary); }
+.card-accent-bar--yellow { background: var(--primary-container); }
+.card-accent-bar--black { background: var(--primary); }
+
+.card-body {
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.card-top-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.tag {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  border: var(--border-medium);
+  padding: 2px 8px;
+  border-radius: var(--rounded);
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+.tag--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.tag--red {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+
+.tag--yellow {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.tag--black {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.mastery-btn {
+  min-height: 40px;
+  padding: 0 var(--space-sm);
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  background: var(--surface-white);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mastery-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.mastery-btn.is-done {
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+}
+
+.card-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+  line-height: 1.3;
+}
+
+.item-prompt {
+  background: var(--surface-container);
+  border: var(--border-medium);
+  border-left: 6px solid var(--primary);
+  padding: var(--space-sm) var(--space-md);
+  overflow-x: auto;
+}
+
+.card-prompt {
+  margin: 0;
+  color: var(--on-surface);
+  font-size: 0.975rem;
+  line-height: 1.75;
+}
+
+/* Accordion inside card */
+.accordion-trigger {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
+  border: var(--border-medium);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--dur-micro) var(--ease-out);
+}
+
+.accordion-trigger:hover {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.accordion-panel {
+  border: var(--border-medium);
+  border-top: 0;
+  background: var(--background);
+  padding: var(--space-md) var(--space-lg);
+  display: none;
+  gap: var(--space-md);
+}
+
+.accordion-panel.is-open {
+  display: grid;
+}
+
+.steps-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.step-item {
+  border-left: 4px solid var(--tertiary);
+  padding: 2px 0 2px var(--space-sm);
+  font-size: 0.93rem;
+  line-height: 1.65;
+  display: grid;
+  gap: 4px;
+}
+
+.insight-box {
+  background: var(--warning-container);
+  border: 1.5px solid var(--outline);
+  border-left: 5px solid var(--primary-container);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.9rem;
+}
+
+.quote-box {
+  background: var(--surface-container);
+  border-left: 4px solid var(--primary);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.84rem;
+  color: var(--on-surface-variant);
+}
+
+.science-box {
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+  border: 1.5px solid var(--positive);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.875rem;
+}
+
+.diagram-box {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.card-footer {
+  border-top: var(--border-medium);
+  background: var(--surface-container);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.78rem;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+
+/* Empty State */
+.empty-state {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-xl);
+  display: grid;
+  gap: var(--space-md);
+  justify-items: start;
+}
+
+/* SOP & Formula Strip */
+.sop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.sop-card {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-xs);
+  align-content: start;
+}
+
+.sop-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.sop-title {
+  margin: var(--space-xs) 0 0 0;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.mantra-banner {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: var(--space-lg);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.15fr);
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.mantra-quote {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.45rem);
+  line-height: 1.45;
+}
+
+.formula-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-xs);
+  font-size: 0.88rem;
+}
+
+.formula-list li {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  padding: var(--space-xs) var(--space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.math-expr {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-container);
+  border: 1px solid var(--outline-variant);
+  padding: 1px 6px;
+  border-radius: var(--rounded);
+}
+
+/* Quiz Generator & Printable Worksheet */
+.quiz-config-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-md);
+  align-items: end;
+}
+
+.quiz-toggles-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--outline-variant);
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 40px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--tertiary);
+  cursor: pointer;
+}
+
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.status-banner {
+  border: var(--border-medium);
+  border-left: 8px solid var(--tertiary);
+  background: var(--surface-white);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.worksheet-paper {
+  background: var(--surface-white);
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  border-radius: var(--rounded);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.worksheet-header {
+  border-bottom: var(--border-thick);
+  padding-bottom: var(--space-md);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-md);
+}
+
+.worksheet-meta-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.blank-line {
+  display: inline-block;
+  min-width: 90px;
+  border-bottom: 2px solid var(--outline);
+}
+
+.quiz-question-card {
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  break-inside: avoid;
+}
+
+.quiz-q-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.quiz-q-check-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-sm);
+}
+
+.quiz-answer-input {
+  max-width: 240px;
+}
+
+.quiz-feedback {
+  font-family: var(--font-label);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+}
+
+.quiz-feedback.correct {
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+  border-color: var(--positive);
+}
+
+.quiz-feedback.wrong {
+  background: var(--error-container);
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.quiz-solution-panel {
+  background: var(--surface-white);
+  border: 1.5px solid var(--outline);
+  border-left: 5px solid var(--tertiary);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* KaTeX overflow safety */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.2rem 0;
+  margin: 0.35rem 0;
+}
+.math-fallback {
+  font-family: var(--font-label);
+  font-weight: 700;
+}
+.math-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 0.2em;
+  font-size: 0.9em;
+  line-height: 1.1;
+}
+.math-frac-num {
+  border-bottom: 1.5px solid currentColor;
+  padding: 0 0.25em 1px;
+}
+.math-frac-den {
+  padding: 1px 0.25em 0;
+}
+
+/* Footer */
+.site-footer {
+  border-top: var(--rule-heavy);
+  padding: var(--space-lg) 0 var(--space-xl) 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 960px) {
+  .masthead { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .compare-grid-3 { grid-template-columns: 1fr; }
+  .sop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mantra-banner { grid-template-columns: 1fr; }
+  .toolbar-inputs { grid-template-columns: 1fr; }
+  .quiz-config-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lab-strip { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .page-grid {
+    grid-template-columns: 1fr;
+    padding: var(--space-md);
+    gap: var(--space-lg);
+  }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .compare-grid-2 { grid-template-columns: 1fr; }
+  .sop-grid { grid-template-columns: 1fr; }
+  .quiz-config-grid { grid-template-columns: 1fr; }
+  .worksheet-paper { padding: var(--space-md); }
+}
+
+@media print {
+  body { background: #ffffff; }
+  .no-print { display: none !important; }
+  .page-grid { max-width: 100%; padding: 0; gap: 0; }
+  .section-open { border-top: none; padding-top: 0; }
+  .worksheet-paper { border: none; box-shadow: none; padding: 0; }
+  .quiz-question-card { border-color: var(--outline); page-break-inside: avoid; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="page-grid">
+
+  <!-- Masthead -->
+  <header class="masthead no-print">
+    <div>
+      <div class="kicker-row">
+        <span class="kicker-block">素养第 01 讲 · 运算能力</span>
+        <span class="kicker-block kicker-block--blue">冠军请听题</span>
+        <span class="flag-trio" aria-hidden="true">
+          <span class="flag-swatch flag-swatch--red"></span>
+          <span class="flag-swatch flag-swatch--yellow"></span>
+          <span class="flag-swatch flag-swatch--blue"></span>
+        </span>
+      </div>
+      <h1 class="title">冠军请听题：<mark>竞赛巧算原理</mark>与交互组卷工作台</h1>
+      <p class="lede">经历个人突围赛、抢答冲锋赛、团队接力赛、冠军争夺战与赛后彩蛋，系统攻克山顶数、转化山峰、平方差抵消与奇偶平方和末项统一公式。</p>
+      <nav class="quick-nav" aria-label="页面导航">
+        <button type="button" class="quick-nav-link" onclick="scrollToSection('sec-compare')">01 公式横向对比</button>
+        <button type="button" class="quick-nav-link" onclick="scrollToSection('sec-library')">02 竞赛分阶题库</button>
+        <button type="button" class="quick-nav-link" onclick="scrollToSection('sec-sop')">03 核心 SOP 与口诀</button>
+        <button type="button" class="quick-nav-link" onclick="scrollToSection('sec-quiz')">04 本地自动组卷打印</button>
+      </nav>
+    </div>
+
+    <div class="source-pill-box">
+      <div class="source-pill-head">
+        <p class="source-pill-title">本工作台唯一内容来源</p>
+        <span class="sync-badge">进度自动保存</span>
+      </div>
+      <ul class="source-list">
+        <li>《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》（活动一至四、高能时刻、课后巩固与阅读空间）</li>
+        <li>《奇数项平方和公式推导》（偶平方和、奇平方和与末项统一公式推导）</li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- KPI Summary Strip -->
+  <section aria-label="学习与复习概览" class="kpi-grid no-print">
+    <div class="kpi-block kpi-block--highlight">
+      <span class="kpi-label">本地复习掌握度</span>
+      <div class="kpi-value" id="kpi-mastered-count">0 / 37 (0%)</div>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="kpi-progress-bar"></div>
+      </div>
+      <div class="kpi-footer-row">
+        <span class="kpi-sub">逐题打卡自动保存</span>
+        <button type="button" class="btn btn--small" id="btn-reset-mastery" onclick="resetMasteryProgress(this)">重置掌握记录</button>
+      </div>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">核心巧算体系</span>
+      <div class="kpi-value">4 大板块 + 2 推导</div>
+      <span class="kpi-sub">山顶数 · 转化山峰 · 平方差 · 奇偶平方和</span>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">全量资料条目</span>
+      <div class="kpi-value" id="kpi-total-count">37 项</div>
+      <span class="kpi-sub" id="kpi-total-note">含 4 项核心原理/阅读 + 33 道竞赛原题</span>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">本地自动组卷</span>
+      <div class="kpi-value" id="kpi-quiz-count">5 题就绪</div>
+      <span class="kpi-sub">支持在线自测、显隐解析及一键打印</span>
+    </div>
+  </section>
+
+  <!-- Section 1: Switchable Formula Comparison Tabs & Interactive Lab -->
+  <section id="sec-compare" class="section-open section-open--blue no-print" aria-labelledby="sec-compare-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--blue">核心公式对比与交互演算台</span>
+        <h2 class="section-heading" id="sec-compare-title">核心公式与巧算技法横向对比台</h2>
+        <p class="section-desc">切换对比三组核心思想的适用边界、转化策略与交互滑动演算实验，直观理解每个巧算公式的来龙去脉。</p>
+      </div>
+    </div>
+
+    <div class="tab-bar" role="tablist" aria-label="核心公式对比标签">
+      <button type="button" class="tab-btn is-active" role="tab" aria-selected="true" id="tab-btn-mountain" onclick="switchComparisonTab('mountain')">1. 山顶数求和公式 vs 变形补全法</button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tab-btn-diff" onclick="switchComparisonTab('diff')">2. 平方差公式与交错抵消求和</button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tab-btn-squares" onclick="switchComparisonTab('squares')">3. 自然数平方和 vs 奇偶平方和与末项统一公式</button>
+    </div>
+
+    <div id="comparison-panel" class="panel-block" role="tabpanel" aria-live="polite"></div>
+  </section>
+
+  <!-- Section 2: Searchable & Filterable Problem Explorer (One problem per row) -->
+  <section id="sec-library" class="section-open section-open--red no-print" aria-labelledby="sec-library-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block">题型检索与复习打卡</span>
+        <h2 class="section-heading" id="sec-library-title">竞赛分阶题库、手写解析与掌握度清单（37 项）</h2>
+        <p class="section-desc">每题独立占行纵向排布，支持按比赛轮次筛选或检索关键词，点击卡片展开完整手写分步推导、几何示意图、原文证据与科普小贴士。</p>
+      </div>
+    </div>
+
+    <div class="toolbar-panel">
+      <div class="toolbar-inputs">
+        <div class="field-group">
+          <label for="search-input" class="field-label">关键词检索（支持题名、数字如 200 / 2014 / 39、公式或科普关键词）</label>
+          <input id="search-input" type="search" class="input-control" placeholder="例如：山顶数、平方差、小数、39、欧拉、补全…" oninput="onSearchInput(this.value)">
+        </div>
+        <div class="field-group">
+          <label for="mastery-status-select" class="field-label">按掌握状态筛选</label>
+          <select id="mastery-status-select" class="select-control" onchange="setMasteryFilter(this.value)">
+            <option value="all">全部条目</option>
+            <option value="todo">仅看「待复习」</option>
+            <option value="done">仅看「已掌握」</option>
+          </select>
+        </div>
+        <div>
+          <button type="button" class="btn" onclick="clearAllLibraryFilters()">清空筛选</button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <span class="field-label">按赛程与专题筛选</span>
+        <div class="filter-pills" id="stage-pills" role="group" aria-label="赛程模块筛选"></div>
+      </div>
+
+      <div class="results-meta">
+        <span id="filter-result-summary">正在显示 37 / 37 项</span>
+        <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+          <button type="button" class="btn btn--small" onclick="toggleAllAccordions(true)">全部展开解析</button>
+          <button type="button" class="btn btn--small" onclick="toggleAllAccordions(false)">全部收起解析</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="cards-container" class="card-grid"></div>
+  </section>
+
+  <!-- Section 3: 4-Step SOP & Formula Mantra -->
+  <section id="sec-sop" class="section-open section-open--yellow no-print" aria-labelledby="sec-sop-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--yellow">竞赛巧算通法与口诀</span>
+        <h2 class="section-heading" id="sec-sop-title">4 步竞赛巧算 SOP 与必背核心公式</h2>
+        <p class="section-desc">汇总本讲四大比赛轮次与彩蛋推导的核心思想，看清结构再下笔，化繁为简一步到位。</p>
+      </div>
+    </div>
+
+    <div class="sop-grid">
+      <article class="sop-card">
+        <span class="sop-num">01</span>
+        <h3 class="sop-title">认山顶 · 补缺提倍</h3>
+        <p style="margin:0; font-size:0.9rem;">标准山顶数直接等于山顶平方 <span class="math-expr">n²</span>；小数先×10后÷10；非步长 1 先提公因数，不从 1 起再补全两端。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>口诀：</strong>不从 1 起先转化，缺少补全或找倍。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">02</span>
+        <h3 class="sop-title">平方差 · 两两分组</h3>
+        <p style="margin:0; font-size:0.9rem;">见 <span class="math-expr">a² - b²</span> 立刻展开为 <span class="math-expr">(a+b)(a-b)</span>；一正一负相邻交错时两两分组，因差为 1 退化为等差求和。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>几何：</strong>挖去小正方形割补成长方形面积不变。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">03</span>
+        <h3 class="sop-title">平方和 · 截断作差</h3>
+        <p style="margin:0; font-size:0.9rem;">连续自然数平方和公式必须从 <span class="math-expr">1²</span> 起步；遇 <span class="math-expr">k²</span> 到 <span class="math-expr">n²</span> 时，用「1² 到 n²」减去「1² 到 (k-1)²」。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>易错：</strong>别把起点 k² 本身多减掉了！</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">04</span>
+        <h3 class="sop-title">奇偶和 · 末项三连乘</h3>
+        <p style="margin:0; font-size:0.9rem;">从 <span class="math-expr">1²</span> 起的连续奇数平方和、从 <span class="math-expr">2²</span> 起的连续偶数平方和，末项为 m 时统一为 <span class="math-expr">m(m+1)(m+2)÷6</span>。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>推导：</strong>偶和提 4 倍，奇和用「全 - 偶」。</p>
+      </article>
+    </div>
+
+    <div class="mantra-banner">
+      <div>
+        <span class="kicker-block" style="margin-bottom:var(--space-sm);">本讲巧算核心口诀</span>
+        <p class="mantra-quote">“山顶求和等于 n²，不从 1 起补或提；<br>交错平方两两配，差 1 化作等差和；<br>奇偶平方记末项，连乘三数再除 6。”</p>
+      </div>
+      <ul class="formula-list">
+        <li>
+          <span><strong>山顶数求和（活动一）</strong></span>
+          <span class="math-expr">1 + 2 + … + n + … + 2 + 1 = n²</span>
+        </li>
+        <li>
+          <span><strong>平方差公式（活动三）</strong></span>
+          <span class="math-expr">a² − b² = (a + b)(a − b)</span>
+        </li>
+        <li>
+          <span><strong>连续自然数平方和（活动四）</strong></span>
+          <span class="math-expr">1² + 2² + … + n² = n(n+1)(2n+1) ÷ 6</span>
+        </li>
+        <li>
+          <span><strong>偶数平方和（高能时刻 1）</strong></span>
+          <span class="math-expr">2² + 4² + … + m² = m(m+1)(m+2) ÷ 6</span>
+        </li>
+        <li>
+          <span><strong>奇数平方和（高能时刻 2）</strong></span>
+          <span class="math-expr">1² + 3² + … + m² = m(m+1)(m+2) ÷ 6</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 4: Client-side Auto-Quiz Generator & Printable Worksheet -->
+  <section id="sec-quiz" class="section-open section-open--black" aria-labelledby="sec-quiz-title">
+    <div class="section-header no-print">
+      <div>
+        <span class="kicker-block">原题抽测与印刷导出</span>
+        <h2 class="section-heading" id="sec-quiz-title">本地自动组卷与课堂印刷工作台</h2>
+        <p class="section-desc">100% 浏览器本地运行，严格从资料原题池抽题，支持学生在线作答与即时批改、参考答案/解析开关及一键打印。</p>
+      </div>
+    </div>
+
+    <div class="toolbar-panel no-print">
+      <div class="quiz-config-grid">
+        <div class="field-group">
+          <label for="quiz-stage" class="field-label">知识点 / 赛程范围</label>
+          <select id="quiz-stage" class="select-control" onchange="onQuizConfigChange()">
+            <option value="all">全部赛程综合抽题（33 题池）</option>
+            <option value="个人突围赛-山顶数">个人突围赛 · 山顶数</option>
+            <option value="抢答冲锋赛-转化山峰">抢答冲锋赛 · 转化山峰</option>
+            <option value="团队接力赛-平方差">团队接力赛 · 平方差</option>
+            <option value="冠军争夺战-平方和">冠军争夺战 · 平方和</option>
+            <option value="赛后彩蛋-奇偶平方和">赛后彩蛋 · 奇偶平方和</option>
+            <option value="课后巩固与心算阅读">课后巩固 · 巩固/落地/探索/课堂</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="quiz-difficulty" class="field-label">难度层级筛选</label>
+          <select id="quiz-difficulty" class="select-control" onchange="onQuizConfigChange()">
+            <option value="all">全部难度混合</option>
+            <option value="基础">基础闯关（试一试 / 任务1-2 / 巩固1-4）</option>
+            <option value="进阶">进阶冲锋（任务3-5 / 实践 / 巩固5-10 / 课堂）</option>
+            <option value="挑战">高能挑战（高能时刻 / 能力落地 / 专属探索）</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="quiz-count" class="field-label">抽取题量（不超过筛选池上限）</label>
+          <select id="quiz-count" class="select-control" onchange="onQuizConfigChange()">
+            <option value="3">3 题（5分钟小测）</option>
+            <option value="5" selected>5 题（标准训练）</option>
+            <option value="8">8 题（综合强化）</option>
+            <option value="12">12 题（冠军冲刺）</option>
+            <option value="99">当前条件全量题</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn btn--primary" onclick="generateQuiz()">
+          <i data-lucide="shuffle" style="width:16px;height:16px;" aria-hidden="true"></i>
+          随机抽取组卷
+        </button>
+      </div>
+
+      <div class="quiz-toggles-row">
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-md);">
+          <label class="checkbox-label">
+            <input type="checkbox" id="toggle-answers" onchange="onQuizDisplayToggle()">
+            <span>显示参考答案</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="toggle-solutions" onchange="onQuizDisplayToggle()">
+            <span>显示完整分步解析</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="toggle-practice-mode" checked onchange="onQuizDisplayToggle()">
+            <span>学生在线作答与即时批改栏</span>
+          </label>
+        </div>
+
+        <div class="quiz-actions">
+          <button type="button" class="btn btn--blue" onclick="printWorksheet()">
+            <i data-lucide="printer" style="width:16px;height:16px;" aria-hidden="true"></i>
+            一键打印 / 存为 PDF
+          </button>
+          <button type="button" class="btn" onclick="exportWorksheetText()">
+            <i data-lucide="download" style="width:16px;height:16px;" aria-hidden="true"></i>
+            导出文本试卷 (.txt)
+          </button>
+        </div>
+      </div>
+
+      <div id="quiz-status-msg" class="status-banner" aria-live="polite"></div>
+    </div>
+
+    <!-- Printable Worksheet Paper -->
+    <div class="worksheet-paper" id="worksheet-paper">
+      <div class="worksheet-header">
+        <div>
+          <span class="kicker-block kicker-block--yellow" style="margin-bottom:var(--space-xs);">第一讲《冠军请听题》专项训练卷</span>
+          <h3 class="section-heading" style="font-size:1.35rem; margin-top:4px;" id="worksheet-title">竞赛巧算综合训练（随机抽题）</h3>
+          <p class="section-desc" style="font-size:0.875rem;" id="worksheet-subtitle">题目严格选自课程手写解析与公式推导资料 · 运算能力训练</p>
+        </div>
+        <div class="worksheet-meta-fields">
+          <span>姓名：<span class="blank-line"></span></span>
+          <span>用时：<span class="blank-line"></span></span>
+          <span>得分：<span class="blank-line" id="worksheet-score-display"></span></span>
+        </div>
+      </div>
+
+      <div id="quiz-questions-list" style="display:flex;flex-direction:column;gap:var(--space-md);"></div>
+
+      <div style="border-top:2px solid var(--outline-variant);padding-top:var(--space-sm);font-size:0.78rem;color:var(--on-surface-variant);display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--space-xs);">
+        <span>资料来源：《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》 &amp; 《奇数项平方和公式推导》</span>
+        <span id="worksheet-stamp"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer no-print">
+    <div>
+      <strong>来源边界声明：</strong>本工作台全部例题、公式、手写推导步骤、科普小贴士与阅读材料均严格溯源至《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》与《奇数项平方和公式推导》，未见信息均如实标注「来源未提及」。
+    </div>
+    <div>
+      素养第 01 讲 · 运算能力训练与交互组卷平台
+    </div>
+  </footer>
+
+</div>
+
+<api-shim></api-shim>
+<script>
+    const STAGES = [
+      { id: `all`, label: `全部阶段` },
+      { id: `个人突围赛-山顶数`, label: `个人突围赛-山顶数` },
+      { id: `抢答冲锋赛-转化山峰`, label: `抢答冲锋赛-转化山峰` },
+      { id: `团队接力赛-平方差`, label: `团队接力赛-平方差` },
+      { id: `冠军争夺战-平方和`, label: `冠军争夺战-平方和` },
+      { id: `赛后彩蛋-奇偶平方和`, label: `赛后彩蛋-奇偶平方和` },
+      { id: `课后巩固与心算阅读`, label: `课后巩固与心算阅读` }
+    ];
+
+    const SOURCE_ITEMS = [
+      // --- 活动一：个人突围赛 ---
+      {
+        id: `s1_try`,
+        index: `01`,
+        stage: `个人突围赛-山顶数`,
+        type: `核心原理`,
+        isQuizItem: false,
+        difficulty: `基础`,
+        title: `山顶数（回声山峰数列）求和规律`,
+        promptLatex: `1 + 2 + 3 + \\dots + n + \\dots + 3 + 2 + 1 = n^2`,
+        summary: `从 1 开始每次加 1 上升到山顶 n，再每次减 1 回到 1，总和就等于山顶数字的平方。`,
+        answer: `n^2`,
+        steps: [
+          { text: `观察基础算式：`, latex: `1 + 2 + 1 = 4 = 2^2` },
+          { text: `山顶为 3 时：`, latex: `1 + 2 + 3 + 2 + 1 = 9 = 3^2` },
+          { text: `山顶为 4 与 5 时：`, latex: `1 + 2 + 3 + 4 + 3 + 2 + 1 = 16 = 4^2,\\quad 1 + 2 + 3 + 4 + 5 + 4 + 3 + 2 + 1 = 25 = 5^2` },
+          { text: `归纳普遍规律（山顶和公式）：`, latex: `1 + 2 + 3 + \\dots + n + \\dots + 3 + 2 + 1 = n \\times n = n^2` }
+        ],
+        insight: `山顶的数字就是平方的底数。把山顶右半边“借”给左半边凑整，可拼成 n 个 n 相加。`,
+        evidence: `原文「我发现了」：山顶的数字和横线上要填的数之间藏着什么联系？知识总结：1+2+3+…+n+…+3+2+1 = n×n。`,
+        scienceTip: `科普小贴士（回声）：声音在空旷地方遇到山壁会弹回来形成回声，音量先升后降像一座音量的山峰，最后回到原点。`,
+        timeLimit: `来源未提及`,
+        diagramType: `mountain`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动一 个人突围赛 · 试一试 & 知识总结（第004页、讲义第1页）`
+      },
+      {
+        id: `s1_task1`,
+        index: `02`,
+        stage: `个人突围赛-山顶数`,
+        type: `赛场任务`,
+        isQuizItem: true,
+        difficulty: `基础`,
+        title: `任务 1：标准山顶数求和（山顶 30）`,
+        promptLatex: `1 + 2 + 3 + \\dots + 29 + 30 + 29 + \\dots + 3 + 2 + 1 = \\text{？}`,
+        summary: `直接识别山顶数字为 30，套用山顶和公式求解。`,
+        answer: `900`,
+        acceptedAnswers: [`900`],
+        steps: [
+          { text: `确认算式从 1 起步、步长为 1、对称回到 1，山顶数字为 30。`, latex: `` },
+          { text: `套用山顶和公式：`, latex: `1 + 2 + \\dots + 29 + 30 + 29 + \\dots + 2 + 1 = 30^2` },
+          { text: `计算结果：`, latex: `30^2 = 900` }
+        ],
+        insight: `先看两端是不是从 1 开始、回到 1，再找准中间最大的“山顶数”。`,
+        evidence: `原文手写解析：= 30² = 900（山顶的数字是多少呢？）。`,
+        scienceTip: `科普小贴士（石英计时器）：倒计时滴答声来自计时器内部石英晶体，每秒振动三万多次，机器把振动次数换算成秒。`,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动一 个人突围赛 · 任务 1（第005页）`
+      },
+      {
+        id: `s1_prac1`,
+        index: `03`,
+        stage: `个人突围赛-山顶数`,
+        type: `即时实践`,
+        isQuizItem: true,
+        difficulty: `基础`,
+        title: `实践 1：超长山顶数求和（山顶 200）`,
+        promptLatex: `1 + 2 + 3 + \\dots + 199 + 200 + 199 + \\dots + 3 + 2 + 1 = \\text{？}`,
+        summary: `数字从 1 延伸到 200 才掉头回来，利用山顶公式一步算出 40000。`,
+        answer: `40000`,
+        acceptedAnswers: [`40000`, `40,000`],
+        steps: [
+          { text: `数字从 1 递增到山顶 200 再对称递减回到 1，属于标准山顶数列。`, latex: `` },
+          { text: `直接套用公式：`, latex: `= 200^2 = 40000` }
+        ],
+        insight: `不管数列有多长，只要符合“1 升至 n 再降至 1”，结果只由山顶 n 决定。`,
+        evidence: `原文：数字从1开始，一路延伸到200才掉头回来。手写解析：= 200² = 40000。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动一 个人突围赛 · 实践 1（第006页）`
+      },
+      {
+        id: `s1_task2`,
+        index: `04`,
+        stage: `个人突围赛-山顶数`,
+        type: `赛场任务`,
+        isQuizItem: true,
+        difficulty: `基础`,
+        title: `任务 2：小数山顶数（山顶 10）`,
+        promptLatex: `0.1 + 0.2 + 0.3 + 0.4 + \\dots + 9.9 + 10 + 9.9 + \\dots + 0.4 + 0.3 + 0.2 + 0.1 = \\text{？}`,
+        summary: `每位先扩大 10 倍变成山顶为 100 的整数山顶数，最后再除以 10。`,
+        answer: `1000`,
+        acceptedAnswers: [`1000`, `1,000`],
+        steps: [
+          { text: `将每个加数同时乘 10 化为整数山顶数，整体和随之除以 10 保持不变：`, latex: `= (1 + 2 + 3 + 4 + \\dots + 99 + 100 + 99 + \\dots + 4 + 3 + 2 + 1) \\div 10` },
+          { text: `括号内山顶数字为 100，套用公式：`, latex: `= 100^2 \\div 10 = 10000 \\div 10` },
+          { text: `得出结果：`, latex: `= 1000` }
+        ],
+        insight: `和整数山顶数相比，每个数字都缩小到原来的十分之一，所以先按整数山顶数算，再统一除以 10！注意山顶 10 乘 10 后变成 100。`,
+        evidence: `原文提示：每个数字和整数的山顶数相比，数字都缩小了多少？手写解析：= 100² ÷ 10 = 10000 ÷ 10 = 1000。`,
+        scienceTip: `科普小贴士（温度计小数点）：36.5℃ 是正常体温，37.3℃ 就是低烧，小数点后一位让温度表达更精确。`,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动一 个人突围赛 · 任务 2（第007页）`
+      },
+      {
+        id: `s1_prac2`,
+        index: `05`,
+        stage: `个人突围赛-山顶数`,
+        type: `即时实践`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `实践 2：小数山顶数（山顶 5）`,
+        promptLatex: `0.1 + 0.2 + 0.3 + 0.4 + \\dots + 4.9 + 5 + 4.9 + \\dots + 0.4 + 0.3 + 0.2 + 0.1 = \\text{？}`,
+        summary: `把 0.1 到 5 扩大 10 倍转化为山顶 50 的整数山顶数，计算后再除以 10。`,
+        answer: `250`,
+        acceptedAnswers: [`250`],
+        steps: [
+          { text: `提取缩放关系，先乘 10 后除 10：`, latex: `= (1 + 2 + 3 + 4 + \\dots + 49 + 50 + 49 + \\dots + 4 + 3 + 2 + 1) \\div 10` },
+          { text: `括号内山顶为 50：`, latex: `= 50^2 \\div 10 = 2500 \\div 10` },
+          { text: `计算结果：`, latex: `= 250` }
+        ],
+        insight: `不要把山顶 5 直接平方后再除以 10！正确转化后整数山顶是 50，即 50² ÷ 10 = 250。`,
+        evidence: `原文手写步骤：= (1+2+3+4+…+49+50+49+…+4)÷10 = 50²÷10 = 2500÷10 = 250。（注：PDF手写OCR末行有字迹识别偏差，按手写中间式 2500÷10 实为 250）`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动一 个人突围赛 · 实践 2（第008页）`
+      },
+
+      // --- 活动二：抢答冲锋赛 ---
+      {
+        id: `s2_try`,
+        index: `06`,
+        stage: `抢答冲锋赛-转化山峰`,
+        type: `核心原理`,
+        isQuizItem: false,
+        difficulty: `基础`,
+        title: `非标准山峰转化法：缺项补全与提取倍数`,
+        promptLatex: `(1)\\; 3 + 4 + 5 + 6 + 7 + 6 + 5 + 4 + 3 \\qquad (2)\\; 2 + 4 + 6 + 8 + 10 + 8 + 6 + 4 + 2`,
+        summary: `当山峰不从 1 起步或相邻步长不为 1 时，先“缺失补全”或“找倍提公因数”转化为标准山顶数。`,
+        answer: `(1) 43；(2) 50`,
+        steps: [
+          { text: `题 (1) 步长为 1 但两端缺了 1 和 2，先补全再减去补上的两头：`, latex: `(1+2+3+4+5+6+7+6+5+4+3+2+1) - (1+2+2+1) = 7^2 - 6 = 43` },
+          { text: `题 (2) 每项都是 2 的倍数，提取公因数 2 还原标准山顶数：`, latex: `(1+2+3+4+5+4+3+2+1) \\times 2 = 5^2 \\times 2 = 50` }
+        ],
+        insight: `我发现了：不从 1 起先转化，缺少补全或找倍。`,
+        evidence: `原文「我发现了」：不从1起先转化，缺少补全或找倍。`,
+        scienceTip: `科普小贴士（蜂巢结构）：蜜蜂产卵按规律排列，相邻两排蜂房错开形成紧密六边形结构，最省材料又存最多蜂蜜。`,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动二 抢答冲锋赛 · 试一试 & 原理复现②（第010页、讲义第2页）`
+      },
+      {
+        id: `s2_task3`,
+        index: `07`,
+        stage: `抢答冲锋赛-转化山峰`,
+        type: `赛场任务`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `任务 3：提公因数 3 并补全 1 的山峰数列`,
+        promptLatex: `6 + 9 + 12 + \\dots + 54 + 57 + 60 + 57 + 54 + \\dots + 12 + 9 + 6 = \\text{？}`,
+        summary: `每次增减 3 且未从 3 起步，先提公因数 3，再在括号内补全两端的 1。`,
+        answer: `1194`,
+        acceptedAnswers: [`1194`, `1,194`],
+        steps: [
+          { text: `观察相邻两数差为 3，先提取公因数 3：`, latex: `= 3 \\times (2 + 3 + 4 + \\dots + 19 + 20 + 19 + \\dots + 4 + 3 + 2)` },
+          { text: `括号里两端缺少 1，补上两端的 1 再减去两个 1：`, latex: `= 3 \\times [(1 + 2 + 3 + \\dots + 19 + 20 + 19 + \\dots + 3 + 2 + 1) - 1 - 1]` },
+          { text: `括号内山顶数为 20，代入公式：`, latex: `= 3 \\times (20^2 - 2) = 3 \\times (400 - 2)` },
+          { text: `乘法分配律展开计算：`, latex: `= 3 \\times 400 - 3 \\times 2 = 1200 - 6 = 1194` }
+        ],
+        insight: `同时出现“公差非 1”和“不从 1 倍起步”时，步骤口诀是：一提公因数，二补缺口项。`,
+        evidence: `原文手写解析：= 3×(20²-2) = 3×(400-2) = 3×400 - 3×2 = 1200 - 6 = 1194。`,
+        scienceTip: `科普小贴士（音乐和弦）：从低音往高音走叫上行，高音往低音走叫下行，先上行到顶再下行像音高山脉，听起来有稳定感。`,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动二 抢答冲锋赛 · 任务 3（第011页）`
+      },
+      {
+        id: `s2_prac3`,
+        index: `08`,
+        stage: `抢答冲锋赛-转化山峰`,
+        type: `即时实践`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `实践 3：提公因数 2 并补全 1 的山峰数列`,
+        promptLatex: `4 + 6 + 8 + \\dots + 28 + 30 + 28 + \\dots + 8 + 6 + 4 = \\text{？}`,
+        summary: `公差为 2 且从 4 开始，先提公因数 2，再补全左右两端的 1。`,
+        answer: `446`,
+        acceptedAnswers: [`446`],
+        steps: [
+          { text: `提取公因数 2：`, latex: `= 2 \\times (2 + 3 + 4 + \\dots + 14 + 15 + 14 + \\dots + 4 + 3 + 2)` },
+          { text: `括号内补全两端的 1 并减去 2：`, latex: `= 2 \\times [(1 + 2 + 3 + \\dots + 14 + 15 + 14 + \\dots + 3 + 2 + 1) - 1 - 1]` },
+          { text: `山顶数为 15：`, latex: `= 2 \\times (15^2 - 2) = 2 \\times (225 - 2) = 450 - 4 = 446` }
+        ],
+        insight: `注意：补全的两个 1 在括号里面，最后乘以括号外的公因数 2 后相当于减去了 4。`,
+        evidence: `原文手写解析：= 2×(15²-2) = 2×(225-2) = 2×225 - 2×2 = 450 - 4 = 446。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动二 抢答冲锋赛 · 实践 3（第012页）`
+      },
+
+      // --- 活动三：团队接力赛 ---
+      {
+        id: `s3_try`,
+        index: `09`,
+        stage: `团队接力赛-平方差`,
+        type: `核心原理`,
+        isQuizItem: true,
+        difficulty: `基础`,
+        title: `试一试 & 平方差公式几何割补证明`,
+        promptLatex: `28^2 - 18^2 = (28 + 18) \\times (28 - 18) = \\text{？}`,
+        summary: `通过大正方形挖去小正方形后切割拼接成长方形，直观得到平方差公式 a²-b² = (a+b)(a-b)。`,
+        answer: `460`,
+        acceptedAnswers: [`460`],
+        steps: [
+          { text: `图 1 阴影部分是大正方形（边长 28）减去小正方形（边长 18）的面积：`, latex: `28^2 - 18^2` },
+          { text: `将阴影切割拼接为图 2 长方形，长为 (28+18)，宽为 (28-18)：`, latex: `= (28 + 18) \\times (28 - 18)` },
+          { text: `计算得：`, latex: `= 46 \\times 10 = 460` },
+          { text: `推广为一般平方差公式：`, latex: `a^2 - b^2 = (a + b)(a - b)` }
+        ],
+        insight: `我发现了：平方差公式 a² - b² = (a + b)(a - b)。图形移动后面积保持不变！`,
+        evidence: `原文「原理复现③」：图1中的阴影部分可转化成图2中的阴影长方形，长是 28+18，宽是 28-18。`,
+        scienceTip: `科普小贴士（古罗马测地术）：古罗马建筑师把不规则土地通过切割和拼接变成容易测量的形状，面积保持不变。`,
+        timeLimit: `来源未提及`,
+        diagramType: `squareDiff`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动三 团队接力赛 · 试一试 & 原理复现③（第014页、讲义第3页）`
+      },
+      {
+        id: `s3_task4`,
+        index: `10`,
+        stage: `团队接力赛-平方差`,
+        type: `赛场任务`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `任务 4：交错平方差（10² 到 1²）`,
+        promptLatex: `10^2 - 9^2 + 8^2 - 7^2 + \\dots + 2^2 - 1^2 = \\text{？}`,
+        summary: `两两分组套用平方差公式，由于每组差都是 1，整个算式转化成 10 到 1 的连续加法。`,
+        answer: `55`,
+        acceptedAnswers: [`55`],
+        steps: [
+          { text: `相邻两项两两分组：`, latex: `= (10^2 - 9^2) + (8^2 - 7^2) + \\dots + (2^2 - 1^2)` },
+          { text: `每组套用平方差公式，各组之差均等于 1：`, latex: `= (10+9)\\times(10-9) + (8+7)\\times(8-7) + \\dots + (2+1)\\times(2-1)` },
+          { text: `化简为从 10 到 1 的等差数列求和：`, latex: `= 10 + 9 + 8 + 7 + \\dots + 2 + 1 = (10 + 1) \\times 10 \\div 2 = 11 \\times 5 = 55` }
+        ],
+        insight: `相邻两个自然数的平方差正好等于它们的和（因为差为 1）。一正一负交错出现时，果断两两分组！`,
+        evidence: `原文手写解析：= (10+9)×1 + (8+7)×1 + … + (2+1)×1 = (10+1)×10÷2 = 11×5 = 55。`,
+        scienceTip: `科普小贴士（接力跑交接棒）：接力跑讲究接棒时机，早了算犯规、晚了速度掉下来，跟算题每一段结果往下传的手感一样。`,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动三 团队接力赛 · 任务 4（第016页）`
+      },
+      {
+        id: `s3_prac4`,
+        index: `11`,
+        stage: `团队接力赛-平方差`,
+        type: `即时实践`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `实践 4：交错平方差（20² 到 1²）`,
+        promptLatex: `20^2 - 19^2 + 18^2 - 17^2 + \\dots + 2^2 - 1^2 = \\text{？}`,
+        summary: `两两分组应用平方差公式，转化为 20+19+…+2+1 的等差求和。`,
+        answer: `210`,
+        acceptedAnswers: [`210`],
+        steps: [
+          { text: `两两分组：`, latex: `= (20^2 - 19^2) + (18^2 - 17^2) + \\dots + (2^2 - 1^2)` },
+          { text: `平方差展开，每组后括号都是 1：`, latex: `= (20+19)\\times(20-19) + (18+17)\\times(18-17) + \\dots + (2+1)\\times(2-1)` },
+          { text: `等差求和：`, latex: `= 20 + 19 + 18 + \\dots + 2 + 1 = (20 + 1) \\times 20 \\div 2 = 21 \\times 10 = 210` }
+        ],
+        insight: `从 20² 降到 1² 一共 20 个数、分成 10 组，展开后恰好拼出从 20 到 1 的连续 20 个自然数之和。`,
+        evidence: `原文手写解析：= (20+1)×20÷2 = 21×10 = 210。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动三 团队接力赛 · 实践 4（第017页）`
+      },
+
+      // --- 活动四：冠军争夺战 ---
+      {
+        id: `s4_try`,
+        index: `12`,
+        stage: `冠军争夺战-平方和`,
+        type: `核心原理`,
+        isQuizItem: true,
+        difficulty: `基础`,
+        title: `试一试 & 三三角叠加推导平方和公式`,
+        promptLatex: `1^2 + 2^2 + 3^2 + 4^2 = \\text{？}`,
+        summary: `通过三个数字三角形旋转叠加，推导出连续自然数平方和公式 n(n+1)(2n+1)÷6，并算出 1²+2²+3²+4² = 30。`,
+        answer: `30`,
+        acceptedAnswers: [`30`],
+        steps: [
+          { text: `数表推导（原理复现④）：把 3 个数字三角形（1, 22, 333, 4444）分别正放与旋转后同位置相加，每个位置之和都等于：`, latex: `1 + n + n = 2n + 1` },
+          { text: `每个三角形共有数字个数为：`, latex: `1 + 2 + 3 + \\dots + n = \\frac{n(n+1)}{2}` },
+          { text: `三个三角形总和除以 3 即得 1 个三角形（平方和）公式：`, latex: `1^2 + 2^2 + \\dots + n^2 = \\frac{(2n+1) \\cdot n(n+1)}{2 \\times 3} = \\frac{n(n+1)(2n+1)}{6}` },
+          { text: `代入 n = 4 验证试一试：`, latex: `4 \\times 5 \\times 9 \\div 6 = 180 \\div 6 = 30` }
+        ],
+        insight: `记忆口诀（首项 1 起步）：n × (n+1) × (2n+1) ÷ 6，注意第三个数 (2n+1) 正好是前两个数 n 和 (n+1) 的和！`,
+        evidence: `原文「试一试」与「原理复现④」：3个三角和，每个位置相加和都一样，1Δ = (1+n+n)×(1+2+3+…+n)÷3 = n(n+1)(2n+1)÷6。`,
+        scienceTip: `科普小贴士（正方形数）：古希腊人把平方数叫作“正方形数”，1颗、4颗、9颗、16颗石子可以摆成不断扩大的棋盘。`,
+        timeLimit: `来源未提及`,
+        diagramType: `sumSquaresTri`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动四 冠军争夺战 · 试一试 & 原理复现④（第019页、讲义第4页）`
+      },
+      {
+        id: `s4_task5`,
+        index: `13`,
+        stage: `冠军争夺战-平方和`,
+        type: `赛场任务`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `任务 5：不从 1 开始的平方和（7² 到 27²）`,
+        promptLatex: `7^2 + 8^2 + 9^2 + \\dots + 27^2 = \\text{？}`,
+        summary: `平方和公式必须从 1² 开始，因此采用“从 1 算到 27，再减去 1 到 6”的作差法。`,
+        answer: `6839`,
+        acceptedAnswers: [`6839`, `6,839`],
+        steps: [
+          { text: `补全前段 1² 到 6²，写成全体减前段：`, latex: `= (1^2 + 2^2 + \\dots + 27^2) - (1^2 + 2^2 + \\dots + 6^2)` },
+          { text: `分别套用平方和公式（n = 27 与 n = 6）：`, latex: `= 27 \\times 28 \\times 55 \\div 6 - 6 \\times 7 \\times 13 \\div 6` },
+          { text: `分步约分计算：`, latex: `= 6930 - 91 = 6839` }
+        ],
+        insight: `题目从 7² 开始到 27² 结束，减去的前段只到 6²（不能把 7² 也减掉！）。`,
+        evidence: `原文提问：这次从哪个数开始、哪个数结束？手写结果 = 6839。`,
+        scienceTip: `科普小贴士（向日葵花盘）：向日葵花盘能结出一千多颗葵花籽，从中心往外一圈一圈展开铺满花盘，恰似数字的累加。`,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动四 冠军争夺战 · 任务 5（第020页）`
+      },
+      {
+        id: `s4_prac5`,
+        index: `14`,
+        stage: `冠军争夺战-平方和`,
+        type: `即时实践`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `实践 5：不从 1 开始的平方和（11² 到 30²）`,
+        promptLatex: `11^2 + 12^2 + 13^2 + \\dots + 30^2 = \\text{？}`,
+        summary: `用 1² 到 30² 的平方和减去 1² 到 10² 的平方和，精准得出 9070。`,
+        answer: `9070`,
+        acceptedAnswers: [`9070`, `9,070`],
+        steps: [
+          { text: `转化成两段从 1² 开始的平方和相减：`, latex: `= (1^2 + 2^2 + \\dots + 30^2) - (1^2 + 2^2 + \\dots + 10^2)` },
+          { text: `代入 n = 30 与 n = 10：`, latex: `= 30 \\times 31 \\times 61 \\div 6 - 10 \\times 11 \\times 21 \\div 6` },
+          { text: `先约分再计算：`, latex: `= 5 \\times 31 \\times 61 - 385 = 9455 - 385 = 9070` }
+        ],
+        insight: `记住常用基准值：1² + 2² + … + 10² = 385，在计算从 11² 开始的平方和时可以直接秒杀减数！`,
+        evidence: `原文手写解析：= 5×31×61 - 2310÷6 = 9455 - 385 = 9070。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `活动四 冠军争夺战 · 实践 5（第021页）`
+      },
+
+      // --- 附加活动 & 奇数项平方和公式推导 ---
+      {
+        id: `s5_moment1`,
+        index: `15`,
+        stage: `赛后彩蛋-奇偶平方和`,
+        type: `高能时刻`,
+        isQuizItem: true,
+        difficulty: `挑战`,
+        title: `高能时刻 1：连续偶数平方和（2² 到 20²）`,
+        promptLatex: `2^2 + 4^2 + 6^2 + \\dots + 20^2 = \\text{？}`,
+        summary: `每个偶数平方都能提出公因数 2²=4，化为 4 倍的自然数平方和；亦可用末项统一公式验证。`,
+        answer: `1540`,
+        acceptedAnswers: [`1540`, `1,540`],
+        steps: [
+          { text: `拆解规律：6² = (2×3)² = 2²×3² = 4×3²，因此每项都可提出公因数 4：`, latex: `2^2 + 4^2 + 6^2 + \\dots + 20^2 = (1^2 + 2^2 + \\dots + 10^2) \\times 4` },
+          { text: `代入 1² 到 10² 平方和公式：`, latex: `= (10 \\times 11 \\times 21 \\div 6) \\times 4 = 385 \\times 4 = 1540` },
+          { text: `末项公式交叉验证（末项 m = 20）：`, latex: `\\frac{20 \\times 21 \\times 22}{6} = 1540` }
+        ],
+        insight: `偶数项平方和可以直接提取公因数 2²（即 4），也可以直接使用“末项公式”：m(m+1)(m+2)÷6！`,
+        evidence: `原文手写解析：= (1²+2²+…+10²)×4 = 385×4 = 1540。`,
+        scienceTip: `科普小贴士（春季蜂群）：春天来临后蜂箱工蜂从几千只逐渐增加到一两万只，每天持续增长。`,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `附加活动 赛后小彩蛋 · 高能时刻 1（第022页）`
+      },
+      {
+        id: `s5_moment2`,
+        index: `16`,
+        stage: `赛后彩蛋-奇偶平方和`,
+        type: `高能时刻`,
+        isQuizItem: true,
+        difficulty: `挑战`,
+        title: `高能时刻 2：连续奇数平方和（1² 到 21²）`,
+        promptLatex: `1^2 + 3^2 + 5^2 + \\dots + 21^2 = \\text{？}`,
+        summary: `使用“补全作差法”（全体连续平方和减去偶数平方和），或直接应用末项公式 21×22×23÷6。`,
+        answer: `1771`,
+        acceptedAnswers: [`1771`, `1,771`],
+        steps: [
+          { text: `方法一（手写补全作差法）：补进 2² 到 20² 再减去它们：`, latex: `= (1^2 + 2^2 + 3^2 + \\dots + 21^2) - (2^2 + 4^2 + 6^2 + \\dots + 20^2)` },
+          { text: `前项套自然数平方和公式，后项即高能时刻 1 的 1540：`, latex: `= 21 \\times 22 \\times 43 \\div 6 - (1^2 + 2^2 + \\dots + 10^2) \\times 2^2` },
+          { text: `计算差值：`, latex: `= 3311 - 1540 = 1771` },
+          { text: `方法二（末项公式验证，末项 m = 21）：`, latex: `\\frac{21 \\times 22 \\times 23}{6} = 7 \\times 11 \\times 23 = 1771` }
+        ],
+        insight: `用全体自然数平方和减去偶数平方和，正好把“高能时刻 1”的成果直接接力过来用！`,
+        evidence: `原文手写解析：= 21×22×43÷6 - (1²+…+10²)×2² = 3311 - 1540 = 1771。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `附加活动 赛后小彩蛋 · 高能时刻 2（第023页）`
+      },
+      {
+        id: `s5_derivation_odd_even`,
+        index: `17`,
+        stage: `赛后彩蛋-奇偶平方和`,
+        type: `核心原理`,
+        isQuizItem: false,
+        difficulty: `挑战`,
+        title: `奇数项与偶数项平方和推导及“末项统一公式”`,
+        promptLatex: `1^2 + 3^2 + \\dots + m^2 = \\frac{m(m+1)(m+2)}{6} \\qquad\\text{且}\\qquad 2^2 + 4^2 + \\dots + m^2 = \\frac{m(m+1)(m+2)}{6}`,
+        summary: `通过“补全作差法”推导前 n 个奇数平方和与提取公因数 4 推导前 n 个偶数平方和，改写为末项 m 时两公式完全一致！`,
+        answer: `m(m+1)(m+2)/6`,
+        steps: [
+          { text: `奇数平方和推导（补全作差）：设 S = 1²+3²+…+(2n-1)²，补全偶数项写为全体减偶数：`, latex: `S = \\frac{2n(2n+1)(4n+1)}{6} - 4 \\times \\frac{n(n+1)(2n+1)}{6}` },
+          { text: `提取公因式 n(2n+1)/6 并化简：`, latex: `S = \\frac{n(2n+1)}{6}[2(4n+1)-4(n+1)] = \\frac{n(2n+1)(4n-2)}{6} = \\frac{n(2n-1)(2n+1)}{3}` },
+          { text: `设末项奇数 m = 2n-1（则 n=(m+1)/2，2n+1=m+2）代入即得：`, latex: `1^2 + 3^2 + 5^2 + \\dots + m^2 = \\frac{m(m+1)(m+2)}{6}` },
+          { text: `偶数平方和推导：设 S = 2²+4²+…+(2n)²，提取 2²=4，令末项 m = 2n 代入：`, latex: `4 \\times \\frac{n(n+1)(2n+1)}{6} = \\frac{2n(n+1)(2n+1)}{3} = \\frac{m(m+1)(m+2)}{6}` },
+          { text: `来源例题验证（1²+3²+…+39² 与 2²+4²+6²）：`, latex: `\\frac{39 \\times 40 \\times 41}{6} = 10660,\\qquad \\frac{6 \\times 7 \\times 8}{6} = 56` }
+        ],
+        insight: `记忆口诀：从 1² 开始的连续奇数平方和，或从 2² 开始的连续偶数平方和，都等于“末项 × (末项+1) × (末项+2) ÷ 6”（从末项开始的连续三个自然数相乘再除以 6）！`,
+        evidence: `原文结论：不管是“从 1² 开始的奇数平方和”，还是“从 2² 开始的偶数平方和”，用末项 m 表示时，公式完全一样！`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《奇数项平方和公式推导》`,
+        sourceSection: `奇数项平方和推导 & 偶数项平方和末项公式`
+      },
+
+      // --- 课后巩固：自我巩固 1–10 ---
+      {
+        id: `ex_c1`,
+        index: `18`,
+        stage: `课后巩固与心算阅读`,
+        type: `自我巩固`,
+        isQuizItem: true,
+        difficulty: `基础`,
+        title: `自我巩固 1：山顶数（山顶 50）`,
+        promptLatex: `1 + 2 + 3 + \\dots + 49 + 50 + 49 + \\dots + 3 + 2 + 1 = \\text{？}`,
+        summary: `标准山顶数列，山顶数字为 50。`,
+        answer: `2500`,
+        acceptedAnswers: [`2500`, `2,500`],
+        steps: [
+          { text: `识别山顶数字为 50：`, latex: `= 50^2 = 2500` }
+        ],
+        insight: `标准山顶数直接取山顶数的平方。`,
+        evidence: `原文手写解析：= 50² = 2500。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `自我巩固 · 第 1 题（讲义第5页）`
+      },
+      {
+        id: `ex_c2`,
+        index: `19`,
+        stage: `课后巩固与心算阅读`,
+        type: `自我巩固`,
+        isQuizItem: true,
+        difficulty: `基础`,
+        title: `自我巩固 2：山顶数（山顶 90）`,
+        promptLatex: `1 + 2 + 3 + \\dots + 89 + 90 + 89 + \\dots + 3 + 2 + 1 = \\text{？}`,
+        summary: `标准山顶数列，山顶数字为 90。`,
+        answer: `8100`,
+        acceptedAnswers: [`8100`, `8,100`],
+        steps: [
+          { text: `识别山顶数字为 90：`, latex: `= 90^2 = 8100` }
+        ],
+        insight: `从 1 升到 90 再降回 1，总和等于 90²。`,
+        evidence: `原文手写解析：= 90² = 8100。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `自我巩固 · 第 2 题（讲义第5页）`
+      },
+      {
+        id: `ex_c3`,
+        index: `20`,
+        stage: `课后巩固与心算阅读`,
+        type: `自我巩固`,
+        isQuizItem: true,
+        difficulty: `基础`,
+        title: `自我巩固 3：小数山顶数（山顶 0.8）`,
+        promptLatex: `0.1 + 0.2 + 0.3 + \\dots + 0.7 + 0.8 + 0.7 + \\dots + 0.3 + 0.2 + 0.1 = \\text{？}`,
+        summary: `先放大 10 倍变成山顶 8 的整数山顶数，求平方后再除以 10。`,
+        answer: `6.4`,
+        acceptedAnswers: [`6.4`],
+        steps: [
+          { text: `转化为整数山顶数再除以 10：`, latex: `= (1 + 2 + \\dots + 7 + 8 + 7 + \\dots + 2 + 1) \\div 10` },
+          { text: `计算结果：`, latex: `= 8^2 \\div 10 = 64 \\div 10 = 6.4` }
+        ],
+        insight: `别忘了最后要除以 10（不是除以 100）。`,
+        evidence: `原文手写解析：= 8²÷10 = 64÷10 = 6.4。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `自我巩固 · 第 3 题（讲义第5页）`
+      },
+      {
+        id: `ex_c4`,
+        index: `21`,
+        stage: `课后巩固与心算阅读`,
+        type: `自我巩固`,
+        isQuizItem: true,
+        difficulty: `基础`,
+        title: `自我巩固 4：小数山顶数（山顶 1.9）`,
+        promptLatex: `0.1 + 0.2 + 0.3 + \\dots + 1.9 + \\dots + 0.3 + 0.2 + 0.1 = \\text{？}`,
+        summary: `放大 10 倍后山顶数为 19，记住 19² = 361。`,
+        answer: `36.1`,
+        acceptedAnswers: [`36.1`],
+        steps: [
+          { text: `整体乘 10 后除 10：`, latex: `= (1 + 2 + 3 + \\dots + 18 + 19 + 18 + \\dots + 3 + 2 + 1) \\div 10` },
+          { text: `计算结果：`, latex: `= 19^2 \\div 10 = 361 \\div 10 = 36.1` }
+        ],
+        insight: `熟记 11²~20² 的平方数能让小数山顶数一眼出答案。`,
+        evidence: `原文手写解析：= 19²÷10 = 361÷10 = 36.1。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `自我巩固 · 第 4 题（讲义第6页）`
+      },
+      {
+        id: `ex_c5`,
+        index: `22`,
+        stage: `课后巩固与心算阅读`,
+        type: `自我巩固`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `自我巩固 5：缺失两端的山峰数列（5 到 15 到 5）`,
+        promptLatex: `5 + 6 + 7 + 8 + \\dots + 14 + 15 + 14 + \\dots + 8 + 7 + 6 + 5 = \\text{？}`,
+        summary: `左右各缺少 1+2+3+4，补全成山顶 15 后减去 (1+2+3+4)×2。`,
+        answer: `205`,
+        acceptedAnswers: [`205`],
+        steps: [
+          { text: `补全两端缺失的 1+2+3+4：`, latex: `= (1 + 2 + 3 + 4 + 5 + \\dots + 15 + \\dots + 5 + 4 + 3 + 2 + 1) - (1 + 2 + 3 + 4) \\times 2` },
+          { text: `分别计算：`, latex: `= 15^2 - 10 \\times 2 = 225 - 20 = 205` }
+        ],
+        insight: `两边都要补全，所以减的时候别忘了乘以 2！`,
+        evidence: `原文手写解析：= 15² - 10×2 = 225 - 20 = 205。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `自我巩固 · 第 5 题（讲义第6页）`
+      },
+      {
+        id: `ex_c6`,
+        index: `23`,
+        stage: `课后巩固与心算阅读`,
+        type: `自我巩固`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `自我巩固 6：提公因数 2 并补全 1（4 到 20 到 4）`,
+        promptLatex: `4 + 6 + 8 + \\dots + 18 + 20 + 18 + \\dots + 8 + 6 + 4 = \\text{？}`,
+        summary: `公差为 2，提取 2 后括号内为 2 到 10 再到 2，补全两端的 1。`,
+        answer: `196`,
+        acceptedAnswers: [`196`],
+        steps: [
+          { text: `提取公因数 2：`, latex: `= 2 \\times (2 + 3 + 4 + \\dots + 9 + 10 + 9 + \\dots + 4 + 3 + 2)` },
+          { text: `括号内补全两端的 1：`, latex: `= 2 \\times [(1 + 2 + \\dots + 10 + \\dots + 2 + 1) - 1 - 1]` },
+          { text: `计算结果：`, latex: `= 2 \\times (10^2 - 2) = 200 - 4 = 196` }
+        ],
+        insight: `先提倍数、再补缺口，注意括号外乘 2 后要减去 2×2=4。`,
+        evidence: `原文手写解析：= 2×(10²-2) = 2×100 - 2×2 = 200 - 4 = 196。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `自我巩固 · 第 6 题（讲义第6页）`
+      },
+      {
+        id: `ex_c7`,
+        index: `24`,
+        stage: `课后巩固与心算阅读`,
+        type: `自我巩固`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `自我巩固 7：交错平方差（8² 到 1²）`,
+        promptLatex: `8^2 - 7^2 + 6^2 - 5^2 + 4^2 - 3^2 + 2^2 - 1^2 = \\text{？}`,
+        summary: `四组两两平方差展开后直接变成 8+7+6+5+4+3+2+1。`,
+        answer: `36`,
+        acceptedAnswers: [`36`],
+        steps: [
+          { text: `两两分组并套用平方差公式：`, latex: `= (8+7)(8-7) + (6+5)(6-5) + (4+3)(4-3) + (2+1)(2-1)` },
+          { text: `转化为连续自然数求和：`, latex: `= 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1 = (8 + 1) \\times 8 \\div 2 = 9 \\times 4 = 36` }
+        ],
+        insight: `差都是 1，直接变成首尾相加的等差数列。`,
+        evidence: `原文手写解析：= (8+1)×8÷2 = 9×4 = 36。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `自我巩固 · 第 7 题（讲义第7页）`
+      },
+      {
+        id: `ex_c8`,
+        index: `25`,
+        stage: `课后巩固与心算阅读`,
+        type: `自我巩固`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `自我巩固 8：交错平方差（16² 到 1²）`,
+        promptLatex: `16^2 - 15^2 + 14^2 - 13^2 + \\dots + 2^2 - 1^2 = \\text{？}`,
+        summary: `两两分组应用平方差，转为 16 到 1 的等差求和。`,
+        answer: `136`,
+        acceptedAnswers: [`136`],
+        steps: [
+          { text: `两两分组应用平方差：`, latex: `= (16+15)(16-15) + (14+13)(14-13) + \\dots + (2+1)(2-1)` },
+          { text: `转化为等差求和：`, latex: `= 16 + 15 + 14 + \\dots + 2 + 1 = (16 + 1) \\times 16 \\div 2 = 17 \\times 8 = 136` }
+        ],
+        insight: `每组差均为 1，首项 16 末项 1 共 16 项。`,
+        evidence: `原文手写解析：= (16+1)×16÷2 = 17×8 = 136。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `自我巩固 · 第 8 题（讲义第7页）`
+      },
+      {
+        id: `ex_c9`,
+        index: `26`,
+        stage: `课后巩固与心算阅读`,
+        type: `自我巩固`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `自我巩固 9：连续自然数平方和（1² 到 16²）`,
+        promptLatex: `1^2 + 2^2 + 3^2 + \\dots + 16^2 = \\text{？}`,
+        summary: `直接代入连续自然数平方和公式，取 n = 16。`,
+        answer: `1496`,
+        acceptedAnswers: [`1496`, `1,496`],
+        steps: [
+          { text: `套用公式 n(n+1)(2n+1)÷6（n = 16，2n+1 = 33）：`, latex: `= 16 \\times 17 \\times 33 \\div 6` },
+          { text: `先约分（16 约 2 得 8，33 约 3 得 11）：`, latex: `= 8 \\times 17 \\times 11 = 1496` }
+        ],
+        insight: `先对分母 6 进行拆解约分（2 和 3），比硬乘后再除以 6 快得多。`,
+        evidence: `原文手写解析：= 16×17×33÷6 = 1496。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `自我巩固 · 第 9 题（讲义第8页）`
+      },
+      {
+        id: `ex_c10`,
+        index: `27`,
+        stage: `课后巩固与心算阅读`,
+        type: `自我巩固`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `自我巩固 10：截取区间平方和（11² 到 40²）`,
+        promptLatex: `11^2 + 12^2 + 13^2 + \\dots + 40^2 = \\text{？}`,
+        summary: `用 1² 到 40² 的平方和减去 1² 到 10² 的平方和。`,
+        answer: `21755`,
+        acceptedAnswers: [`21755`, `21,755`],
+        steps: [
+          { text: `补全前段作差：`, latex: `= (1^2 + 2^2 + \\dots + 40^2) - (1^2 + 2^2 + \\dots + 10^2)` },
+          { text: `分别套用平方和公式：`, latex: `= 40 \\times 41 \\times 81 \\div 6 - 10 \\times 11 \\times 21 \\div 6` },
+          { text: `计算结果：`, latex: `= 22140 - 385 = 21755` }
+        ],
+        insight: `切记减去的是 1²~10²（385），不是 1²~11²。`,
+        evidence: `原文手写解析：= 40×41×81÷6 - 10×11×21÷6 = 22140 - 385 = 21755。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `自我巩固 · 第 10 题（讲义第8页）`
+      },
+
+      // --- 能力落地 & 专属探索 1–4 ---
+      {
+        id: `ex_land`,
+        index: `28`,
+        stage: `课后巩固与心算阅读`,
+        type: `能力落地`,
+        isQuizItem: true,
+        difficulty: `挑战`,
+        title: `能力落地：构造平方差巧算大数`,
+        promptLatex: `(2014 \\times 2014 + 2012) - 2013 \\times 2013 = \\text{？}`,
+        summary: `把 2014×2014 与 -2013×2013 配对写成平方差，化成三个连续自然数相加。`,
+        answer: `6039`,
+        acceptedAnswers: [`6039`, `6,039`],
+        steps: [
+          { text: `交换顺序将两平方项配对：`, latex: `= 2014^2 - 2013^2 + 2012` },
+          { text: `套用平方差公式：`, latex: `= (2014 + 2013) \\times (2014 - 2013) + 2012` },
+          { text: `化成连续三数之和：`, latex: `= 2014 + 2013 + 2012 = 2013 \\times 3 = 6039` }
+        ],
+        insight: `看见相邻数的乘积（a×a - (a-1)×(a-1)），立刻用平方差消去二次方！`,
+        evidence: `原文手写解析：= (2014+2013)×(2014-2013)+2012 = 2014+2013+2012 = 2013×3 = 6039。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `能力落地（讲义第9页）`
+      },
+      {
+        id: `ex_exp1`,
+        index: `29`,
+        stage: `课后巩固与心算阅读`,
+        type: `专属探索`,
+        isQuizItem: true,
+        difficulty: `挑战`,
+        title: `专属探索 1：对称乘积化为平方差再套平方和`,
+        promptLatex: `29 \\times 31 + 28 \\times 32 + 27 \\times 33 + 26 \\times 34 + 25 \\times 35 = \\text{？}`,
+        summary: `每组两因数均以 30 为中心对称，写成 (30-k)(30+k) = 30² - k² 后合并套用平方和公式。`,
+        answer: `4445`,
+        acceptedAnswers: [`4445`, `4,445`],
+        steps: [
+          { text: `每项以 30 为基准改写：`, latex: `= (30-1)(30+1) + (30-2)(30+2) + \\dots + (30-5)(30+5)` },
+          { text: `套用平方差公式展开：`, latex: `= (30^2 - 1^2) + (30^2 - 2^2) + \\dots + (30^2 - 5^2)` },
+          { text: `合并同类项：`, latex: `= 30^2 \\times 5 - (1^2 + 2^2 + 3^2 + 4^2 + 5^2)` },
+          { text: `代入计算：`, latex: `= 4500 - 5 \\times 6 \\times 11 \\div 6 = 4500 - 55 = 4445` }
+        ],
+        insight: `“两数之和固定为 60”的乘积序列，必是以 30 为轴的平方差！`,
+        evidence: `原文手写解析：= 30²×5 - (1²+2²+3²+4²+5²) = 4500 - 55 = 4445。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `专属探索 · 第 1 题（讲义第11页）`
+      },
+      {
+        id: `ex_exp2`,
+        index: `30`,
+        stage: `课后巩固与心算阅读`,
+        type: `专属探索`,
+        isQuizItem: true,
+        difficulty: `挑战`,
+        title: `专属探索 2：1×39 + 2×38 + … + 39×1（双方法印证）`,
+        promptLatex: `1 \\times 39 + 2 \\times 38 + 3 \\times 37 + 4 \\times 36 + \\dots + 39 \\times 1 = \\text{？}`,
+        summary: `既可像手写稿以 20 为中心化为平方差，也与《奇数项平方和公式推导》中 1²+3²+…+39² = 10660 数值完全一致！`,
+        answer: `10660`,
+        acceptedAnswers: [`10660`, `10,660`],
+        steps: [
+          { text: `以中间项 20×20 为轴，前后对称写为 (20-k)(20+k)：`, latex: `= (20-19)(20+19) + \\dots + (20-1)(20+1) + 20^2 + (20+1)(20-1) + \\dots + (20+19)(20-19)` },
+          { text: `合并共 39 个 20² 与两倍的 (1² 到 19²)：`, latex: `= 20^2 \\times 39 - (1^2 + 2^2 + \\dots + 19^2) \\times 2` },
+          { text: `计算结果：`, latex: `= 15600 - (19 \\times 20 \\times 39 \\div 6) \\times 2 = 15600 - 4940 = 10660` },
+          { text: `与《奇数项平方和公式推导》中的等式 1²+3²+…+39² 印证（末项 m=39）：`, latex: `\\frac{39 \\times 40 \\times 41}{6} = 13 \\times 20 \\times 41 = 10660` }
+        ],
+        insight: `一题串联两大工具：对称配对出平方差 + 连续平方和公式。`,
+        evidence: `原文手写解析：= 20²×39 - (1²+2²+…+19²)×2 = 15600 - 4940 = 10660；《奇数项平方和公式推导》：39×40×41÷6 = 10660。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》 & 《奇数项平方和公式推导》`,
+        sourceSection: `专属探索 · 第 2 题（讲义第11页）& 末项公式验证`
+      },
+      {
+        id: `ex_exp3`,
+        index: `31`,
+        stage: `课后巩固与心算阅读`,
+        type: `专属探索`,
+        isQuizItem: true,
+        difficulty: `挑战`,
+        title: `专属探索 3：奇数平方和（1² 到 49²）`,
+        promptLatex: `1^2 + 3^2 + 5^2 + \\dots + 49^2 = \\text{？}`,
+        summary: `可用讲义的“全体减偶数”计算，也可直接用末项统一公式 49×50×51÷6 秒解。`,
+        answer: `20825`,
+        acceptedAnswers: [`20825`, `20,825`],
+        steps: [
+          { text: `手写解法（补全偶数作差）：`, latex: `= (1^2 + 2^2 + \\dots + 49^2) - (2^2 + 4^2 + \\dots + 48^2)` },
+          { text: `偶数段提取 2²：`, latex: `= 49 \\times 50 \\times 99 \\div 6 - (1^2 + 2^2 + \\dots + 24^2) \\times 2^2` },
+          { text: `计算结果：`, latex: `= 40425 - 19600 = 20825` },
+          { text: `末项公式验证（m = 49）：`, latex: `\\frac{49 \\times 50 \\times 51}{6} = 49 \\times 25 \\times 17 = 20825` }
+        ],
+        insight: `用末项公式 m(m+1)(m+2)÷6 只需一步乘法，和手写“全体减偶数”结果完全吻合！`,
+        evidence: `原文手写解析：= 49×50×99÷6 - 24×25×49÷6×4 = 40425 - 19600 = 20825。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `专属探索 · 第 3 题（讲义第12页）`
+      },
+      {
+        id: `ex_exp4`,
+        index: `32`,
+        stage: `课后巩固与心算阅读`,
+        type: `专属探索`,
+        isQuizItem: true,
+        difficulty: `挑战`,
+        title: `专属探索 4：非倍数等差平方和（构造对照序列 A-B）`,
+        promptLatex: `25^2 + 38^2 + 51^2 + 64^2 + \\dots + 181^2 + 194^2 = \\text{？}`,
+        summary: `公差为 13 但底数均比 13 的倍数小 1，构造整倍数序列 A 并利用平方差计算 A-B！`,
+        answer: `206311`,
+        acceptedAnswers: [`206311`, `206,311`],
+        steps: [
+          { text: `设原式为 B，观察各项均比 13 的倍数少 1，构造对照序列 A：`, latex: `A = 26^2 + 39^2 + 52^2 + \\dots + 182^2 + 195^2` },
+          { text: `A 提取公因数 13² 并套用平方和公式（从 2² 到 15²）：`, latex: `A = (2^2 + 3^2 + \\dots + 15^2) \\times 13^2 = (15 \\times 16 \\times 31 \\div 6 - 1) \\times 169 = 1239 \\times 169 = 209391` },
+          { text: `作差 A - B，逐项应用平方差公式（差全为 1）：`, latex: `A - B = (26^2 - 25^2) + (39^2 - 38^2) + \\dots + (195^2 - 194^2) = 51 + 77 + \\dots + 389` },
+          { text: `A - B 为首项 51、末项 389、共 14 项的等差数列，求和得：`, latex: `A - B = (51 + 389) \\times 14 \\div 2 = 3080` },
+          { text: `因此原式 B = A - (A - B)：`, latex: `B = 209391 - 3080 = 206311` }
+        ],
+        insight: `遇到公差 d 的平方和但不能直接提公因数时，找“相邻的 d 的倍数平方和 A”，把 A-B 变成平方差抵消！`,
+        evidence: `原文手写解析：A = (15×16×31÷6-1)×13² = 209391，A-B = 3080，原式 = 209391 - 3080 = 206311。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `专属探索 · 第 4 题（讲义第12页）`
+      },
+
+      // --- 课堂落实 1–4（含限时10分钟、25分/题） ---
+      {
+        id: `ex_class1`,
+        index: `33`,
+        stage: `课后巩固与心算阅读`,
+        type: `课堂落实`,
+        isQuizItem: true,
+        difficulty: `基础`,
+        title: `课堂落实 1：小数山顶数（山顶 0.9）`,
+        promptLatex: `0.1 + 0.2 + 0.3 + \\dots + 0.9 + \\dots + 0.3 + 0.2 + 0.1 = \\text{？}`,
+        summary: `课堂 10 分钟检测第 1 题（25 分），小数山顶数求解。`,
+        answer: `8.1`,
+        acceptedAnswers: [`8.1`],
+        steps: [
+          { text: `转化为整数山顶数再除以 10：`, latex: `= (1 + 2 + \\dots + 9 + \\dots + 2 + 1) \\div 10` },
+          { text: `计算结果：`, latex: `= 9^2 \\div 10 = 81 \\div 10 = 8.1` }
+        ],
+        insight: `扩大 10 倍后山顶是 9，算完再缩回 10 倍。`,
+        evidence: `原文手写解析：= 9²÷10 = 8.1。`,
+        scienceTip: ``,
+        timeLimit: `限时 10 分钟（全卷4题总分100分，本题 25 分）`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `课堂落实 · 第 1 题（讲义第13页）`
+      },
+      {
+        id: `ex_class2`,
+        index: `34`,
+        stage: `课后巩固与心算阅读`,
+        type: `课堂落实`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `课堂落实 2：缺项山峰数列（4 到 10 到 4）`,
+        promptLatex: `4 + 5 + 6 + 7 + 8 + 9 + 10 + 9 + 8 + 7 + 6 + 5 + 4 = \\text{？}`,
+        summary: `课堂 10 分钟检测第 2 题（25 分），补全两端缺失的 1+2+3。`,
+        answer: `88`,
+        acceptedAnswers: [`88`],
+        steps: [
+          { text: `补全两端缺失的 (1+2+3)，用山顶 10 的平方减去 2×6：`, latex: `= 10^2 - (1 + 2 + 3) \\times 2` },
+          { text: `计算结果：`, latex: `= 100 - 12 = 88` }
+        ],
+        insight: `两侧分别少了 1+2+3=6，一共减去 12。`,
+        evidence: `原文手写解析：= 10² - 12 = 100 - 12 = 88。`,
+        scienceTip: ``,
+        timeLimit: `限时 10 分钟（全卷4题总分100分，本题 25 分）`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `课堂落实 · 第 2 题（讲义第13页）`
+      },
+      {
+        id: `ex_class3`,
+        index: `35`,
+        stage: `课后巩固与心算阅读`,
+        type: `课堂落实`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `课堂落实 3：交错平方差（14² 到 1²）`,
+        promptLatex: `14^2 - 13^2 + 12^2 - 11^2 + \\dots + 4^2 - 3^2 + 2^2 - 1^2 = \\text{？}`,
+        summary: `课堂 10 分钟检测第 3 题（25 分），交错平方差转化为 14 到 1 连加。`,
+        answer: `105`,
+        acceptedAnswers: [`105`],
+        steps: [
+          { text: `两两分组并套用平方差公式：`, latex: `= (14^2 - 13^2) + (12^2 - 11^2) + \\dots + (2^2 - 1^2)` },
+          { text: `每组差均为 1，化为等差数列求和：`, latex: `= 14 + 13 + 12 + \\dots + 2 + 1 = (14 + 1) \\times 14 \\div 2 = 105` }
+        ],
+        insight: `从 14 到 1 连续相加等于 15 × 7 = 105。`,
+        evidence: `原文手写解析：= (14+1)×14÷2 = 105。`,
+        scienceTip: ``,
+        timeLimit: `限时 10 分钟（全卷4题总分100分，本题 25 分）`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `课堂落实 · 第 3 题（讲义第14页）`
+      },
+      {
+        id: `ex_class4`,
+        index: `36`,
+        stage: `课后巩固与心算阅读`,
+        type: `课堂落实`,
+        isQuizItem: true,
+        difficulty: `进阶`,
+        title: `课堂落实 4：截取区间平方和（5² 到 40²）`,
+        promptLatex: `5^2 + 6^2 + 7^2 + \\dots + 40^2 = \\text{？}`,
+        summary: `课堂 10 分钟检测第 4 题（25 分），用 1²~40² 减去 1²~4²。`,
+        answer: `22110`,
+        acceptedAnswers: [`22110`, `22,110`],
+        steps: [
+          { text: `补全前段作差：`, latex: `= (1^2 + 2^2 + 3^2 + \\dots + 40^2) - (1^2 + 2^2 + 3^2 + 4^2)` },
+          { text: `分别套用平方和公式：`, latex: `= 40 \\times 41 \\times 81 \\div 6 - 4 \\times 5 \\times 9 \\div 6` },
+          { text: `计算差值：`, latex: `= 22140 - 30 = 22110` }
+        ],
+        insight: `记得 1²+2²+3²+4² = 30，从 22140 中减去 30 即可。`,
+        evidence: `原文手写解析：= 22140 - 30 = 22110。`,
+        scienceTip: ``,
+        timeLimit: `限时 10 分钟（全卷4题总分100分，本题 25 分）`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `课堂落实 · 第 4 题（讲义第14页）`
+      },
+
+      // --- 阅读空间：心算能力超强的数学家 ---
+      {
+        id: `reading_mental`,
+        index: `37`,
+        stage: `课后巩固与心算阅读`,
+        type: `阅读空间`,
+        isQuizItem: false,
+        difficulty: `基础`,
+        title: `阅读空间：心算能力超强的数学家（欧拉 & 冯·诺依曼）`,
+        promptLatex: `\\text{欧拉（心算无穷级数小数点后第 50 位）}\\quad\\cdot\\quad\\text{约翰·冯·诺依曼（3 秒心算复杂积分）}`,
+        summary: `讲述数学大师欧拉与“现代电子计算机之父”冯·诺依曼惊人观察力与心算能力的故事。`,
+        answer: `心算与规律洞察`,
+        steps: [
+          { text: `欧拉：阿拉戈评价“欧拉进行计算看起来毫不费劲儿，就像人进行呼吸，像鹰在风中盘旋一样”。可瞬间心算前一百个质数中任一数的六次方；两名学生算无穷级数第 17 项小数点后第 50 位起争执，欧拉通过心算迅速给出正确答案。`, latex: `` },
+          { text: `约翰·冯·诺依曼：“现代电子计算机之父”。6 岁心算八位数乘除法，8 岁掌握微积分，12 岁读懂波莱尔《函数论》要义。`, latex: `` },
+          { text: `黑板积分趣闻：物理学家塞格雷与同事为一积分问题苦战一下午无果，冯·诺依曼路过办公室门外看了一眼移动黑板，约 3 秒钟即给出答案。`, latex: `` }
+        ],
+        insight: `结合本讲「行有所获」：敏锐观察数字规律与结构，正是提升运算能力的源泉。`,
+        evidence: `原文：欧拉写下浩如烟海的书籍和论文……冯·诺依曼走到门口，看了一眼黑板，立即给出了答案（大概花了3秒钟）。`,
+        scienceTip: ``,
+        timeLimit: `来源未提及`,
+        sourceFile: `《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》`,
+        sourceSection: `阅读空间 · 心算能力超强的数学家（第024页）`
+      }
+    ];
+
+    // =========================================================================
+    // =========================================================================
+    // 2. APPLICATION STATE (Persisted via window.notebookAppApi)
+    // =========================================================================
+    const STAGE_ACCENT_MAP = {
+      '个人突围赛-山顶数': { bar: `blue`, tag: `tag--blue` },
+      '抢答冲锋赛-转化山峰': { bar: `yellow`, tag: `tag--yellow` },
+      '团队接力赛-平方差': { bar: `red`, tag: `tag--red` },
+      '冠军争夺战-平方和': { bar: `blue`, tag: `tag--blue` },
+      '赛后彩蛋-奇偶平方和': { bar: `yellow`, tag: `tag--yellow` },
+      '课后巩固与心算阅读': { bar: `black`, tag: `tag--black` }
+    };
+
+    const appState = {
+      searchQuery: ``,
+      activeStage: `all`,
+      masteryFilter: `all`,
+      masteredIds: [],
+      expandedIds: [`s1_try`],
+      activeTab: `mountain`,
+      labMountainMode: `standard`,
+      labMountainPeak: 5,
+      labDiffA: 28,
+      labDiffB: 18,
+      quizConfig: {
+        stage: `all`,
+        difficulty: `all`,
+        count: 5,
+        showAnswers: false,
+        showSolutions: false,
+        practiceMode: true
+      },
+      quizQuestionIds: [],
+      quizUserAnswers: {}
+    };
+
+    // =========================================================================
+    // 3. SAFE KATEX & HTML MATH RENDERING (Zero raw LaTeX leaks)
+    // =========================================================================
+    function mathFallbackHtml(tex) {
+      let s = String(tex || ``);
+      s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, `<span class="math-frac"><span class="math-frac-num">$1</span><span class="math-frac-den">$2</span></span>`);
+      s = s.replace(/\\text\{([^{}]+)\}/g, `$1`);
+      s = s.replace(/\\times/g, `×`);
+      s = s.replace(/\\div/g, `÷`);
+      s = s.replace(/\\cdot/g, `·`);
+      s = s.replace(/\\dots/g, `…`);
+      s = s.replace(/\\qquad/g, ` &nbsp;&nbsp; `);
+      s = s.replace(/\\quad/g, ` &nbsp; `);
+      s = s.replace(/\\;/g, ` `);
+      s = s.replace(/\^\{([^{}]+)\}/g, `<sup>$1</sup>`);
+      s = s.replace(/\^([0-9a-zA-Z])/g, `<sup>$1</sup>`);
+      s = s.replace(/\\\\/g, `<br>`);
+      s = s.replace(/\{|\}/g, ``);
+      return `<span class="math-fallback">${s}</span>`;
+    }
+
+    function renderMath(tex, displayMode) {
+      if (!tex) return ``;
+      if (window.katex && typeof window.katex.renderToString === `function`) {
+        try {
+          return window.katex.renderToString(tex, {
+            displayMode: Boolean(displayMode),
+            throwOnError: false,
+            strict: false
+          });
+        } catch (e) {
+          return mathFallbackHtml(tex);
+        }
+      }
+      return mathFallbackHtml(tex);
+    }
+
+    function escapeHtml(str) {
+      return String(str || ``)
+        .replace(/&/g, `&amp;`)
+        .replace(/</g, `&lt;`)
+        .replace(/>/g, `&gt;`)
+        .replace(/"/g, `&quot;`)
+        .replace(/'/g, `&#39;`);
+    }
+
+    // =========================================================================
+    // 4. SVG DIAGRAMS (Bauhaus styled, strictly grounded in source explanations)
+    // =========================================================================
+    function buildSourceDiagram(type) {
+      if (type === `mountain`) {
+        return `
+          <div class="diagram-box">
+            <svg viewBox="0 0 320 120" width="100%" style="max-width:360px;" role="img" aria-label="山顶数阶梯升起与回落示意图">
+              <title>山顶数阶梯峰形示意图</title>
+              <rect x="20" y="88" width="32" height="16" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="56" y="72" width="32" height="32" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="92" y="56" width="32" height="48" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="128" y="40" width="32" height="64" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="164" y="56" width="32" height="48" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="200" y="72" width="32" height="32" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="236" y="88" width="32" height="16" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="36" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a1a">1</text>
+              <text x="72" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a1a">2</text>
+              <text x="108" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a1a">3</text>
+              <text x="144" y="31" text-anchor="middle" font-size="11" font-weight="700" fill="#0055ff">山顶 n=4</text>
+              <text x="144" y="116" text-anchor="middle" font-size="11" font-weight="900" fill="#1a1a1a">4</text>
+              <text x="180" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a1a">3</text>
+              <text x="216" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a1a">2</text>
+              <text x="252" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a1a">1</text>
+            </svg>
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);">原理图：先升后降像音量的山峰，右半 3+2+1 与左半 1+2+3 配对凑成 4 个 4（即 4²=16）</span>
+          </div>
+        `;
+      }
+      if (type === `squareDiff`) {
+        return `
+          <div class="diagram-box">
+            <svg viewBox="0 0 380 135" width="100%" style="max-width:420px;" role="img" aria-label="28平方减18平方几何割补示意图">
+              <title>平方差几何割补图</title>
+              <rect x="15" y="15" width="90" height="90" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="47" y="15" width="58" height="58" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.5" stroke-dasharray="4 2"/>
+              <text x="60" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a1a">图1: 28² - 18²</text>
+              <text x="76" y="48" text-anchor="middle" font-size="10" fill="#4a4a4a">18×18</text>
+              <line x1="15" y1="73" x2="47" y2="73" stroke="#e63b2e" stroke-width="2" stroke-dasharray="3 2"/>
+              <text x="135" y="65" text-anchor="middle" font-size="18" font-weight="900" fill="#0055ff">→</text>
+              <rect x="165" y="40" width="190" height="36" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+              <line x1="278" y1="40" x2="278" y2="76" stroke="#e63b2e" stroke-width="2" stroke-dasharray="3 2"/>
+              <text x="260" y="30" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a1a">长 = 28 + 18 = 46</text>
+              <text x="260" y="95" text-anchor="middle" font-size="11" font-weight="700" fill="#e63b2e">宽 = 28 - 18 = 10</text>
+              <text x="260" y="122" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a1a">图2: (28+18)×(28-18) = 460</text>
+            </svg>
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);">原图复现（第014页 &amp; 讲义第3页）：图1阴影割补转化为图2阴影长方形</span>
+          </div>
+        `;
+      }
+      if (type === `sumSquaresTri`) {
+        return `
+          <div class="diagram-box">
+            <svg viewBox="0 0 360 120" width="100%" style="max-width:400px;" role="img" aria-label="三个数字三角形叠加推导平方和示意图">
+              <title>三三角叠加推导平方和</title>
+              <text x="58" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="#0055ff">1</text>
+              <text x="58" y="45" text-anchor="middle" font-size="11" font-weight="700" fill="#0055ff">2  2</text>
+              <text x="58" y="65" text-anchor="middle" font-size="11" font-weight="700" fill="#0055ff">3  3  3</text>
+              <text x="58" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#0055ff">4  4  4  4</text>
+              <text x="58" y="108" text-anchor="middle" font-size="10" fill="#4a4a4a">三角①</text>
+
+              <text x="115" y="58" font-size="14" font-weight="900" fill="#1a1a1a">+</text>
+              <text x="168" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="#e63b2e">4</text>
+              <text x="168" y="45" text-anchor="middle" font-size="11" font-weight="700" fill="#e63b2e">3  4</text>
+              <text x="168" y="65" text-anchor="middle" font-size="11" font-weight="700" fill="#e63b2e">2  3  4</text>
+              <text x="168" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#e63b2e">1  2  3  4</text>
+              <text x="168" y="108" text-anchor="middle" font-size="10" fill="#4a4a4a">三角②</text>
+
+              <text x="225" y="58" font-size="14" font-weight="900" fill="#1a1a1a">=</text>
+              <rect x="245" y="12" width="100" height="80" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="295" y="28" text-anchor="middle" font-size="11" font-weight="900" fill="#1a1a1a">9</text>
+              <text x="295" y="46" text-anchor="middle" font-size="11" font-weight="900" fill="#1a1a1a">9  9</text>
+              <text x="295" y="64" text-anchor="middle" font-size="11" font-weight="900" fill="#1a1a1a">9  9  9</text>
+              <text x="295" y="82" text-anchor="middle" font-size="11" font-weight="900" fill="#1a1a1a">9  9  9  9</text>
+              <text x="295" y="108" text-anchor="middle" font-size="10" fill="#4a4a4a">与三角③同位均和为 9</text>
+            </svg>
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);">原图复现（原理复现④）：3 个三角同位置相加和均为 (1+4+4)=9，故 1Δ = 9×(1+2+3+4)÷3 = 30</span>
+          </div>
+        `;
+      }
+      return ``;
+    }
+
+    // =========================================================================
+    // 5. PERSISTENCE HELPERS (window.notebookAppApi)
+    // =========================================================================
+    async function saveAppState() {
+      if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+        try {
+          await window.notebookAppApi.setAppState({
+            masteredIds: appState.masteredIds,
+            activeStage: appState.activeStage,
+            activeTab: appState.activeTab,
+            quizConfig: appState.quizConfig,
+            quizQuestionIds: appState.quizQuestionIds,
+            quizUserAnswers: appState.quizUserAnswers
+          });
+        } catch (err) {
+          // Graceful handling if host rejects payload
+        }
+      }
+    }
+
+    // =========================================================================
+    // 6. LIBRARY FILTERING, SINGLE-COLUMN CARDS & MASTERY CHECKLIST
+    // =========================================================================
+    function getFilteredItems() {
+      const q = appState.searchQuery.trim().toLowerCase();
+      return SOURCE_ITEMS.filter(function (item) {
+        if (appState.activeStage !== `all` && item.stage !== appState.activeStage) return false;
+        const isDone = appState.masteredIds.indexOf(item.id) !== -1;
+        if (appState.masteryFilter === `done` && !isDone) return false;
+        if (appState.masteryFilter === `todo` && isDone) return false;
+        if (!q) return true;
+        const haystack = [
+          item.title,
+          item.stage,
+          item.type,
+          item.summary,
+          item.promptLatex,
+          item.answer,
+          item.insight,
+          item.evidence,
+          item.scienceTip,
+          item.sourceSection
+        ].join(` `).toLowerCase();
+        return haystack.indexOf(q) !== -1;
+      });
+    }
+
+    function renderStagePills() {
+      const container = document.getElementById(`stage-pills`);
+      if (!container) return;
+      container.innerHTML = STAGES.map(function (st) {
+        const count = st.id === `all`
+          ? SOURCE_ITEMS.length
+          : SOURCE_ITEMS.filter(function (x) { return x.stage === st.id; }).length;
+        const activeClass = appState.activeStage === st.id ? ` is-active` : ``;
+        return `
+          <button type="button" class="pill-btn${activeClass}" onclick="setStageFilter('${st.id}')">
+            <span>${escapeHtml(st.label)}</span>
+            <span class="pill-count">(${count})</span>
+          </button>
+        `;
+      }).join(``);
+    }
+
+    function renderKPIs() {
+      const total = SOURCE_ITEMS.length;
+      const quizTotal = SOURCE_ITEMS.filter(function (x) { return x.isQuizItem; }).length;
+      const coreTotal = total - quizTotal;
+      const done = appState.masteredIds.length;
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+      const kpiTotal = document.getElementById(`kpi-total-count`);
+      const kpiTotalNote = document.getElementById(`kpi-total-note`);
+      const kpiMastered = document.getElementById(`kpi-mastered-count`);
+      const kpiBar = document.getElementById(`kpi-progress-bar`);
+      const kpiQuiz = document.getElementById(`kpi-quiz-count`);
+
+      if (kpiTotal) kpiTotal.textContent = `${total} 项`;
+      if (kpiTotalNote) kpiTotalNote.textContent = `含 ${coreTotal} 项核心原理/阅读 + ${quizTotal} 道竞赛原题`;
+      if (kpiMastered) kpiMastered.textContent = `${done} / ${total} (${pct}%)`;
+      if (kpiBar) kpiBar.style.width = `${pct}%`;
+      if (kpiQuiz) kpiQuiz.textContent = `${appState.quizQuestionIds.length} 题就绪`;
+    }
+
+    function renderCards() {
+      const container = document.getElementById(`cards-container`);
+      const summaryEl = document.getElementById(`filter-result-summary`);
+      if (!container) return;
+
+      const items = getFilteredItems();
+      if (summaryEl) {
+        summaryEl.textContent = `正在显示 ${items.length} / ${SOURCE_ITEMS.length} 项资料内容`;
+      }
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3 style="margin:0; font-size:var(--subhead-size);">没有匹配到相关内容</h3>
+            <p style="margin:0; color:var(--on-surface-variant);">请尝试更换关键词或切换回「全部阶段 / 全部条目」。本工作台仅展示上传资料中真实存在的题目与原理。</p>
+            <button type="button" class="btn btn--primary" onclick="clearAllLibraryFilters()">清除全部筛选条件</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(function (item) {
+        const isMastered = appState.masteredIds.indexOf(item.id) !== -1;
+        const isOpen = appState.expandedIds.indexOf(item.id) !== -1;
+        const accent = STAGE_ACCENT_MAP[item.stage] || { bar: `blue`, tag: `tag--blue` };
+        const typeTagClass = (item.type === `核心原理` || item.type === `阅读空间`)
+          ? `tag--yellow`
+          : (item.difficulty === `挑战` ? `tag--red` : ``);
+
+        const stepsHtml = item.steps.map(function (st, idx) {
+          const mathPart = st.latex ? `<div>${renderMath(st.latex, false)}</div>` : ``;
+          return `
+            <li class="step-item">
+              <div><strong>步骤 ${idx + 1}：</strong>${escapeHtml(st.text)}</div>
+              ${mathPart}
+            </li>
+          `;
+        }).join(``);
+
+        const diagramHtml = item.diagramType ? buildSourceDiagram(item.diagramType) : ``;
+        const scienceHtml = item.scienceTip
+          ? `<div class="science-box"><strong>科普拓展：</strong>${escapeHtml(item.scienceTip)}</div>`
+          : ``;
+
+        return `
+          <article class="problem-card${isMastered ? ` is-mastered` : ``}" id="card-${item.id}">
+            <div>
+              <div class="card-accent-bar card-accent-bar--${accent.bar}" aria-hidden="true"></div>
+              <div class="card-body">
+                <div class="card-top-row">
+                  <div class="tag-group">
+                    <span class="tag tag--black">${escapeHtml(item.index)}</span>
+                    <span class="tag ${accent.tag}">${escapeHtml(item.stage)}</span>
+                    <span class="tag ${typeTagClass}">${escapeHtml(item.type)}</span>
+                    <span class="tag">${escapeHtml(item.difficulty)}</span>
+                  </div>
+                  <button type="button" class="mastery-btn${isMastered ? ` is-done` : ``}" onclick="toggleMastered('${item.id}')" aria-pressed="${isMastered}">
+                    <span>${isMastered ? `✓ 已掌握` : `○ 待复习`}</span>
+                  </button>
+                </div>
+
+                <h3 class="card-title">${escapeHtml(item.title)}</h3>
+                <div class="item-prompt">${renderMath(item.promptLatex, true)}</div>
+                <p class="card-prompt">${escapeHtml(item.summary)}</p>
+
+                <div>
+                  <button type="button" class="accordion-trigger" aria-expanded="${isOpen}" onclick="toggleAccordion('${item.id}')">
+                    <span>${isOpen ? `收起手写解析与原文摘录` : `展开完整手写解析（答案：${escapeHtml(item.answer)}）`}</span>
+                    <span aria-hidden="true">${isOpen ? `▲` : `▼`}</span>
+                  </button>
+
+                  <div class="accordion-panel${isOpen ? ` is-open` : ``}">
+                    <div>
+                      <span class="field-label" style="display:block; margin-bottom:var(--space-xs);">完整分步推导（参考结果：${escapeHtml(item.answer)}）</span>
+                      <ul class="steps-list">${stepsHtml}</ul>
+                    </div>
+
+                    ${diagramHtml}
+
+                    <div class="insight-box">
+                      <strong>关键洞察：</strong>${escapeHtml(item.insight)}
+                    </div>
+
+                    <div class="quote-box">
+                      <strong>原文证据摘录：</strong>${escapeHtml(item.evidence)}<br>
+                      <span><strong>限时/分值：</strong>${escapeHtml(item.timeLimit)}</span>
+                    </div>
+
+                    ${scienceHtml}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <footer class="card-footer">
+              <span><strong>来源文件：</strong>${escapeHtml(item.sourceFile)}</span>
+              <span><strong>所属活动/章节：</strong>${escapeHtml(item.sourceSection)}</span>
+            </footer>
+          </article>
+        `;
+      }).join(``);
+    }
+
+    // Hoisted Library Event Handlers
+    function onSearchInput(val) {
+      appState.searchQuery = val || ``;
+      renderCards();
+    }
+
+    function setStageFilter(stageId) {
+      appState.activeStage = stageId;
+      renderStagePills();
+      renderCards();
+      saveAppState();
+    }
+
+    function setMasteryFilter(mode) {
+      appState.masteryFilter = mode || `all`;
+      const sel = document.getElementById(`mastery-status-select`);
+      if (sel) sel.value = appState.masteryFilter;
+      renderCards();
+    }
+
+    function clearAllLibraryFilters() {
+      appState.searchQuery = ``;
+      appState.activeStage = `all`;
+      appState.masteryFilter = `all`;
+      const input = document.getElementById(`search-input`);
+      if (input) input.value = ``;
+      const sel = document.getElementById(`mastery-status-select`);
+      if (sel) sel.value = `all`;
+      renderStagePills();
+      renderCards();
+      saveAppState();
+    }
+
+    function toggleAccordion(id) {
+      const idx = appState.expandedIds.indexOf(id);
+      if (idx === -1) {
+        appState.expandedIds.push(id);
+      } else {
+        appState.expandedIds.splice(idx, 1);
+      }
+      renderCards();
+    }
+
+    function toggleAllAccordions(expand) {
+      const visibleIds = getFilteredItems().map(function (x) { return x.id; });
+      if (expand) {
+        visibleIds.forEach(function (id) {
+          if (appState.expandedIds.indexOf(id) === -1) appState.expandedIds.push(id);
+        });
+      } else {
+        appState.expandedIds = appState.expandedIds.filter(function (id) {
+          return visibleIds.indexOf(id) === -1;
+        });
+      }
+      renderCards();
+    }
+
+    function toggleMastered(id) {
+      const idx = appState.masteredIds.indexOf(id);
+      if (idx === -1) {
+        appState.masteredIds.push(id);
+      } else {
+        appState.masteredIds.splice(idx, 1);
+      }
+      renderKPIs();
+      renderCards();
+      saveAppState();
+    }
+
+    function resetMasteryProgress(btn) {
+      if (!btn) return;
+      if (btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.textContent = `再点一次确认清零`;
+        btn.classList.add(`btn--danger`);
+        return;
+      }
+      btn.dataset.armed = `false`;
+      btn.textContent = `重置掌握记录`;
+      btn.classList.remove(`btn--danger`);
+      appState.masteredIds = [];
+      renderKPIs();
+      renderCards();
+      saveAppState();
+    }
+
+    // =========================================================================
+    // 7. FORMULA COMPARISON TABS & INTERACTIVE LABS
+    // =========================================================================
+    function switchComparisonTab(tabId) {
+      appState.activeTab = tabId;
+      [`mountain`, `diff`, `squares`].forEach(function (k) {
+        const btn = document.getElementById(`tab-btn-${k}`);
+        if (btn) {
+          const isActive = k === tabId;
+          btn.classList.toggle(`is-active`, isActive);
+          btn.setAttribute(`aria-selected`, String(isActive));
+        }
+      });
+      renderComparisonPanel();
+      saveAppState();
+    }
+
+    function renderComparisonPanel() {
+      const panel = document.getElementById(`comparison-panel`);
+      if (!panel) return;
+
+      if (appState.activeTab === `mountain`) {
+        const n = Number(appState.labMountainPeak) || 5;
+        const mode = appState.labMountainMode;
+        let formulaTex = ``;
+        let resultNote = ``;
+        if (mode === `standard`) {
+          formulaTex = `1 + 2 + \\dots + ${n} + \\dots + 2 + 1 = ${n}^2 = ${n * n}`;
+          resultNote = `标准山顶数直接套用 n²（对应任务1、实践1）。`;
+        } else if (mode === `decimal`) {
+          const peakInt = n * 10;
+          formulaTex = `0.1 + 0.2 + \\dots + ${n} + \\dots + 0.2 + 0.1 = (1 + 2 + \\dots + ${peakInt} + \\dots + 2 + 1) \\div 10 = ${peakInt}^2 \\div 10 = ${(peakInt * peakInt) / 10}`;
+          resultNote = `小数山顶数整体先扩大 10 倍，按整数山顶 ${peakInt} 计算后除以 10（对应任务2、实践2）。`;
+        } else {
+          const val = 3 * (n * n - 2);
+          formulaTex = `6 + 9 + \\dots + ${3 * n} + \\dots + 9 + 6 = 3 \\times [(1 + 2 + \\dots + ${n} + \\dots + 2 + 1) - 1 - 1] = 3 \\times (${n}^2 - 2) = ${val}`;
+          resultNote = `非标准山峰（步长 3 且缺 3）：先提公因数 3，再补全左右两端的 1 后减去 2（对应任务3）。`;
+        }
+
+        panel.innerHTML = `
+          <div class="compare-grid-2">
+            <div class="compare-col">
+              <div class="compare-col-head">
+                <strong>A. 山顶数直接求和公式</strong>
+                <span class="tag tag--blue">活动一 · 个人突围赛</span>
+              </div>
+              <div class="formula-banner">${renderMath(`1 + 2 + 3 + \\dots + n + \\dots + 3 + 2 + 1 = n^2`, true)}</div>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>适用前提：</strong>严格从 1 开始，相邻差为 1，升至山顶 n 后再对称降至 1。</p>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>小数变式：</strong>若首项为 0.1、步长 0.1、山顶为 k，则每项扩大 10 倍转为山顶 10k 的整数山顶数，结果为 ${renderMath(`(10k)^2 \\div 10`, false)}。</p>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>资料实例：</strong>山顶 30 得 900；山顶 200 得 40000；小数山顶 10 得 1000、山顶 5 得 250。</p>
+            </div>
+
+            <div class="compare-col compare-col--accent">
+              <div class="compare-col-head">
+                <strong>B. 非标准山峰 · 变形补全与找倍法</strong>
+                <span class="tag tag--yellow">活动二 · 抢答冲锋赛</span>
+              </div>
+              <div class="formula-banner">${renderMath(`\\text{缺项先补全再减去} \\quad / \\quad \\text{非步长 1 先提公因数找倍}`, true)}</div>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>核心口诀：</strong>「不从 1 起先转化，缺少补全或找倍。」</p>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>典型 1（缺少两端）：</strong>如 ${renderMath(`3+4+5+6+7+6+5+4+3`, false)}，补全左右 ${renderMath(`1+2`, false)} 得 ${renderMath(`7^2 - (1+2)\\times 2 = 43`, false)}。</p>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>典型 2（倍数+缺项）：</strong>如 ${renderMath(`6+9+\\dots+60+\\dots+9+6`, false)}，先提 3 得 ${renderMath(`3\\times(2+\\dots+20+\\dots+2)`, false)}，再补两端 1 得 ${renderMath(`3\\times(20^2-2)=1194`, false)}。</p>
+            </div>
+          </div>
+
+          <div class="lab-strip">
+            <div class="lab-controls">
+              <div class="field-group">
+                <label for="lab-mountain-mode" class="field-label">交互演算台：选择山峰结构类型</label>
+                <select id="lab-mountain-mode" class="select-control" onchange="updateMountainLabMode(this.value)">
+                  <option value="standard" ${mode === `standard` ? `selected` : ``}>标准山顶数（步长1，从1起）</option>
+                  <option value="decimal" ${mode === `decimal` ? `selected` : ``}>小数山顶数（步长0.1，先×10后÷10）</option>
+                  <option value="scaled" ${mode === `scaled` ? `selected` : ``}>提公因数3 + 补全1（对应任务3结构）</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="lab-mountain-n" class="field-label">调节山顶参数 n（当前：${n}）</label>
+                <input id="lab-mountain-n" type="range" min="3" max="30" value="${n}" oninput="updateMountainLabPeak(this.value)">
+              </div>
+            </div>
+            <div class="lab-output">
+              <span class="field-label">实时符号推导演示</span>
+              <div style="overflow-x:auto;">${renderMath(formulaTex, true)}</div>
+              <p style="margin:0; font-size:0.875rem; color:var(--on-surface-variant);">${escapeHtml(resultNote)}</p>
+            </div>
+          </div>
+
+          <div class="aside-callout">
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);"><strong>来源出处：</strong>《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》 · 活动一（第004–008页）、活动二（第010–012页）及知识总结</span>
+          </div>
+        `;
+      } else if (appState.activeTab === `diff`) {
+        const a = Number(appState.labDiffA) || 28;
+        const b = Math.min(Number(appState.labDiffB) || 18, a - 1);
+        const diffAns = (a + b) * (a - b);
+        panel.innerHTML = `
+          <div class="compare-grid-2">
+            <div class="compare-col">
+              <div class="compare-col-head">
+                <strong>A. 平方差几何割补与直接套用</strong>
+                <span class="tag tag--red">活动三 · 试一试 / 能力落地</span>
+              </div>
+              <div class="formula-banner">${renderMath(`a^2 - b^2 = (a + b)(a - b)`, true)}</div>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>几何意义：</strong>边长 a 的正方形挖去边长 b 的正方形，剩余阴影可割补成长为 ${renderMath(`(a+b)`, false)}、宽为 ${renderMath(`(a-b)`, false)} 的长方形。</p>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>大数巧算（能力落地）：</strong>${renderMath(`2014^2 + 2012 - 2013^2 = (2014+2013)(2014-2013) + 2012 = 2013\\times 3 = 6039`, false)}。</p>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>对称乘积（专属探索 1）：</strong>${renderMath(`29\\times 31 = (30-1)(30+1) = 30^2 - 1^2`, false)}。</p>
+            </div>
+
+            <div class="compare-col compare-col--accent">
+              <div class="compare-col-head">
+                <strong>B. 交错平方差两两分组抵消法</strong>
+                <span class="tag tag--yellow">活动三 · 任务4 / 实践4 / 课堂3</span>
+              </div>
+              <div class="formula-banner">${renderMath(`20^2 - 19^2 + 18^2 - 17^2 + \\dots + 2^2 - 1^2 = 20 + 19 + \\dots + 2 + 1`, true)}</div>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>解题结构：</strong>相邻两项一加一减交替出现时，两两括号分组，每组展开后因 ${renderMath(`(k) - (k-1) = 1`, false)}，直接退化为连续自然数等差求和！</p>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>资料实例验证：</strong>${renderMath(`10^2-9^2+\\dots-1^2 = 55`, false)}；${renderMath(`14^2-13^2+\\dots-1^2 = 105`, false)}；${renderMath(`16^2-15^2+\\dots-1^2 = 136`, false)}；${renderMath(`20^2-19^2+\\dots-1^2 = 210`, false)}。</p>
+            </div>
+          </div>
+
+          <div class="lab-strip">
+            <div class="lab-controls">
+              <div class="field-group">
+                <label for="lab-diff-a" class="field-label">外正方形边长 a（当前：${a}）</label>
+                <input id="lab-diff-a" type="range" min="10" max="50" value="${a}" oninput="updateDiffLabA(this.value)">
+              </div>
+              <div class="field-group">
+                <label for="lab-diff-b" class="field-label">内挖正方形边长 b（当前：${b}，需小于 a）</label>
+                <input id="lab-diff-b" type="range" min="1" max="${a - 1}" value="${b}" oninput="updateDiffLabB(this.value)">
+              </div>
+            </div>
+            <div class="lab-output">
+              <span class="field-label">实时平方差转化结果</span>
+              <div style="overflow-x:auto;">${renderMath(`${a}^2 - ${b}^2 = (${a} + ${b}) \\times (${a} - ${b}) = ${a + b} \\times ${a - b} = ${diffAns}`, true)}</div>
+              <p style="margin:0; font-size:0.875rem; color:var(--on-surface-variant);">观察：当 a 与 b 相邻（即 a - b = 1）时，差平方直接等于 a + b，这就是交错平方差“消去平方”的秘密。</p>
+            </div>
+          </div>
+
+          <div class="aside-callout">
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);"><strong>来源出处：</strong>《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》 · 活动三（第013–017页）、能力落地及专属探索1</span>
+          </div>
+        `;
+      } else {
+        panel.innerHTML = `
+          <div class="compare-grid-3">
+            <div class="compare-col">
+              <div class="compare-col-head">
+                <strong>1. 连续自然数平方和</strong>
+                <span class="tag tag--blue">活动四 · 冠军争夺战</span>
+              </div>
+              <div class="formula-banner">${renderMath(`1^2 + 2^2 + \\dots + n^2 = \\frac{n(n+1)(2n+1)}{6}`, true)}</div>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>推导依据：</strong>三个数字三角旋转叠加，同位置和均为 ${renderMath(`2n+1`, false)}（原理复现④）。</p>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>截断区间策略：</strong>若从 k² 起算到 n²，则先从 1² 算到 n²，再减去 1² 到 (k-1)²（如任务5与实践5）。</p>
+            </div>
+
+            <div class="compare-col compare-col--accent">
+              <div class="compare-col-head">
+                <strong>2. 偶数平方和（提取公因数）</strong>
+                <span class="tag tag--yellow">高能时刻 1 &amp; 推导</span>
+              </div>
+              <div class="formula-banner">${renderMath(`2^2 + 4^2 + \\dots + (2n)^2 = 4(1^2 + \\dots + n^2) = \\frac{2n(n+1)(2n+1)}{3}`, true)}</div>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>核心策略：</strong>每项拆出 ${renderMath(`2^2 = 4`, false)}，转化为自然数平方和的 4 倍。</p>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>末项换元（令 m = 2n）：</strong>化简得 ${renderMath(`\\frac{m(m+1)(m+2)}{6}`, false)}（例：${renderMath(`2^2+4^2+6^2 = \\frac{6\\times 7\\times 8}{6} = 56`, false)}）。</p>
+            </div>
+
+            <div class="compare-col">
+              <div class="compare-col-head">
+                <strong>3. 奇数平方和（容斥作差法）</strong>
+                <span class="tag tag--red">高能时刻 2 &amp; 推导</span>
+              </div>
+              <div class="formula-banner">${renderMath(`1^2 + 3^2 + \\dots + (2n-1)^2 = \\text{全} - \\text{偶} = \\frac{n(2n-1)(2n+1)}{3}`, true)}</div>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>核心策略：</strong>补全偶数项后用「1² 到 (2n)² 全体和」减去「2² 到 (2n)² 偶数和」。</p>
+              <p class="card-prompt" style="font-size:0.9rem;"><strong>末项换元（令 m = 2n-1）：</strong>同样化简为 ${renderMath(`\\frac{m(m+1)(m+2)}{6}`, false)}（例：${renderMath(`1^2+3^2+\\dots+39^2 = \\frac{39\\times 40\\times 41}{6} = 10660`, false)}）。</p>
+            </div>
+          </div>
+
+          <div class="aside-callout">
+            <strong>惊喜结论 · 奇偶平方和末项统一公式（仅限从 1² 开始的连续奇数或从 2² 开始的连续偶数）：</strong>
+            <div style="overflow-x:auto;">${renderMath(`\\text{奇：}1^2 + 3^2 + 5^2 + \\dots + m^2 = \\frac{m(m+1)(m+2)}{6} \\qquad\\text{偶：}2^2 + 4^2 + 6^2 + \\dots + m^2 = \\frac{m(m+1)(m+2)}{6}`, true)}</div>
+            <p style="margin:0; font-size:0.9rem;">记忆口诀：<strong>「从末项开始的连续三个自然数相乘，再除以 6」</strong>。验证高能时刻 1（m=20）：${renderMath(`20\\times 21\\times 22\\div 6 = 1540`, false)}；验证高能时刻 2（m=21）：${renderMath(`21\\times 22\\times 23\\div 6 = 1771`, false)}。</p>
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);"><strong>来源出处：</strong>《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》（第018–023页） &amp; 《奇数项平方和公式推导》</span>
+          </div>
+        `;
+      }
+    }
+
+    function updateMountainLabMode(val) {
+      appState.labMountainMode = val;
+      renderComparisonPanel();
+    }
+    function updateMountainLabPeak(val) {
+      appState.labMountainPeak = Number(val);
+      renderComparisonPanel();
+    }
+    function updateDiffLabA(val) {
+      appState.labDiffA = Number(val);
+      if (appState.labDiffB >= appState.labDiffA) {
+        appState.labDiffB = appState.labDiffA - 1;
+      }
+      renderComparisonPanel();
+    }
+    function updateDiffLabB(val) {
+      appState.labDiffB = Number(val);
+      renderComparisonPanel();
+    }
+
+    // =========================================================================
+    // 8. LOCAL AUTO-QUIZ GENERATOR & PRINTABLE WORKSHEET
+    // =========================================================================
+    function getQuizPool() {
+      const cfg = appState.quizConfig;
+      return SOURCE_ITEMS.filter(function (item) {
+        if (!item.isQuizItem) return false;
+        if (cfg.stage !== `all` && item.stage !== cfg.stage) return false;
+        if (cfg.difficulty !== `all` && item.difficulty !== cfg.difficulty) return false;
+        return true;
+      });
+    }
+
+    function shuffleArray(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    }
+
+    function onQuizConfigChange() {
+      const stageEl = document.getElementById(`quiz-stage`);
+      const diffEl = document.getElementById(`quiz-difficulty`);
+      const countEl = document.getElementById(`quiz-count`);
+      if (stageEl) appState.quizConfig.stage = stageEl.value;
+      if (diffEl) appState.quizConfig.difficulty = diffEl.value;
+      if (countEl) appState.quizConfig.count = Number(countEl.value) || 5;
+      generateQuiz();
+    }
+
+    function onQuizDisplayToggle() {
+      const ansEl = document.getElementById(`toggle-answers`);
+      const solEl = document.getElementById(`toggle-solutions`);
+      const pracEl = document.getElementById(`toggle-practice-mode`);
+      if (ansEl) appState.quizConfig.showAnswers = ansEl.checked;
+      if (solEl) appState.quizConfig.showSolutions = solEl.checked;
+      if (pracEl) appState.quizConfig.practiceMode = pracEl.checked;
+      renderWorksheet();
+      saveAppState();
+    }
+
+    function generateQuiz() {
+      const pool = getQuizPool();
+      const requested = appState.quizConfig.count;
+      const shuffled = shuffleArray(pool);
+      const selected = shuffled.slice(0, Math.min(requested, shuffled.length));
+      appState.quizQuestionIds = selected.map(function (q) { return q.id; });
+      appState.quizUserAnswers = {};
+      renderKPIs();
+      renderWorksheet();
+      saveAppState();
+    }
+
+    function normalizeAnswer(str) {
+      return String(str || ``)
+        .trim()
+        .replace(/,/g, ``)
+        .replace(/\s+/g, ``);
+    }
+
+    function buildQuizFeedbackMarkup(item, userRaw) {
+      const userNorm = normalizeAnswer(userRaw);
+      if (!item || !userNorm) return ``;
+      const accepted = (item.acceptedAnswers || [item.answer]).map(normalizeAnswer);
+      if (accepted.indexOf(userNorm) !== -1) {
+        return `<span class="quiz-feedback correct">✓ 回答正确</span>`;
+      }
+      return `<span class="quiz-feedback wrong">✗ 再核对一下规律</span>`;
+    }
+
+    function updateQuizUserAnswer(qId, val) {
+      appState.quizUserAnswers[qId] = val;
+      const fbEl = document.getElementById(`feedback-${qId}`);
+      if (fbEl) {
+        const item = SOURCE_ITEMS.find(function (x) { return x.id === qId; });
+        fbEl.innerHTML = buildQuizFeedbackMarkup(item, val);
+      }
+      renderQuizScoreSummary();
+      saveAppState();
+    }
+
+    function renderQuizScoreSummary() {
+      const scoreEl = document.getElementById(`worksheet-score-display`);
+      if (!scoreEl) return;
+      if (!appState.quizConfig.practiceMode || appState.quizQuestionIds.length === 0) {
+        scoreEl.textContent = ``;
+        return;
+      }
+      let correctCount = 0;
+      let attemptedCount = 0;
+      appState.quizQuestionIds.forEach(function (qId) {
+        const item = SOURCE_ITEMS.find(function (x) { return x.id === qId; });
+        const userVal = normalizeAnswer(appState.quizUserAnswers[qId]);
+        if (!item || !userVal) return;
+        attemptedCount++;
+        const accepted = (item.acceptedAnswers || [item.answer]).map(normalizeAnswer);
+        if (accepted.indexOf(userVal) !== -1) correctCount++;
+      });
+      if (attemptedCount === 0) {
+        scoreEl.textContent = ``;
+      } else {
+        scoreEl.textContent = `${correctCount} / ${appState.quizQuestionIds.length} 题`;
+      }
+    }
+
+    function renderWorksheet() {
+      const listEl = document.getElementById(`quiz-questions-list`);
+      const statusEl = document.getElementById(`quiz-status-msg`);
+      const titleEl = document.getElementById(`worksheet-title`);
+      const stampEl = document.getElementById(`worksheet-stamp`);
+      if (!listEl) return;
+
+      const pool = getQuizPool();
+      const questions = appState.quizQuestionIds
+        .map(function (id) { return SOURCE_ITEMS.find(function (x) { return x.id === id; }); })
+        .filter(Boolean);
+
+      const stageText = appState.quizConfig.stage === `all` ? `全讲综合` : appState.quizConfig.stage;
+      const diffText = appState.quizConfig.difficulty === `all` ? `混合难度` : appState.quizConfig.difficulty;
+
+      if (titleEl) {
+        titleEl.textContent = `${stageText} · 专项练习卷（共 ${questions.length} 题）`;
+      }
+      if (stampEl) {
+        const now = new Date();
+        stampEl.textContent = `本地组卷时间：${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, `0`)}-${String(now.getDate()).padStart(2, `0`)}`;
+      }
+
+      if (questions.length === 0) {
+        if (statusEl) {
+          statusEl.textContent = `当前筛选条件（${stageText} / ${diffText}）下在上传资料中没有匹配原题（题池 0 题）。请放宽阶段或难度条件，本工具绝不虚构题目。`;
+        }
+        listEl.innerHTML = `
+          <div class="empty-state">
+            <strong>当前条件暂无对应原题（来源未提及该组合题型）</strong>
+            <p style="margin:0; color:var(--on-surface-variant);">例如「个人突围赛-山顶数」在原讲义中仅含基础与进阶题，不含高能挑战题。请切换难度为「全部难度混合」。</p>
+            <button type="button" class="btn btn--primary btn--small" onclick="resetQuizFilterToAll()">重置为全部难度并重新抽题</button>
+          </div>
+        `;
+        renderQuizScoreSummary();
+        return;
+      }
+
+      if (statusEl) {
+        statusEl.textContent = `已从「${stageText} · ${diffText}」真实原题池（共 ${pool.length} 题）中随机抽取 ${questions.length} 题。`;
+      }
+
+      const showAns = appState.quizConfig.showAnswers;
+      const showSol = appState.quizConfig.showSolutions;
+      const practiceMode = appState.quizConfig.practiceMode;
+
+      listEl.innerHTML = questions.map(function (q, idx) {
+        const userRaw = appState.quizUserAnswers[q.id] || ``;
+        const feedbackHtml = practiceMode ? buildQuizFeedbackMarkup(q, userRaw) : ``;
+
+        const inputRowHtml = practiceMode ? `
+          <div class="quiz-q-check-row no-print">
+            <div class="field-group" style="flex:1;max-width:240px;">
+              <label for="quiz-ans-${q.id}" class="field-label">第 ${idx + 1} 题你的答案</label>
+              <input id="quiz-ans-${q.id}" type="text" class="input-control quiz-answer-input" value="${escapeHtml(userRaw)}" placeholder="输入计算结果…" oninput="updateQuizUserAnswer('${q.id}', this.value)">
+            </div>
+            <span id="feedback-${q.id}">${feedbackHtml}</span>
+          </div>
+        ` : ``;
+
+        let solutionHtml = ``;
+        if (showAns || showSol) {
+          const stepsText = showSol ? q.steps.map(function (st, sIdx) {
+            return `<div>${sIdx + 1}. ${escapeHtml(st.text)} ${st.latex ? renderMath(st.latex, false) : ``}</div>`;
+          }).join(``) : ``;
+
+          solutionHtml = `
+            <div class="quiz-solution-panel">
+              ${showAns ? `<div><strong>参考答案：</strong>${escapeHtml(q.answer)}</div>` : ``}
+              ${showSol ? `<div><strong>分步解析：</strong>${stepsText}</div>` : ``}
+              ${showSol ? `<div><strong>技巧提示：</strong>${escapeHtml(q.insight)}</div>` : ``}
+            </div>
+          `;
+        }
+
+        return `
+          <div class="quiz-question-card">
+            <div class="quiz-q-head">
+              <div class="tag-group">
+                <span class="tag tag--black">第 ${idx + 1} 题</span>
+                <span class="tag tag--blue">${escapeHtml(q.stage)}</span>
+                <span class="tag tag--yellow">${escapeHtml(q.difficulty)}</span>
+              </div>
+              <span style="font-size:0.78rem; color:var(--on-surface-variant);">出处：${escapeHtml(q.sourceSection)}</span>
+            </div>
+
+            <div style="font-weight:700;">${escapeHtml(q.title)}</div>
+            <div class="item-prompt">${renderMath(q.promptLatex, true)}</div>
+            ${inputRowHtml}
+            ${solutionHtml}
+          </div>
+        `;
+      }).join(``);
+
+      renderQuizScoreSummary();
+    }
+
+    function resetQuizFilterToAll() {
+      appState.quizConfig.stage = `all`;
+      appState.quizConfig.difficulty = `all`;
+      const stageEl = document.getElementById(`quiz-stage`);
+      const diffEl = document.getElementById(`quiz-difficulty`);
+      if (stageEl) stageEl.value = `all`;
+      if (diffEl) diffEl.value = `all`;
+      generateQuiz();
+    }
+
+    function printWorksheet() {
+      window.print();
+    }
+
+    function exportWorksheetText() {
+      const questions = appState.quizQuestionIds
+        .map(function (id) { return SOURCE_ITEMS.find(function (x) { return x.id === id; }); })
+        .filter(Boolean);
+      if (questions.length === 0) return;
+
+      const lines = [
+        `《冠军请听题》专项练习卷（本地组卷导出）`,
+        `资料来源：《【素养】26秋-4C+-第01讲-冠军请听题-手写解析.pdf》 & 《奇数项平方和公式推导》`,
+        `题量：${questions.length} 题    姓名：__________    得分：__________`,
+        `============================================================`,
+        ``
+      ];
+
+      questions.forEach(function (q, idx) {
+        lines.push(`${idx + 1}. [${q.stage} · ${q.difficulty}] ${q.title}`);
+        lines.push(`   题目：${q.promptLatex.replace(/\\dots/g, `...`).replace(/\\times/g, `×`).replace(/\\div/g, `÷`).replace(/\\text\{？\}/g, `？`)}`);
+        lines.push(`   出处：${q.sourceFile} ${q.sourceSection}`);
+        if (appState.quizConfig.showAnswers) {
+          lines.push(`   参考答案：${q.answer}`);
+        }
+        if (appState.quizConfig.showSolutions) {
+          lines.push(`   解析步骤：`);
+          q.steps.forEach(function (st, sIdx) {
+            lines.push(`     (${sIdx + 1}) ${st.text} ${st.latex}`);
+          });
+        }
+        lines.push(``);
+      });
+
+      const content = lines.join(`\n`);
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content: content,
+          contentType: `text/plain`,
+          encoding: `UTF-8`,
+          filename: `冠军请听题-专项练习卷.txt`
+        });
+      } else {
+        const blob = new Blob([content], { type: `text/plain;charset=utf-8` });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement(`a`);
+        a.href = url;
+        a.download = `冠军请听题-专项练习卷.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: `smooth`, block: `start` });
+    }
+
+    // =========================================================================
+    // 9. INITIALIZATION & HYDRATION
+    // =========================================================================
+    async function initApp() {
+      let savedState = null;
+      if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+        try {
+          savedState = await window.notebookAppApi.getAppState();
+        } catch (err) {
+          savedState = null;
+        }
+      }
+
+      if (savedState && typeof savedState === `object`) {
+        if (Array.isArray(savedState.masteredIds)) appState.masteredIds = savedState.masteredIds;
+        if (typeof savedState.activeStage === `string`) appState.activeStage = savedState.activeStage;
+        if (typeof savedState.activeTab === `string`) appState.activeTab = savedState.activeTab;
+        if (savedState.quizConfig && typeof savedState.quizConfig === `object`) {
+          appState.quizConfig = Object.assign({}, appState.quizConfig, savedState.quizConfig);
+        }
+        if (Array.isArray(savedState.quizQuestionIds)) appState.quizQuestionIds = savedState.quizQuestionIds;
+        if (savedState.quizUserAnswers && typeof savedState.quizUserAnswers === `object`) {
+          appState.quizUserAnswers = savedState.quizUserAnswers;
+        }
+      }
+
+      const stageEl = document.getElementById(`quiz-stage`);
+      const diffEl = document.getElementById(`quiz-difficulty`);
+      const countEl = document.getElementById(`quiz-count`);
+      const ansEl = document.getElementById(`toggle-answers`);
+      const solEl = document.getElementById(`toggle-solutions`);
+      const pracEl = document.getElementById(`toggle-practice-mode`);
+
+      if (stageEl) stageEl.value = appState.quizConfig.stage;
+      if (diffEl) diffEl.value = appState.quizConfig.difficulty;
+      if (countEl) countEl.value = String(appState.quizConfig.count);
+      if (ansEl) ansEl.checked = Boolean(appState.quizConfig.showAnswers);
+      if (solEl) solEl.checked = Boolean(appState.quizConfig.showSolutions);
+      if (pracEl) pracEl.checked = Boolean(appState.quizConfig.practiceMode);
+
+      if (appState.quizQuestionIds.length === 0) {
+        const pool = getQuizPool();
+        appState.quizQuestionIds = shuffleArray(pool).slice(0, Math.min(appState.quizConfig.count, pool.length)).map(function (q) { return q.id; });
+      }
+
+      renderStagePills();
+      renderKPIs();
+      renderCards();
+      switchComparisonTab(appState.activeTab);
+      renderWorksheet();
+
+      if (window.lucide && typeof window.lucide.createIcons === `function`) {
+        window.lucide.createIcons();
+      }
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    document.addEventListener(`DOMContentLoaded`, function () {
+      initApp();
+    });
+  </script>
+</body>
+</html>

@@ -127,7 +127,7 @@ body {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-lg);
 }
 
@@ -154,6 +154,7 @@ body {
 .accent-bar--blue { background: var(--tertiary); }
 .accent-bar--red { background: var(--secondary); }
 .accent-bar--yellow { background: var(--primary-container); }
+.accent-bar--black { background: var(--primary); }
 
 .card-body {
   padding: var(--space-lg);
@@ -189,6 +190,11 @@ body {
 .tag--red {
   background: var(--secondary);
   color: var(--on-secondary);
+}
+
+.tag--black {
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .card-title {
@@ -353,6 +359,29 @@ body {
       <footer class="card-footer">
         <span style="font-size:0.8rem; color:var(--on-surface-variant);">Lesson 3 · 第 4 讲</span>
         <a class="open-btn" href="./进位制交互式学习与题库工作台.html">进入工作台 →</a>
+      </footer>
+    </article>
+
+    <article class="nav-card">
+      <div>
+        <div class="accent-bar accent-bar--black" aria-hidden="true"></div>
+        <div class="card-body">
+          <div class="tag-row">
+            <span class="tag tag--black">运算巧算专题</span>
+            <span class="tag tag--yellow">37 项全题库</span>
+          </div>
+          <h2 class="card-title">冠军请听题：竞赛巧算原理与交互组卷工作台</h2>
+          <p class="card-desc">涵盖山顶数求和、非标准山峰转化、平方差抵消与奇偶平方和末项统一公式，配合交互演算与自测组卷。</p>
+          <ul class="card-features">
+            <li>三组核心巧算公式横向对比 + 参数滑动实时演算台</li>
+            <li>37 项分赛程手写解析、几何割补图与科普拓展</li>
+            <li>内置在线作答批改、分数统计、一键打印与 TXT 导出</li>
+          </ul>
+        </div>
+      </div>
+      <footer class="card-footer">
+        <span style="font-size:0.8rem; color:var(--on-surface-variant);">素养第 01 讲 · 运算能力</span>
+        <a class="open-btn" href="./冠军请听题：数学运算能力训练与交互式自测平台.html">进入工作台 →</a>
       </footer>
     </article>
 
