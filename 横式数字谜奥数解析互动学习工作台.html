@@ -1,0 +1,3051 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="artifact-type" content="dashboard">
+<meta name="design-style" content="bauhaus">
+<title>横式数字谜：全题型解析与破题策略工作台</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+
+  /* 1. Bauhaus surfaces & ink */
+  --background: #f5f0e8;
+  --surface-container-low: #f2ede5;
+  --surface-container: #eee9e0;
+  --surface-container-high: #e8e3da;
+  --surface-white: #ffffff;
+
+  --on-surface: #1a1a1a;
+  --on-surface-variant: #4a4a4a;
+
+  --outline: #1a1a1a;
+  --outline-variant: #d0cbc3;
+
+  --primary: #1a1a1a;
+  --on-primary: #ffffff;
+  --primary-container: #ffcc00;
+  --on-primary-container: #1a1a1a;
+  --secondary: #e63b2e;
+  --on-secondary: #ffffff;
+  --tertiary: #0055ff;
+  --on-tertiary: #ffffff;
+  --error: #cc0000;
+  --on-error: #ffffff;
+
+  /* Data series */
+  --data-1: #e63b2e;
+  --data-2: #0055ff;
+  --data-3: #1a1a1a;
+  --data-4: #9a7300;
+  --data-context: #b5afa5;
+
+  /* Fonts (Noto Sans SC listed first for CJK) */
+  --font-headline: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+  --font-body: 'Noto Sans SC', 'Inter', sans-serif;
+  --font-label: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+
+  /* Shape */
+  --rounded: 0.125rem;
+  --rounded-lg: 0.25rem;
+  --rounded-full: 0.75rem;
+
+  /* Style effects */
+  --border-thick: 3px solid var(--outline);
+  --border-medium: 2px solid var(--outline);
+  --offset-shadow: 5px 5px 0 var(--outline);
+  --offset-shadow-sm: 3px 3px 0 var(--outline);
+  --rule-heavy: 6px solid var(--outline);
+
+  /* 2. Shared semantic & scale tokens */
+  --positive: #156d3f;
+  --on-positive: #ffffff;
+  --positive-container: #d8efe0;
+  --on-positive-container: #114b2c;
+  --warning: #8f5800;
+  --warning-container: #fff3c4;
+  --focus: #0055ff;
+
+  /* Type scale (Dashboard / Tool tighter ratio) */
+  --display-size: clamp(1.85rem, 1.4rem + 1.8vw, 2.75rem);
+  --headline-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.2rem);
+  --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+  --label-size: 0.75rem;
+
+  /* Spacing scale (4pt base) */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+}
+
+/* Base reset */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; margin: 0; padding: 0; }
+header { position: static !important; }
+
+body {
+  background-color: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.page-grid {
+  display: grid;
+  gap: var(--space-xl);
+  padding: var(--space-lg);
+  max-width: 1240px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.page-grid * { min-width: 0; }
+
+/* Masthead / Header */
+.masthead {
+  border-top: var(--rule-heavy);
+  border-bottom: var(--border-thick);
+  padding: var(--space-lg) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: end;
+}
+
+.kicker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.kicker-block {
+  display: inline-block;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  background: var(--primary);
+  color: var(--on-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-medium);
+}
+
+.kicker-block--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.kicker-block--yellow {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.kicker-block--red {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+
+.flag-trio {
+  display: inline-flex;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.flag-swatch {
+  width: 14px;
+  height: 18px;
+  border: var(--border-medium);
+  display: inline-block;
+}
+.flag-swatch--red { background: var(--secondary); }
+.flag-swatch--yellow { background: var(--primary-container); }
+.flag-swatch--blue { background: var(--tertiary); }
+
+.title {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: var(--display-size);
+  line-height: 1.12;
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--on-surface);
+}
+
+.title mark {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: 0 var(--space-xs);
+  box-decoration-break: clone;
+}
+
+.lede {
+  margin: 0;
+  color: var(--on-surface-variant);
+  max-width: 65ch;
+}
+
+.source-pill-box {
+  background: var(--surface-container-low);
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  padding: var(--space-md);
+}
+
+.source-pill-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.source-pill-title {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  margin: 0;
+  color: var(--on-surface);
+}
+
+.sync-badge {
+  font-family: var(--font-label);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border: 1.5px solid var(--outline);
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+}
+
+.source-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+}
+
+/* KPI Summary Row */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+
+.kpi-block {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container-low);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.kpi-block--highlight {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.kpi-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+}
+
+.kpi-block--highlight .kpi-label {
+  color: var(--on-primary-container);
+}
+
+.kpi-value {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-sub {
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+.kpi-block--highlight .kpi-sub {
+  color: var(--on-primary-container);
+}
+
+.kpi-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.inline-toast {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--positive);
+  min-height: 1.25em;
+}
+
+.progress-track {
+  width: 100%;
+  height: 12px;
+  border: var(--border-medium);
+  background: var(--surface-white);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--tertiary);
+  transition: width var(--dur-short) var(--ease-out);
+}
+
+/* Section Openings (One-accent rule) */
+.section-open {
+  border-top: var(--space-sm) solid var(--section-accent, var(--tertiary));
+  padding-top: var(--space-lg);
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.section-open--blue { --section-accent: var(--tertiary); }
+.section-open--red { --section-accent: var(--secondary); }
+.section-open--yellow { --section-accent: var(--primary-container); }
+.section-open--black { --section-accent: var(--primary); }
+
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-md);
+}
+
+.section-heading {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--headline-size);
+  line-height: 1.2;
+  margin: var(--space-xs) 0 0 0;
+}
+
+.section-desc {
+  margin: var(--space-xs) 0 0 0;
+  color: var(--on-surface-variant);
+  max-width: 68ch;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--background);
+  color: var(--on-surface);
+  cursor: pointer;
+  transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+
+.btn:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+.btn--primary {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.btn--primary:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.btn--blue:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn--small {
+  min-height: 36px;
+  padding: 0 var(--space-sm);
+  font-size: 0.8125rem;
+}
+
+/* Comparison Tabs & Panel */
+.tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.tab-btn {
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  cursor: pointer;
+  box-shadow: var(--offset-shadow-sm);
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.tab-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.tab-btn.is-active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.comparison-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.panel-block {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container-low);
+  padding: var(--space-lg);
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.compare-col {
+  border: var(--border-medium);
+  background: var(--surface-white);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+  align-content: start;
+}
+
+.compare-col--accent {
+  background: var(--surface-container);
+}
+
+.compare-col-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--border-medium);
+  padding-bottom: var(--space-xs);
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.compare-col-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+}
+
+.compare-row {
+  border-bottom: 1px solid var(--outline-variant);
+  padding-bottom: var(--space-xs);
+}
+.compare-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.compare-row-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+  display: block;
+}
+
+.compare-row-val {
+  font-size: 0.9375rem;
+  margin-top: 3px;
+}
+
+.strategy-step-list {
+  margin: 4px 0 0 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.strategy-warning-box {
+  background: var(--warning-container);
+  border-left: 5px solid var(--secondary);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+/* Interactive Transformation Simulator */
+.sim-box {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.sim-stage {
+  border: var(--border-medium);
+  background: var(--background);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.sim-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.sim-slot {
+  border: var(--border-medium);
+  background: var(--surface-white);
+  padding: var(--space-xs) var(--space-sm);
+  min-width: 72px;
+  text-align: center;
+  font-weight: 700;
+  font-family: var(--font-label);
+}
+
+.sim-slot--swapped {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.sim-slot--eliminated {
+  background: var(--surface-container-high);
+  color: var(--on-surface-variant);
+  text-decoration: line-through;
+  opacity: 0.72;
+}
+
+.sim-slot-role {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+}
+
+/* Vertical cryptarithm grid inside simulator */
+.vertical-calc {
+  display: inline-grid;
+  grid-template-columns: repeat(6, 2rem);
+  gap: 2px;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 1rem;
+  background: var(--surface-white);
+  border: var(--border-medium);
+  padding: var(--space-sm);
+  justify-items: center;
+  align-items: center;
+}
+
+.v-cell {
+  width: 1.9rem;
+  height: 1.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.v-cell--hi {
+  background: var(--primary-container);
+  border: 1.5px solid var(--outline);
+}
+
+.v-cell--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.v-rule {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 2px;
+  background: var(--outline);
+  margin: 2px 0;
+}
+
+.sim-verdict {
+  padding: var(--space-sm) var(--space-md);
+  border-left: 5px solid var(--tertiary);
+  background: var(--surface-container-low);
+  font-size: 0.9rem;
+}
+
+.sim-verdict--active {
+  border-left-color: var(--positive);
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+}
+
+.jump-section {
+  border-top: 2px dashed var(--outline-variant);
+  padding-top: var(--space-sm);
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.jump-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* Math & Cryptarithm Formatting */
+.math-expr {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--surface-container);
+  border: 1px solid var(--outline-variant);
+  padding: 1px 6px;
+  border-radius: var(--rounded);
+  line-height: 1.25;
+}
+
+.equation-box {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-container);
+  border: var(--border-medium);
+  border-left: 6px solid var(--primary);
+  padding: var(--space-xs) var(--space-sm);
+  line-height: 1.55;
+  color: var(--on-surface);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.sym-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15em;
+  height: 1.15em;
+  border: 2px solid var(--outline);
+  background: var(--surface-white);
+  color: transparent;
+  vertical-align: -0.15em;
+  margin: 0 1px;
+  font-size: 0.88em;
+  user-select: all;
+}
+
+.sym-tri {
+  color: var(--tertiary);
+  font-weight: 900;
+}
+
+.sym-cir {
+  color: var(--secondary);
+  font-weight: 900;
+}
+
+.math-arrow {
+  color: var(--tertiary);
+  font-weight: 700;
+}
+
+/* Search & Filter Toolbar */
+.toolbar-panel {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.toolbar-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: var(--space-md);
+  align-items: end;
+}
+
+.field-group {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.field-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--on-surface);
+}
+
+.input-control, .select-control {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-sm);
+  border: 0;
+  border-bottom: var(--border-thick);
+  background: var(--surface-white);
+  font-size: var(--body-size);
+  border-radius: 0;
+}
+
+.select-control {
+  padding-right: var(--space-lg);
+}
+
+.input-control:focus-visible, .select-control:focus-visible {
+  border-bottom-color: var(--tertiary);
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.filter-rows-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.pill-btn {
+  min-height: 40px;
+  padding: var(--space-xs) var(--space-md);
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  background: var(--surface-white);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.pill-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.pill-btn.is-active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  box-shadow: var(--offset-shadow-sm);
+}
+
+.results-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  border-top: 1px solid var(--outline-variant);
+  padding-top: var(--space-sm);
+}
+
+/* Problem Cards Grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.problem-card {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
+}
+
+.problem-card.is-mastered {
+  background: var(--surface-container-low);
+}
+
+.problem-card.is-highlighted {
+  border-color: var(--tertiary);
+  box-shadow: 6px 6px 0 var(--tertiary);
+}
+
+.card-accent-bar {
+  height: 8px;
+  width: 100%;
+  border-bottom: var(--border-medium);
+}
+.card-accent-bar--blue { background: var(--tertiary); }
+.card-accent-bar--red { background: var(--secondary); }
+.card-accent-bar--yellow { background: var(--primary-container); }
+.card-accent-bar--black { background: var(--primary); }
+
+.card-body {
+  padding: var(--space-md) var(--space-lg);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.card-top-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.tag {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  border: var(--border-medium);
+  padding: 2px 8px;
+  border-radius: var(--rounded);
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+.tag--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.tag--red {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+
+.tag--yellow {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.tag--black {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.tag--muted {
+  background: var(--warning-container);
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+.mastery-btn {
+  min-height: 40px;
+  padding: 0 var(--space-sm);
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  background: var(--surface-white);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mastery-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.mastery-btn.is-done {
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+}
+
+.card-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+  line-height: 1.3;
+}
+
+.card-prompt {
+  margin: 0;
+  color: var(--on-surface);
+  font-size: 0.94rem;
+}
+
+.card-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  font-size: 0.8125rem;
+  color: var(--on-surface-variant);
+  border-top: 1px dashed var(--outline-variant);
+  padding-top: var(--space-xs);
+}
+
+/* Accordion inside card */
+.accordion-trigger {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
+  border: var(--border-medium);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--dur-micro) var(--ease-out);
+}
+
+.accordion-trigger:hover {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.accordion-panel {
+  border: var(--border-medium);
+  border-top: 0;
+  background: var(--background);
+  padding: var(--space-md);
+  display: none;
+  gap: var(--space-sm);
+}
+
+.accordion-panel.is-open {
+  display: grid;
+}
+
+.breakthrough-callout {
+  background: var(--surface-white);
+  border: 1.5px solid var(--outline);
+  border-left: 5px solid var(--primary-container);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.9rem;
+}
+
+.answer-callout {
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+  border: 1.5px solid var(--positive);
+  padding: var(--space-xs) var(--space-sm);
+  font-weight: 700;
+  font-size: 0.94rem;
+}
+
+.answer-callout--missing {
+  background: var(--warning-container);
+  color: var(--warning);
+  border-color: var(--warning);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.step-item {
+  border-left: 4px solid var(--tertiary);
+  padding-left: var(--space-sm);
+  font-size: 0.9rem;
+}
+
+.quote-box {
+  background: var(--surface-container);
+  border-left: 4px solid var(--primary);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.83rem;
+  color: var(--on-surface-variant);
+}
+
+.card-footer {
+  border-top: var(--border-medium);
+  background: var(--surface-container);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.78rem;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+}
+
+/* Empty State */
+.empty-state {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-xl);
+  display: none;
+  gap: var(--space-md);
+  justify-items: start;
+}
+
+.empty-state.is-visible {
+  display: grid;
+}
+
+/* SOP & Formula Strip */
+.sop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.sop-card {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-xs);
+  align-content: start;
+}
+
+.sop-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.sop-title {
+  margin: var(--space-xs) 0 0 0;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.mantra-banner {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: var(--space-lg);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.mantra-quote {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.45rem);
+  line-height: 1.45;
+}
+
+.formula-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-xs);
+  font-size: 0.88rem;
+}
+
+.formula-list li {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  padding: var(--space-xs) var(--space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Pitfall Checklist Cards */
+.pitfall-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+
+.pitfall-card {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-sm);
+  border-left: 10px solid var(--secondary);
+}
+
+.pitfall-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.pitfall-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+}
+
+.pitfall-row {
+  font-size: 0.9rem;
+  border-top: 1px solid var(--outline-variant);
+  padding-top: var(--space-xs);
+}
+
+/* Variant / Comparison Table */
+.table-wrap {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  overflow-x: auto;
+}
+
+.variant-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.variant-table thead th {
+  background: var(--surface-container-high);
+  border-bottom: var(--border-thick);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  white-space: nowrap;
+}
+
+.variant-table tbody td {
+  border-bottom: 1px solid var(--outline-variant);
+  padding: var(--space-sm) var(--space-md);
+  vertical-align: top;
+}
+
+.variant-table tbody tr:hover {
+  background: var(--surface-container-low);
+}
+
+.variant-table tbody tr.is-active-row {
+  background: var(--warning-container);
+}
+
+.table-jump-btn {
+  min-height: 36px;
+  padding: 2px 10px;
+  border: var(--border-medium);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+
+.table-jump-btn:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+/* Footer */
+.site-footer {
+  border-top: var(--rule-heavy);
+  padding: var(--space-lg) 0 var(--space-xl) 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 960px) {
+  .masthead { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .comparison-shell { grid-template-columns: 1fr; }
+  .sop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mantra-banner { grid-template-columns: 1fr; }
+  .pitfall-grid { grid-template-columns: 1fr; }
+  .toolbar-inputs { grid-template-columns: 1fr; }
+  .filter-rows-split { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .page-grid {
+    grid-template-columns: 1fr;
+    padding: var(--space-md);
+    gap: var(--space-lg);
+  }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .compare-grid { grid-template-columns: 1fr; }
+  .sop-grid { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="page-grid">
+
+  <!-- Masthead -->
+  <header class="masthead">
+    <div>
+      <div class="kicker-row">
+        <span class="kicker-block">Lesson 9 · 小学奥数专题</span>
+        <span class="kicker-block kicker-block--blue">横式数字谜</span>
+        <span class="flag-trio" aria-hidden="true">
+          <span class="flag-swatch flag-swatch--red"></span>
+          <span class="flag-swatch flag-swatch--yellow"></span>
+          <span class="flag-swatch flag-swatch--blue"></span>
+        </span>
+      </div>
+      <h1 class="title">横式数字谜：<mark>全题型解析</mark>与破题策略工作台</h1>
+      <p class="lede">严格依据教材与练习册整理，系统覆盖位值原理与方程、横式改写竖式、整除与平方奇偶特征、范围估算与有序填空四大核心方法，支持多维检索、策略交互演示与复习进度清单追踪。</p>
+    </div>
+
+    <div class="source-pill-box">
+      <div class="source-pill-head">
+        <p class="source-pill-title">本工作台唯一内容来源（共 29 题）</p>
+        <span class="sync-badge" id="header-sync-status">进度自动保存</span>
+      </div>
+      <ul class="source-list">
+        <li>《Lesson 9-横式数字谜.pdf》（教材 17 项：Warm Up / Exploration / Key Points）</li>
+        <li>《Lesson 9-横式数字谜-练习册.pdf》（练习册 12 题逐题解析与答案）</li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- KPI Summary Row -->
+  <section aria-label="学习进度与题库概览" class="kpi-grid">
+    <div class="kpi-block kpi-block--highlight">
+      <span class="kpi-label">当前复习进度</span>
+      <div class="kpi-value" id="kpi-mastered">0 / 29 题</div>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="kpi-progress-bar"></div>
+      </div>
+      <div class="kpi-footer-row">
+        <span class="kpi-sub" id="kpi-progress-pct">已掌握 0% · 待复习 29 题</span>
+        <button type="button" class="btn btn--small" id="reset-progress-btn" onclick="handleResetProgress(this)">重置进度</button>
+      </div>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">总收录题量</span>
+      <div class="kpi-value" id="kpi-total">29 题</div>
+      <span class="kpi-sub" id="kpi-review-sub">教材 17 项 · 练习册 12 题（待复习 29 题）</span>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">四大核心破题策略</span>
+      <div class="kpi-value">4 大模块</div>
+      <span class="kpi-sub">位值原理 · 改写竖式 · 乘除特征 · 数字填空</span>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">当前筛选命中 &amp; 导出</span>
+      <div class="kpi-value" id="kpi-filtered">29 题</div>
+      <div class="kpi-footer-row">
+        <button type="button" class="btn btn--small btn--blue" onclick="exportProgress()">导出复习清单</button>
+      </div>
+      <span class="inline-toast" id="kpi-toast" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <!-- Section 1: Switchable Strategy Tabs & Interactive Transformation Simulator -->
+  <section class="section-open section-open--blue" aria-labelledby="sec-strategy-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--blue">核心策略对比台</span>
+        <h2 class="section-heading" id="sec-strategy-title">四大破题策略对比与「变形拆解」交互演示</h2>
+        <p class="section-desc">横式数字谜不同于竖式，需先通过变形或数理特征找到突破口。切换下方标签页可对比四大方法，右侧可点击按钮体验讲义经典题的破题变形过程并直达原题。</p>
+      </div>
+    </div>
+
+    <div class="tab-bar" role="tablist" aria-label="核心解题策略切换">
+      <button type="button" role="tab" class="tab-btn is-active" id="tab-place" aria-selected="true" onclick="selectStrategy('place')">1. 位值原理与方程法</button>
+      <button type="button" role="tab" class="tab-btn" id="tab-vertical" aria-selected="false" onclick="selectStrategy('vertical')">2. 横式改写竖式分析</button>
+      <button type="button" role="tab" class="tab-btn" id="tab-divisibility" aria-selected="false" onclick="selectStrategy('divisibility')">3. 整除、平方与奇偶特征</button>
+      <button type="button" role="tab" class="tab-btn" id="tab-fill" aria-selected="false" onclick="selectStrategy('fill')">4. 范围估算与有序填空</button>
+    </div>
+
+    <div class="comparison-shell">
+      <!-- Left: Structured Two-Column Strategy Breakdown -->
+      <div class="panel-block" id="strategy-detail-panel" role="tabpanel" aria-live="polite">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Right: Interactive Breakthrough Simulator + Direct Jumps -->
+      <aside class="sim-box" aria-label="讲义经典题变形演示与原题直达">
+        <div class="field-group">
+          <label class="field-label" for="sim-scenario-select">选择经典原题演练破题变形</label>
+          <select id="sim-scenario-select" class="select-control" onchange="selectSimScenario(this.value)">
+            <option value="place">位值整体设元：4 × KLMNP4 = 4KLMNP（Exploration 1）</option>
+            <option value="vertical">横式改写竖式：兵炮马卒 + 兵炮车卒 = 车卒马兵卒（Warm Up 1）</option>
+            <option value="divisibility">平方与11特征：AB + CC = DEE = C×C×F×F（练习册 第9题）</option>
+            <option value="fill">除法转乘估算：□□ ÷ □□ = □□ − □□ = 8（练习册 第5题）</option>
+          </select>
+        </div>
+
+        <div class="sim-stage" id="sim-stage">
+          <!-- Populated by JS -->
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
+          <button type="button" class="btn btn--primary" id="btn-sim-action" onclick="toggleSimAction()">执行破题变形演示</button>
+        </div>
+
+        <div class="sim-verdict" id="sim-verdict">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="jump-section">
+          <span class="field-label">当前策略对应原题直达（点击定位并展开解析）</span>
+          <div class="jump-list" id="strategy-jump-list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Section 2: Searchable & Filterable Problem Explorer -->
+  <section class="section-open section-open--red" aria-labelledby="sec-explorer-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block">题型检索与复习打卡</span>
+        <h2 class="section-heading" id="sec-explorer-title">教材与练习册全题库（29 题逐题精讲）</h2>
+        <p class="section-desc">支持按知识模块、来源栏目与复习状态筛选，或输入汉字、字母算式、数字关键词快速定位。展开每张题卡可查看「破题突破口 → 最终答案 → 逐步推导过程 → 原文出处」。</p>
+      </div>
+    </div>
+
+    <div class="toolbar-panel">
+      <div class="toolbar-inputs">
+        <div class="field-group">
+          <label class="field-label" for="search-input">关键词搜索（支持汉字、字母算式、数字或题号，如：2018、团团、546、BAD、12345679）</label>
+          <input type="search" id="search-input" class="input-control" oninput="handleSearchInput(this.value)" autocomplete="off" placeholder="输入：兵炮马卒、KLMNP4、2018、517、FORTY、11的倍数...">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="status-filter">按复习清单状态筛选</label>
+          <select id="status-filter" class="select-control" onchange="setStatusFilter(this.value)">
+            <option value="all">全部状态</option>
+            <option value="review">仅看「待复习」</option>
+            <option value="mastered">仅看「已掌握」</option>
+          </select>
+        </div>
+        <div>
+          <button type="button" class="btn" onclick="resetAllFilters()">清空筛选</button>
+        </div>
+      </div>
+
+      <div class="filter-rows-split">
+        <div class="field-group">
+          <span class="field-label">按知识模块筛选</span>
+          <div class="filter-pills" id="module-filter-row" role="group" aria-label="知识模块筛选">
+            <button type="button" class="pill-btn is-active" onclick="setModuleFilter('all')">全部模块</button>
+            <button type="button" class="pill-btn" onclick="setModuleFilter('位值原理')">位值原理</button>
+            <button type="button" class="pill-btn" onclick="setModuleFilter('改写竖式')">改写竖式</button>
+            <button type="button" class="pill-btn" onclick="setModuleFilter('乘除特征')">乘除特征</button>
+            <button type="button" class="pill-btn" onclick="setModuleFilter('数字填空')">数字填空</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">按来源栏目筛选</span>
+          <div class="filter-pills" id="source-filter-row" role="group" aria-label="来源栏目筛选">
+            <button type="button" class="pill-btn is-active" onclick="setSourceFilter('all')">全部来源</button>
+            <button type="button" class="pill-btn" onclick="setSourceFilter('热身题')">热身题</button>
+            <button type="button" class="pill-btn" onclick="setSourceFilter('探索例题')">探索例题</button>
+            <button type="button" class="pill-btn" onclick="setSourceFilter('核心难点')">核心难点</button>
+            <button type="button" class="pill-btn" onclick="setSourceFilter('练习册精选')">练习册精选</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-meta">
+        <span id="filter-summary-text">正在显示 29 / 29 条教材与练习册题目</span>
+        <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+          <button type="button" class="btn btn--small" onclick="expandAllVisible()">全部展开解析</button>
+          <button type="button" class="btn btn--small" onclick="collapseAllVisible()">全部收起解析</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="empty-state" role="status">
+      <h3 style="margin:0; font-size:var(--subhead-size);">没有找到符合条件的题目</h3>
+      <p style="margin:0; color:var(--on-surface-variant);">当前搜索关键词、知识模块、来源栏目或复习状态组合下没有匹配题目。你可以清空筛选条件重新浏览全部 29 道教材与练习册题目。</p>
+      <button type="button" class="btn btn--primary" onclick="resetAllFilters()">显示全部题目</button>
+    </div>
+
+    <!-- Cards Container -->
+    <div class="card-grid" id="problems-list">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- Section 3: 4-Step SOP, Formulas & Mantra -->
+  <section class="section-open section-open--yellow" aria-labelledby="sec-sop-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--yellow">标准破题流程与高频工具</span>
+        <h2 class="section-heading" id="sec-sop-title">横式数字谜 4 步解题 SOP 与必记数理规律</h2>
+        <p class="section-desc">提炼自本讲四大策略与 29 道例题解析，拿到陌生横式先看结构、再变形、后锁范围、最后回代检验。</p>
+      </div>
+    </div>
+
+    <div class="sop-grid">
+      <article class="sop-card">
+        <span class="sop-num">01</span>
+        <h3 class="sop-title">审结构 · 辨信号</h3>
+        <p style="margin:0; font-size:0.9rem;">扫一眼题干特征：同字反复出现看<strong>位值展开</strong>；多位加乘看<strong>改写竖式</strong>；叠数/平方看<strong>整除特征</strong>；限数填入看<strong>乘除估算</strong>。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>原理：</strong>横式数字谜最忌盲目瞎试，先定策略再动笔。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">02</span>
+        <h3 class="sop-title">巧变形 · 建方程</h3>
+        <p style="margin:0; font-size:0.9rem;">重复整段直接设 <span class="math-expr">x</span>（如 <span class="math-expr">KLMNP = x</span>）；加减乘法抄成对齐竖式，让个位尾数与最高位进位一目了然。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>原理：</strong>把抽象文字变成方程或竖式，约束立刻显现。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">03</span>
+        <h3 class="sop-title">抓高约束 · 缩范围</h3>
+        <p style="margin:0; font-size:0.9rem;">优先攻破乘除法、完全平方数、11 的倍数与数字 0 的位置，将几十种可能压缩至 1~2 种候选。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>原理：</strong>乘除与进位对数字大小最敏感，最容易锁死唯一解。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">04</span>
+        <h3 class="sop-title">严检验 · 防漏解</h3>
+        <p style="margin:0; font-size:0.9rem;">代回原横式逐项核对：首位不为 0、数字是否互不相同、进位有无矛盾、是否存在多解（如 325 或 563）。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>原理：</strong>不少奥数题存在两解或伪解，检验是满分的最后一道闸门。</p>
+      </article>
+    </div>
+
+    <div class="mantra-banner">
+      <div>
+        <span class="kicker-block" style="margin-bottom:var(--space-sm);">本讲破题总口诀</span>
+        <p class="mantra-quote">“横式不好算，先变竖式或位值；<br>叠数必含 11 倍，平方奇偶来删枝；<br>填空先锁乘与除，首位禁 0 莫大意。”</p>
+      </div>
+      <ul class="formula-list">
+        <li>
+          <span><strong>叠字两位数拆解（Warm Up 2 / Ex3–5）</strong></span>
+          <span class="math-expr">△△ = 11 × △，aa × bb = 121ab</span>
+        </li>
+        <li>
+          <span><strong>左右添数整体位值（Exploration 1）</strong></span>
+          <span class="math-expr">4abc = 4000 + x，abc4 = 10x + 4</span>
+        </li>
+        <li>
+          <span><strong>经典缺 8 数性质（练习册 第 2 题）</strong></span>
+          <span class="math-expr">12345679 × 9 = 111111111</span>
+        </li>
+        <li>
+          <span><strong>两位数和的平方数（练习册 第 9 题）</strong></span>
+          <span class="math-expr">DEE = (C × F)² &lt; 200 ⇒ 100 或 144</span>
+        </li>
+        <li>
+          <span><strong>整体求和守恒（Exploration 7）</strong></span>
+          <span class="math-expr">1+2+…+8 = 36，均分 3 组得 △ = 12</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 4: 4 Major Pitfalls -->
+  <section class="section-open section-open--black" aria-labelledby="sec-pitfall-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block">易错难点与避坑清单</span>
+        <h2 class="section-heading" id="sec-pitfall-title">4 大高频丢分坑：对应策略 → 错因剖析 → 避坑检查动作</h2>
+        <p class="section-desc">汇总自四大破题策略的易错提示与教材、练习册典型失分点。</p>
+      </div>
+    </div>
+
+    <div class="pitfall-grid">
+      <article class="pitfall-card">
+        <div class="pitfall-head">
+          <h3 class="pitfall-title">坑 1：首位误填 0 或添位次方算错</h3>
+          <span class="tag">Exploration 1 / 练习册 第 4 题</span>
+        </div>
+        <div class="pitfall-row"><strong>【常见错法】</strong> 列整体方程时把“在三位数左端写 4”误写成 <span class="math-expr">400 + x</span>（少写一个 0）；或解出多位数的首位字母等于 0 却未排除。</div>
+        <div class="pitfall-row"><strong>【错因剖析】</strong> 忽略了多位数位数与 10 的次方对应关系（三位数左端添 4 占千位，应为 <span class="math-expr">4000 + x</span>；右端添 4 则原数扩大 10 倍为 <span class="math-expr">10x + 4</span>）。</div>
+        <div class="pitfall-row"><strong>【避坑检查动作】</strong> 动笔先标出所有多位数的首位汉字/字母（如喜、爱、数、a、b），强制写上“≠ 0”；两数求差未说明大小时分两种情况列方程。</div>
+      </article>
+
+      <article class="pitfall-card">
+        <div class="pitfall-head">
+          <h3 class="pitfall-title">坑 2：改写竖式后漏算连续进位</h3>
+          <span class="tag">Warm Up 1 / 练习册 第 1、3、7 题</span>
+        </div>
+        <div class="pitfall-row"><strong>【常见错法】</strong> 算完个位加法直接推十位数字，忘记加上个位传来的进位 1 或 2，导致中间数位全盘推错。</div>
+        <div class="pitfall-row"><strong>【错因剖析】</strong> 多位数加减或乘法进位不仅影响相邻高位，还可能触发连续进位（如 <span class="math-expr">7×2+1=15</span> 进而使百位 <span class="math-expr">4×2+1=9</span>）。</div>
+        <div class="pitfall-row"><strong>【避坑检查动作】</strong> 竖式每确定一位就在高位角落标出进位小数字，得出全解后必须完整重算一遍竖式核验无矛盾。</div>
+      </article>
+
+      <article class="pitfall-card">
+        <div class="pitfall-head">
+          <h3 class="pitfall-title">坑 3：套用整除或平方特征后忘记“数字互异”</h3>
+          <span class="tag">Exploration 3、5 / 练习册 第 6、9 题</span>
+        </div>
+        <div class="pitfall-row"><strong>【常见错法】</strong> 用 11 的倍数或完全平方数算出候选值后直接作答，例如在 <span class="math-expr">DEE = 100</span> 时取 <span class="math-expr">C = 5</span> 得到 <span class="math-expr">100 − 55 = 45</span>，未察觉数字 5 重复出现。</div>
+        <div class="pitfall-row"><strong>【错因剖析】</strong> 过于专注整除与平方规律，忽略了“不同字母/汉字代表不同数字”的全局硬约束。</div>
+        <div class="pitfall-row"><strong>【避坑检查动作】</strong> 每得到一组解，立刻把所有用到的数字按顺序列出来逐个查重（如 <span class="math-expr">4, 2, 9, 6, 8, 5, 1, 0</span> 互不相同）。</div>
+      </article>
+
+      <article class="pitfall-card">
+        <div class="pitfall-head">
+          <h3 class="pitfall-title">坑 4：忽视特殊运算顺序或 0 的禁用位置</h3>
+          <span class="tag">Exploration 8 / 练习册 第 5、11 题</span>
+        </div>
+        <div class="pitfall-row"><strong>【常见错法】</strong> 做顺序运算九宫格时习惯性“先乘除后加减”；或在 0~6 填空中随意把 0 放入乘积个位导致被除数个位重复出现 0。</div>
+        <div class="pitfall-row"><strong>【错因剖析】</strong> 没审清题干特殊规则，或没有提前排查 0 在首位、除数、乘积个位上的连锁限制。</div>
+        <div class="pitfall-row"><strong>【避坑检查动作】</strong> 见“填入 0~6 / 1~9”先圈出是否含 0 并确定 0 的唯一合法位置；见多行表格题先读清运算顺序要求。</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Section 5: 4-Strategy Quick Reference Comparison Table -->
+  <section class="section-open section-open--blue" aria-labelledby="sec-table-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--blue">全讲义策略总览</span>
+        <h2 class="section-heading" id="sec-table-title">四大破题策略横向速查表（点击定位对应题库模块）</h2>
+        <p class="section-desc">一眼对照核心数学工具、题干识别信号与教材练习册典型例题，点击右侧按钮可直接筛选上方题库中的对应模块。</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="variant-table" aria-label="四大破题策略横向速查表">
+        <thead>
+          <tr>
+            <th>策略模块</th>
+            <th>核心数学工具</th>
+            <th>题干识别信号</th>
+            <th>教材与练习册典型对应</th>
+            <th>快速筛选</th>
+          </tr>
+        </thead>
+        <tbody id="strategy-compare-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div>
+      <strong>来源声明：</strong>本工作台所有题目、解析、策略与摘录均严格依据《Lesson 9-横式数字谜.pdf》（教材）与《Lesson 9-横式数字谜-练习册.pdf》（练习册）整理。
+    </div>
+    <div>
+      注：原卷未给出答案或局部 OCR 缺失的题目均已明确标明「来源未提及」。
+    </div>
+  </footer>
+
+</div>
+
+<api-shim></api-shim>
+<script>
+// ========================
+// 1. Grounded Strategy Data & Interactive Demos
+// ========================
+const STRATEGIES = [
+  {
+    id: `place`,
+    moduleName: `位值原理`,
+    num: `策略 01`,
+    title: `位值原理与方程法`,
+    tool: `十进制位值展开、整体设元（如设 abc = x）与一元一次方程`,
+    signal: `相同汉字或字母重复出现在不同数位，或某多位数整体移动（左/右添数字）`,
+    coreIdea: `把多位数按“千位×1000 + 百位×100 + 十位×10 + 个位”展开，或者把未知的多位数整体设为未知数 x，将复杂的数字谜直接转化为简单的代数方程求解。`,
+    steps: [
+      `识别重复结构：如“喜爱数学 + 爱数学 + 数学 + 学 = 2018”或“4 × KLMNP4 = 4KLMNP”。`,
+      `按位值原理合并系数：分别统计每个字母/汉字在个、十、百、千位出现的次数并列式；整体移位类可直接设部分位数为 x。`,
+      `利用一位数限制（0–9，且首位不为 0）与互不相同条件确定唯一整数解。`
+    ],
+    warning: `易错提示：多位数首位字母（如喜、爱、数、a、b 等）绝对不能为 0；列整体方程时注意左端添数字乘的是 10 的对应次方（如在三位数左端写 4 相当于加 4000，右端写 4 相当于 10x + 4）。`,
+    examples: [
+      { id: `tb-ex1-1`, label: `教材 Exploration 1 (KLMNP4)` },
+      { id: `tb-ex1-2`, label: `教材 Exploration 1 (写4求差)` },
+      { id: `tb-ex1-5`, label: `教材 Exploration 1 第5题` },
+      { id: `tb-ex4-10`, label: `教材 Exploration 4 第10题` },
+      { id: `wb-4`, label: `练习册 第4题` }
+    ]
+  },
+  {
+    id: `vertical`,
+    moduleName: `改写竖式`,
+    num: `策略 02`,
+    title: `横式改写竖式分析`,
+    tool: `竖式对齐数位、末位尾数检验、最高位进位范围判断`,
+    signal: `多位数加减或乘法横式，位数较多或部分数位已知（含方框与汉字竖式等价转化）`,
+    coreIdea: `将横式改写成竖式后，同一数位上下对齐，能直观利用“个位决定尾数”“最高位只能进位 1（或有限整数）”快速锁死关键数字。`,
+    steps: [
+      `把横式抄写为标准加法或乘法竖式，对齐个、十、百、千位。`,
+      `双端夹击：先看个位（如 A+B+C 尾数为 C 推出 A+B=10；或 3×□ 末位为 8 推出 □=6），再看最高位进位（如四位数加四位数得五位数，和的首位只能为 1）。`,
+      `向中间数位逐步推进，并把解代回竖式检验是否满足数字互不相同或进位无矛盾。`
+    ],
+    warning: `易错提示：进位不仅影响十位，还可能连续向百位、千位进位；计算个位加法后一定要验证十位是否收到来自个位的进位 1 或 2。`,
+    examples: [
+      { id: `tb-wu1`, label: `教材 Warm Up 1 (兵炮马卒)` },
+      { id: `tb-ex2-6`, label: `教材 Exploration 2 第6题` },
+      { id: `wb-1`, label: `练习册 第1题` },
+      { id: `wb-2`, label: `练习册 第2题` },
+      { id: `wb-3`, label: `练习册 第3题` },
+      { id: `wb-7`, label: `练习册 第7题` }
+    ]
+  },
+  {
+    id: `divisibility`,
+    moduleName: `乘除特征`,
+    num: `策略 03`,
+    title: `整除、平方与奇偶特征`,
+    tool: `11 的倍数特征、完全平方数锁定、奇偶性分配与乘积尾数规律`,
+    signal: `出现重叠两位数（△△、AA、团团、好好）、平方乘积结构，或限定 1~9 奇偶组合`,
+    coreIdea: `当算式中含有“AA”“团团”这类叠数时，它必然是 11 的倍数；当遇到“C×C×F×F”时，它必然是完全平方数；当 1~9 分配到加减乘除时，先用奇偶数量排除不可能的分支。`,
+    steps: [
+      `识别特征数：叠字两位数 = 11 × 单数字，故结果必为 11 的倍数（奇数位数字和与偶数位数字和的差为 11 的倍数）。`,
+      `锁死高约束算式：在加减乘除混合题中，先看乘法（只能得到一位数积）或完全平方数（如 100、144），快速缩小到 1~2 种候选。`,
+      `利用奇偶性（剩余数字中偶数的个数）或题目附带的整除条件（如“乘积是 13 的倍数”）一次性淘汰伪解。`
+    ],
+    warning: `易错提示：验证 11 的整除特征时，别忘记数字不能重复的附加限制（如 100 - 55 = 45 会导致数字 5 重复，必须舍去）。`,
+    examples: [
+      { id: `tb-wu2`, label: `教材 Warm Up 2` },
+      { id: `tb-ex3-1`, label: `教材 Exploration 3 (1)` },
+      { id: `tb-ex3-2`, label: `教材 Exploration 3 (2)` },
+      { id: `wb-6`, label: `练习册 第6题` },
+      { id: `wb-8`, label: `练习册 第8题` },
+      { id: `wb-9`, label: `练习册 第9题` },
+      { id: `wb-12`, label: `练习册 第12题` }
+    ]
+  },
+  {
+    id: `fill`,
+    moduleName: `数字填空`,
+    num: `策略 04`,
+    title: `范围估算与有序填空`,
+    tool: `极值放缩、0 的禁用位置分析、除法转乘法估算、数字总和均分`,
+    signal: `指定“将 0~6 或 1~9 每个数字恰好用一次填入方框”，要求组成多个联立等式`,
+    coreIdea: `数字不重复填空的突破口在于“最受限的位置”：乘除运算对数字大小极度敏感，0 只能出现在特定个位，通过上下界估算把几十种可能压缩到唯一解。`,
+    steps: [
+      `定结构与位数：统计方框总个数与可用数字个数，判断有几个是一位数、几个是两位数。`,
+      `排除 0 和极值：首位及乘除法中的单数字除数/乘数不能为 0；将除法转为乘法估范围（如 8 × □□ ≤ 99 ⇒ □□ 只能是 10, 11, 12）。`,
+      `优先填乘除法等式，再用剩下的少数数字配平加减法等式。`
+    ],
+    warning: `易错提示：注意审清题干特殊规则，如 Exploration 8 要求“不按先乘除，而是从上到下、从左到右依次运算”；含有数字 0 时，需先确定 0 只能放在哪一个两位数的个位。`,
+    examples: [
+      { id: `tb-ex5-11`, label: `教材 Exploration 5 第11题` },
+      { id: `tb-ex7-14`, label: `教材 Exploration 7 第14题` },
+      { id: `wb-5`, label: `练习册 第5题` },
+      { id: `wb-10`, label: `练习册 第10题` },
+      { id: `wb-11`, label: `练习册 第11题` }
+    ]
+  }
+];
+
+const SIM_SCENARIOS = {
+  place: {
+    title: `教材 Exploration 1 (1) · 整体设元法`,
+    desc: `横式：4 × KLMNP4 = 4KLMNP，直接逐位试数繁琐，观察不变的五位整体 KLMNP。`,
+    actionText: `执行位值整体设元变形`,
+    resetText: `还原初始横式`,
+    type: `slots`,
+    slotsBefore: [
+      { role: `乘数`, val: `4 ×` },
+      { role: `原六位数`, val: `KLMNP4` },
+      { role: `等号`, val: `=` },
+      { role: `移位六位数`, val: `4KLMNP` }
+    ],
+    slotsAfter: [
+      { role: `令五位数 = x`, val: `KLMNP = x`, changed: true },
+      { role: `左式位值`, val: `4(10x + 4)`, changed: true },
+      { role: `右式位值`, val: `400000 + x`, changed: true },
+      { role: `化简求解`, val: `39x = 399984`, changed: true }
+    ],
+    verdictBefore: `当前是六位数乘法横式。点击上方按钮，把重复出现的五位整体 KLMNP 打包设为 x。`,
+    verdictAfter: `变形完成！解得 x = 399984 ÷ 39 = 10256，即 K=1, L=0, M=2, N=5, P=6，一步锁定 M = 2（验证：4 × 102564 = 410256）。`
+  },
+  vertical: {
+    title: `教材 Warm Up 1 · 横式改写竖式双端夹击`,
+    desc: `横式：兵炮马卒 + 兵炮车卒 = 车卒马兵卒，横着看难对齐，改写为竖式观察两端数位。`,
+    actionText: `一键改写为对齐竖式并标出突破口`,
+    resetText: `还原原始横式`,
+    type: `vertical`,
+    verdictBefore: `当前横式包含 5 个不同汉字。点击上方按钮将其改写为数位对齐的加法竖式。`,
+    verdictAfter: `竖式双端锁死：万位“车”由进位产生 ⇒ 车 = 1；个位“卒 + 卒”末位仍为“卒” ⇒ 卒 = 0；顺推得 5240 + 5210 = 10450！`
+  },
+  divisibility: {
+    title: `练习册 第 9 题 · 完全平方数锁定候选`,
+    desc: `横式：AB + CC = DEE = C × C × F × F，利用平方结构与两位数之和上界压缩范围。`,
+    actionText: `执行完全平方与范围筛选`,
+    resetText: `还原原始横式`,
+    type: `slots`,
+    slotsBefore: [
+      { role: `两位数之和`, val: `AB + CC` },
+      { role: `末两位相同`, val: `= DEE` },
+      { role: `完全平方结构`, val: `= (C × F)²` }
+    ],
+    slotsAfter: [
+      { role: `可能解 ①`, val: `DEE = 100`, changed: true },
+      { role: `可能解 ②`, val: `DEE = 144`, changed: true },
+      { role: `超界排除`, val: `400 / 900`, eliminated: true },
+      { role: `验重得双解`, val: `786142 / 782105`, changed: true }
+    ],
+    verdictBefore: `右侧 C×C×F×F = (C×F)² 是末两位相同的三位完全平方数。点击上方按钮筛选全部候选值。`,
+    verdictAfter: `两位数之和小于 200，立刻淘汰 400 与 900！仅剩 144（C=6, F=2 ⇒ 786142）与 100（C=2, F=5 ⇒ 782105，排除重复 5 的 45）。`
+  },
+  fill: {
+    title: `练习册 第 5 题 · 除法转乘法极值估算`,
+    desc: `横式：□□ ÷ □□ = □□ − □□ = 8（1~9 各用一次），先攻破约束最强的除法式。`,
+    actionText: `将除法转为乘法并筛选唯一解`,
+    resetText: `还原原始方框横式`,
+    type: `slots`,
+    slotsBefore: [
+      { role: `除法等式`, val: `□□ ÷ □□ = 8` },
+      { role: `减法等式`, val: `□□ − □□ = 8` },
+      { role: `可用数字`, val: `1~9（已用8）` }
+    ],
+    slotsAfter: [
+      { role: `含 0 淘汰`, val: `8×10 = 80`, eliminated: true },
+      { role: `重复淘汰`, val: `8×11 = 88`, eliminated: true },
+      { role: `唯一成立`, val: `8×12 = 96`, changed: true },
+      { role: `余数配平`, val: `45 − 37 = 8`, changed: true }
+    ],
+    verdictBefore: `直接试填 8 个空格组合极多。点击上方按钮，把 □□ ÷ □□ = 8 改写成 8 × □□ = □□ 做范围放缩。`,
+    verdictAfter: `8 乘两位数积不超过 99，候选瞬间压缩到 10、11、12 三个数！淘汰含 0 与重复数字，唯一锁定 96 ÷ 12 = 45 − 37 = 8。`
+  }
+};
+
+// ========================
+// 2. Grounded Problem Bank (29 items, 100% preserved)
+// ========================
+const PROBLEMS = [
+  // ---- 教材：Lesson 9-横式数字谜.pdf (17 items) ----
+  {
+    id: `tb-wu1`,
+    code: `教材 · Warm Up 1 (1–2题)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Warm Up 1 · 第 1–2 题`,
+    category: `热身题`,
+    module: `改写竖式`,
+    missingAnswer: false,
+    prompt: `下列算式中不同的汉字表示不同的数字，相同的汉字表示相同的数字，求出这个算式（含第1题英文版与第2题中文版）。`,
+    equation: `兵炮马卒 + 兵炮车卒 = 车卒马兵卒`,
+    breakthrough: `将横式改写为竖式。两个四位数相加得到五位数，和的万位“车”必定由千位进位产生，故车 = 1；再看个位“卒 + 卒”个位仍为“卒”，锁定卒 = 0。`,
+    steps: [
+      `定万位：四位数 + 四位数 = 五位数，进位只能是 1，所以 车 = 1。`,
+      `定个位：卒 + 卒 的个位仍是 卒，且个位无进位，所以 卒 = 0。`,
+      `定千位：兵 + 兵 加上百位可能的进位等于 10（即“车卒”），故 兵 = 5（百位不向千位进位）。`,
+      `定百位与十位：十位为 马 + 车 = 马 + 1 = 兵 = 5，得 马 = 4；百位为 炮 + 炮 = 马 = 4，得 炮 = 2。`,
+      `代入检验：5240 + 5210 = 10450，五个汉字对应数字 5, 2, 4, 1, 0 互不相同，完全成立。`
+    ],
+    answer: `5240 + 5210 = 10450（兵=5, 炮=2, 马=4, 车=1, 卒=0）`,
+    quote: `“兵炮马卒 + 兵炮车卒 = 车卒马兵卒 …… 5240 + 5210 = 10450”`
+  },
+  {
+    id: `tb-ex1-1`,
+    code: `教材 · Exploration 1 (1)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 1 · 字母 M 题`,
+    category: `探索例题`,
+    module: `位值原理`,
+    missingAnswer: false,
+    prompt: `下列算式中，相同的字母代表相同的数字，不同的字母代表不同的数字。找出字母 M 所代表的数字。`,
+    equation: `4 × KLMNP4 = 4KLMNP`,
+    breakthrough: `把连续不变的五位整体 KLMNP 设为未知数 x，利用十进制位值关系列出一元一次方程直接求解。`,
+    steps: [
+      `设五位数 KLMNP = x。`,
+      `根据位值原理，六位数 KLMNP4 = 10x + 4，六位数 4KLMNP = 400000 + x。`,
+      `代入原等式得：4 × (10x + 4) = 400000 + x。`,
+      `展开并移项：40x + 16 = 400000 + x ⇒ 39x = 399984。`,
+      `解得 x = 10256，即 K=1, L=0, M=2, N=5, P=6，因此 M = 2。`
+    ],
+    answer: `M = 2（原六位数为 102564，4 × 102564 = 410256）`,
+    quote: `“令 KLMNP = x，则有 4(10x+4) = 400000+x …… 39x = 399984，x = 10256，M = 2。”`
+  },
+  {
+    id: `tb-ex1-2`,
+    code: `教材 · Exploration 1 (2)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 1 · 添写数字 4 求差`,
+    category: `探索例题`,
+    module: `位值原理`,
+    missingAnswer: false,
+    prompt: `把 4 写在某个三位数的左端得到一个四位数，把 4 写在这个三位数的右端也得到一个四位数，已知这两个四位数的差是 1071，求这个三位数。`,
+    equation: `|4abc − abc4| = 1071`,
+    breakthrough: `设这个三位数为 x，左端写 4 得 4000 + x，右端写 4 得 10x + 4；因未说明哪个四位数更大，需分两种情况列方程讨论。`,
+    steps: [
+      `设原三位数 abc = x，则 4abc = 4000 + x，abc4 = 10x + 4（注：原文手写简记为 400+x，对应方程计算按 4000+x 得出 9x=2925）。`,
+      `情况 ①（左端添 4 更大）：(4000 + x) − (10x + 4) = 1071 ⇒ 3996 − 9x = 1071 ⇒ 9x = 2925 ⇒ x = 325。`,
+      `情况 ②（右端添 4 更大）：(10x + 4) − (4000 + x) = 1071 ⇒ 9x − 3996 = 1071 ⇒ 9x = 5067 ⇒ x = 563。`,
+      `检验：|4325 − 3254| = 1071，|5634 − 4563| = 1071，均符合三位数要求。`
+    ],
+    answer: `325 或 563`,
+    quote: `“① (4000+x)-(10x+4)=1071，9x=2925，x=325；② (10x+4)-(4000+x)=1071，9x=5067，x=563。”`
+  },
+  {
+    id: `tb-ex1-5`,
+    code: `教材 · Exploration 1 (5)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 1 · 第 5 题（2019 APMOPS First Round #1）`,
+    category: `探索例题`,
+    module: `位值原理`,
+    missingAnswer: false,
+    prompt: `若 ab + ba + b = aab，求 a + b 的值。（ab 表示一个两位数，其中 a 在十位上，b 在个位上）`,
+    equation: `ab + ba + b = aab`,
+    breakthrough: `将所有多位数用十进制位值原理完全展开，合并同类项消元，得到 a 与 b 的简单倍数关系。`,
+    steps: [
+      `利用位值原理展开：ab = 10a + b，ba = 10b + a，aab = 100a + 10a + b = 110a + b。`,
+      `代入原式：(10a + b) + (10b + a) + b = 110a + b。`,
+      `整理方程：11a + 12b = 110a + b ⇒ 11b = 99a ⇒ b = 9a。`,
+      `因为 a, b 均不为 0 且均为一位数，只能取 a = 1, b = 9。`,
+      `所以 a + b = 1 + 9 = 10（验证：19 + 91 + 9 = 119）。`
+    ],
+    answer: `a + b = 10（a = 1, b = 9）`,
+    quote: `“10a+b+10b+a+b=110a+b ⇒ 11b=99a ⇒ b=9a，a,b均不为0且均为一位数，a=1,b=9，a+b=10。”`
+  },
+  {
+    id: `tb-ex2-6`,
+    code: `教材 · Exploration 2 (6)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 2 · 第 6 题`,
+    category: `探索例题`,
+    module: `改写竖式`,
+    missingAnswer: false,
+    prompt: `满足最后四位数字是 2018 且能被 2019 整除的最小的自然数，它各位上的数字和是多少？`,
+    equation: `2019 × x = …2018`,
+    breakthrough: `改写为 2019 乘以未知数 x 的乘法竖式，从个位到百位逐位反推乘数 x 的末三位数字，使积的末四位恰好等于 2018。`,
+    steps: [
+      `设满足条件的自然数为 2019x，将 x 从个位起各数位记为 a, b, c…，列竖式 2019 × (…cba)。`,
+      `确定个位 a：积的个位是 8，要求 9 × a 的末位为 8，故 a = 2（2019 × 2 = 4038）。`,
+      `确定十位 b：积的十位是 1，已有来自个位乘积的十位数字 3，故 9 × b 的末位需为 8（3 + 8 = 11 进 1），得 b = 2（2019 × 22 = 44418，百位目前为 4）。`,
+      `确定百位 c：积的百位是 0，已有百位数字 4，故 9 × c 的末位需为 6（4 + 6 = 10），得 c = 4。`,
+      `验证最小乘数 x = 422：2019 × 422 = 852018，末四位恰为 2018，各位数字和为 8 + 5 + 2 + 0 + 1 + 8 = 24。`
+    ],
+    answer: `24（最小的自然数为 852018）`,
+    quote: `“2019 × 422 = 852018，数字和为 24。”`
+  },
+  {
+    id: `tb-wu2`,
+    code: `教材 · Warm Up 2 (7–8题)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Warm Up 2 · 第 7–8 题`,
+    category: `热身题`,
+    module: `乘除特征`,
+    missingAnswer: false,
+    prompt: `观察 △△ × □ 的乘积一定是（ ）的倍数。（选项：A. 2  B. 3  C. 7  D. 11）`,
+    equation: `△△ × □ = ? × ( )`,
+    breakthrough: `两位数 △△ 是相同数字组成的叠数，按位值原理必定能拆成 11 × △，因此乘积天然含有因数 11。`,
+    steps: [
+      `由位值原理：△△ = 10 × △ + △ = 11 × △。`,
+      `原式化为：△△ × □ = 11 × △ × □。`,
+      `由于因数中含有 11，不论 △ 和 □ 取何数字，乘积一定是 11 的倍数。`
+    ],
+    answer: `D. 11`,
+    quote: `“观察 △△ × □ 的乘积一定是 (D) 的倍数。A.2  B.3  C.7  D.11”`
+  },
+  {
+    id: `tb-ex3-1`,
+    code: `教材 · Exploration 3 (1)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 3 · 第 9 题 (1)`,
+    category: `探索例题`,
+    module: `乘除特征`,
+    missingAnswer: false,
+    prompt: `下列算式中，相同符号代表相同数字，不同符号代表不同数字，则满足条件的算式有哪些？`,
+    equation: `△△ × △ = ○□△`,
+    breakthrough: `两方面入手：先看积的个位仍为 △（即 △ × △ 末位为 △，只有 0, 1, 5, 6）；再结合积必须为三位数排除过小取值。`,
+    steps: [
+      `把 △△ 写成 11 × △，原式即 11 × △² = ○□△（三位数）。`,
+      `看个位数字：△ × △ 的个位数字等于 △，符合条件的一位数只有 0, 1, 5, 6。`,
+      `逐个检验位数与数字不重复条件：△=0 得 0（非三位数）；△=1 得 11（非三位数）。`,
+      `当 △=5 时，55 × 5 = 275（○=2, □=7, △=5，互不相同，成立）；当 △=6 时，66 × 6 = 396（○=3, □=9, △=6，互不相同，成立）。`
+    ],
+    answer: `55 × 5 = 275 和 66 × 6 = 396`,
+    quote: `“11△² = ○□△，△ = 5, 6 ⇒ 275, 396”`
+  },
+  {
+    id: `tb-ex3-2`,
+    code: `教材 · Exploration 3 (2)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 3 · 第 9 题 (2)`,
+    category: `探索例题`,
+    module: `乘除特征`,
+    missingAnswer: false,
+    prompt: `在下面的算式中，相同的汉字代表相同的数字，不同的汉字代表不同的数字，那么“数学”两字代表的两位数是多少？`,
+    equation: `数数 × 科学 = 学数学`,
+    breakthrough: `把“数数”拆成 11 × 数，得出三位数“学数学”必为 11 的倍数；同时看个位“数 × 学”的末位仍为“学”。`,
+    steps: [
+      `记 数 = a，科 = b，学 = c，算式即 aa × bc = cac，即 11a × bc = cac。`,
+      `积 cac 是 11 的倍数，原文枚举所有 11 的倍数型 cac：121, 242, 363, 484, 616, 737, 858, 979。`,
+      `看个位关系：a × c 的末位等于 c（且 a ≠ c，首位不为 0），满足条件的组合为 a = 1（1 乘任何数末位不变），或 c = 5（a 为奇数），或 a = 6（c 为偶数）。`,
+      `结合上述列表逐一检验：6 对应的偶数型或 5 型均不成立；当 a = 1, c = 6 时，cac = 616，11 × bc = 616 ⇒ bc = 56（b = 5, c = 6，数字 1, 5, 6 互不相同）。`,
+      `原文标注出最终两位数 ac = 16（即“数学”= 16）。`
+    ],
+    answer: `16（算式为 11 × 56 = 616）`,
+    quote: `“cac: 121, 242, 363, 484, 616, 737, 858, 979 …… ac = 16”`
+  },
+  {
+    id: `tb-ex4-10`,
+    code: `教材 · Exploration 4 (10)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 4 · 第 10 题（2017 NMOS Special Round #10）`,
+    category: `探索例题`,
+    module: `位值原理`,
+    missingAnswer: false,
+    prompt: `算式中，相同汉字代表相同的数字，不同的汉字代表不同的数字，求出这个算式。`,
+    equation: `团团 × 圆圆 = 团结结团`,
+    breakthrough: `用位值原理把“团团”“圆圆”和“团结结团”展开并同除以 11，再通过因数分离确定唯一的一位数取值。`,
+    steps: [
+      `设 团 = a，圆 = b，结 = c，原式写作 aa × bb = acca。`,
+      `位值展开：11a × 11b = 1001a + 110c。`,
+      `两边同除以 11：11ab = 91a + 10c，移项并提取公因数 a 得 a(11b − 91) = 10c。`,
+      `因为右边 10c ≥ 0 且 a > 0，所以 11b − 91 必须为正整数（若 b ≤ 8 则 11b ≤ 88 < 91），故唯一可能 b = 9。`,
+      `代入 b = 9 得 8a = 10c，即 4a = 5c。由于 a, c 为互异一位数且 a ≠ 0，只能 a = 5, c = 4，即 55 × 99 = 5445。`
+    ],
+    answer: `55 × 99 = 5445（团=5, 圆=9, 结=4）`,
+    quote: `“11a × 11b = 1001a + 110c ⇒ a(11b-91)=10c，b=9 ⇒ 4a=5c，55 × 99 = 5445。”`
+  },
+  {
+    id: `tb-ex5-11`,
+    code: `教材 · Exploration 5 (11)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 5 · 第 11 题`,
+    category: `探索例题`,
+    module: `乘除特征`,
+    missingAnswer: false,
+    prompt: `在下面两个算式中，相同的汉字表示相同的数字，不同的汉字表示不同的数字，“花相似人不同”代表的六位数是多少？`,
+    equation: `aa × bb = cde；bb ÷ aa = f ÷ gh，求 cdefgh`,
+    breakthrough: `先由第一式 121 × a × b = cde（三位数）锁定 a × b ≤ 8，再排查 121 的倍数中数字不重复的三位数，并与第二式比值匹配。`,
+    steps: [
+      `由第一式 aa × bb = 11a × 11b = 121ab = cde，因积是三位数，故 ab ≤ 8（121 × 9 = 1089 越界）。`,
+      `原文依次排除 121 × ab 的三位数：ab=2(242 重复)、ab=3(363 重复)、ab=4(484 重复)、ab=5(605)、ab=6(726 重复)、ab=7(847 重复)、ab=8(968)。`,
+      `其中 ab=8 只能拆为 2×4，且数字 2,4 与 9,6,8 不重复；第二式 b ÷ a = f ÷ gh 需要由不同数字组成等比分数。`,
+      `取 a = 4, b = 2，则 44 × 22 = 968（c=9, d=6, e=8）；第二式 22 ÷ 44 = 1/2 = 5 ÷ 10（f=5, g=1, h=0）。`,
+      `所有数字 4, 2, 9, 6, 8, 5, 1, 0 均互不相同，六位数 cdefgh = 968510。`
+    ],
+    answer: `968510（对应 44 × 22 = 968，22 ÷ 44 = 5 ÷ 10）`,
+    quote: `“121ab = cde，b÷a = f÷gh …… 2÷4 = 5÷10，cdefgh = 968510。”`
+  },
+  {
+    id: `tb-ex6-12`,
+    code: `教材 · Exploration 6 (12)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 6 · 第 12 题`,
+    category: `探索例题`,
+    module: `数字填空`,
+    missingAnswer: true,
+    prompt: `将 1~8 这八个数分别填入右图，使图中四边正好组成加、减、乘、除四个等式。`,
+    equation: `四边框图：加、减、乘、除四个等式（1~8 填入）`,
+    breakthrough: `原文说明需将 1~8 填入四边组成的四个等式，切入点通常先确定乘法与除法边（范围最小），再配平加减法边。`,
+    steps: [
+      `来源 PDF 文本抽取中仅保留局部手写碎片（如 1+7=8、7−5=2、□÷□=□ 旁标 8、4 等）以及图框缺失符号。`,
+      `因原图四边顶点共用关系与运算符位置在 PDF 文字提取中未能完整还原，完整最终填法「来源未提及」。`
+    ],
+    answer: `来源未提及（原图布局 OCR 缺失，仅见局部草稿 1+7=8 等）`,
+    quote: `“将1~8这八个数分别填入右图，使图中四边正好组成加、减、乘、除四个等式。”`
+  },
+  {
+    id: `tb-wu3-13`,
+    code: `教材 · Warm Up 3 (13)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Warm Up 3 · 第 13 题`,
+    category: `热身题`,
+    module: `数字填空`,
+    missingAnswer: true,
+    prompt: `下题是由 1~9 这九个数字组成的算式，其中有一个数字已经知道，请将其余的数字填入空格，使算式成立。`,
+    equation: `（含 = 56、÷ × = 9 等多行空格算式，原图结构未完整保留）`,
+    breakthrough: `从已知数字（如积 56、商 9 或 6）的乘除法等式出发，锁定唯一的一位数乘除因数，再回填其余数字。`,
+    steps: [
+      `来源 PDF 文本中可见手写试算碎片（如 54、66、12 ÷ 9 × 3 = 4 等），但原图方框布局在文本抽取中缺失。`,
+      `完整题干方框图与标准答案「来源未提及」。`
+    ],
+    answer: `来源未提及（原图空格排版未在 PDF 文本中保留）`,
+    quote: `“下题是由 1 ~ 9 这九个数字组成的算式，其中有一个数字已经知道，请将其余的数字填入空格……”`
+  },
+  {
+    id: `tb-ex7-14`,
+    code: `教材 · Exploration 7 (14)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 7 · 第 14 题`,
+    category: `探索例题`,
+    module: `数字填空`,
+    missingAnswer: false,
+    prompt: `将 1, 2, 3, 4, 5, 6, 7, 8 这八个数字分别填入右图的八个 ○ 中，使得图中的六个等式都成立，求 △ = ？`,
+    equation: `八个 ○ 组成六个等式，求底部 △`,
+    breakthrough: `不必急于枚举每个 ○ 的位置，利用整体求和守恒：八个数字的总和固定为 36，按等式结构的 3 倍关系直接求出 △。`,
+    steps: [
+      `计算 1 到 8 这八个数字的总和：(1 + 8) × 8 ÷ 2 = 36。`,
+      `根据原文给出的算式关系：(1 + 8) × 8 ÷ 2 ÷ 3 = 12，即三条支路总和恰好均分为 3 个 △。`,
+      `直接得出 △ = 12（具体八个 ○ 的个别填法图在原文文本中未完整显示）。`
+    ],
+    answer: `△ = 12`,
+    quote: `“使得图中的六个等式都成立。则 △ = 12。(1+8)×8÷2÷3=12”`
+  },
+  {
+    id: `tb-ex8`,
+    code: `教材 · Exploration 8`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Exploration 8 · 顺序运算九宫格`,
+    category: `探索例题`,
+    module: `数字填空`,
+    missingAnswer: true,
+    prompt: `请在“□”中各填入一次 1~9，使全部等式成立。计算时不按先×÷进行，而是按从上到下、从左到右的顺序进行（如 1+2×3=9，4÷3×6=8）。`,
+    equation: `3×3 九宫格 (a~i)，含 d+e-f=2、(g+h)÷i=2 等顺序运算`,
+    breakthrough: `原文通过设为字母 a~i 后，重点利用“整除 3 的倍数特征”来约束每行三数之和（如 a+b+c = 6c、g+h+i = 3i 均为 3 的倍数）。`,
+    steps: [
+      `原文手写列出关键行约束：第一行 (a+b)÷c 导出 a+b+c 为 3 的倍数，且讨论 c=1/2/3/5；`,
+      `第二行：d+e−f = 2 得出只能为 4−2、7−5 或 10−8（即 f 只能取 2, 5, 8），且 d+e+f 为 3 的倍数；`,
+      `第三行：(g+h)÷i = 2 导出 g+h = 2i，故 g+h+i = 3i 也为 3 的倍数；`,
+      `原文表格与草稿中可见局部试填数字（如 1, 9, 4 / 9, 8, 2 等），完整无歧义最终九宫格答案「来源未提及」。`
+    ],
+    answer: `来源未提及（原文给出局部代数约束，完整终盘表格在 PDF 中 OCR 混淆未定稿）`,
+    quote: `“d+e-f=2只能为4-2,7-5,10-8，f=2/5/8；g+h=2i，g+h+i=3i 3的倍数。”`
+  },
+  {
+    id: `tb-kp-1`,
+    code: `教材 · Key Points (1)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Key Points · 第 1 题`,
+    category: `核心难点`,
+    module: `改写竖式`,
+    missingAnswer: true,
+    prompt: `加法算式 BAD + BAD = GOOD 中，相同的字母代表相同的数字，不同的字母代表不同的数字。已知 BAD 不是 3 的倍数，GOOD 不是 8 的倍数，那么 ABGD 代表的四位数是？`,
+    equation: `BAD + BAD = GOOD`,
+    breakthrough: `来源原文仅列出 Key Points 题干，未附答案与解析。审题观察：两个三位数相加得四位数，可从改写竖式看千位进位 G 与个位 D + D 末位仍为 D 入手。`,
+    steps: [
+      `原文未提供本小题的推导过程与答案，明确标记为「来源未提及」。`,
+      `（审题线索提示，非原文解析：由竖式最高位进位可得 G=1；由个位 D+D 末位为 D 可得 D=0，再结合 B ≥ 5 产生进位、BAD 非 3 的倍数与 GOOD 非 8 的倍数做排除检验。）`
+    ],
+    answer: `来源未提及（教材 Key Points 仅给出题目）`,
+    quote: `“加法算式 BAD + BAD = GOOD 中 …… 已知 BAD 不是 3 的倍数，GOOD 不是 8 的倍数，那么 ABGD 代表的四位数是”`
+  },
+  {
+    id: `tb-kp-2`,
+    code: `教材 · Key Points (2)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Key Points · 第 2 题`,
+    category: `核心难点`,
+    module: `位值原理`,
+    missingAnswer: true,
+    prompt: `下面两个算式中，相同的汉字代表相同的数字，不同的汉字代表不同的数字，求“美妙数学”代表的四位数。`,
+    equation: `美 × 妙数学 = 数数妙；美 + 妙数学 = 妙数数`,
+    breakthrough: `来源原文仅列出 Key Points 题干，未附答案与解析。审题观察：先看第二式“美 + 妙数学 = 妙数数”，三位数加一位数后百位仍为“妙”，说明十位不向百位进位，且十位由“数”变为“数”，重点观察个位进位对十位数字的影响。`,
+    steps: [
+      `原文未提供本小题的推导过程与答案，明确标记为「来源未提及」。`,
+      `（审题线索提示，非原文解析：可利用“美 + 妙数学 = 妙数数”中十位数字未变判断“美 + 学 < 10”从而直接锁定“学 = 数”，再代入第一式乘法求解。）`
+    ],
+    answer: `来源未提及（教材 Key Points 仅给出题目）`,
+    quote: `“美 × 妙数学 = 数数妙，美 + 妙数学 = 妙数数，美妙数学 = ”`
+  },
+  {
+    id: `tb-kp-3`,
+    code: `教材 · Key Points (3)`,
+    sourceFile: `Lesson 9-横式数字谜.pdf`,
+    sourceSection: `Key Points · 第 3 题`,
+    category: `核心难点`,
+    module: `改写竖式`,
+    missingAnswer: true,
+    prompt: `在下方的加法式中，不同的字母代表不同的数字，相同的字母代表相同的数字，请你用适当的数字代替字母，使算式 FORTY + TEN + TEN = SIXTY 成立。`,
+    equation: `FORTY + TEN + TEN = SIXTY`,
+    breakthrough: `来源原文仅列出 Key Points 题干，未附答案与解析。审题观察：改写为三数相加竖式后，末两位均为 TY，故 TEN + TEN 的末两位必须对原数末两位无变化或产生整数进位，从而直接从个位 N 和十位 E 破局。`,
+    steps: [
+      `原文未提供本小题的推导过程与答案，明确标记为「来源未提及」。`,
+      `（审题线索提示，非原文解析：从个位 Y + N + N 末位为 Y 得 2N 末位为 0 ⇒ N=0 或 5；再看十位 T + E + E + 进位 末位为 T 锁定 E 与进位。）`
+    ],
+    answer: `来源未提及（教材 Key Points 仅给出题目）`,
+    quote: `“请你用适当的数字代替字母，使算式 FORTY + TEN + TEN = SIXTY 成立。”`
+  },
+
+  // ---- 练习册：Lesson 9-横式数字谜-练习册.pdf (12 items) ----
+  {
+    id: `wb-1`,
+    code: `练习册 · 第 1 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 1 题`,
+    category: `练习册精选`,
+    module: `改写竖式`,
+    missingAnswer: false,
+    prompt: `A、B、C 各代表不同的数字，如果竖式/横式 AA(A) + BBB + CCC = CBBC 成立，则 A = ？`,
+    equation: `AAA + BBB + CCC = CBBC（原文横式印刷为 AA+BBB+CCC=CBBC，竖式解析为 AAA+BBB+CCC=CBBC）`,
+    breakthrough: `将横式变成竖式，先观察个位 A + B + C 的个位为 C 推出 A + B = 10，再看千位锁定 C 只能取 1 或 2。`,
+    steps: [
+      `将横式变为竖式，对齐个、十、百、千位。`,
+      `观察个位：A + B + C 的个位为 C，因此 A + B = 10（个位向十位进 1）。`,
+      `观察和的千位：三个三位数相加最大不超过 3000，所以 C = 1 或 2。`,
+      `情况 (1) 当 C = 2 时，观察十位进位与和，得 B = 3, A = 7，经检验不符合要求。`,
+      `情况 (2) 当 C = 1 时，观察十位得 B = 2, A = 8，经检验 888 + 222 + 111 = 1221 = CBBC，完全符合要求。`
+    ],
+    answer: `A = 8`,
+    quote: `“解析：将横式变为竖式，观察个位，A+B+C 的个位为 C，A+B=10。观察和的千位，C=1或2……当 C=1 时，B=2, A=8，符合要求。”`
+  },
+  {
+    id: `wb-2`,
+    code: `练习册 · 第 2 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 2 题`,
+    category: `练习册精选`,
+    module: `改写竖式`,
+    missingAnswer: false,
+    prompt: `在算式“来参加奥运会比赛 × 赛 = 来来来来来来来来来”中，“来参加奥运会比赛”所表示的数是？`,
+    equation: `来参加奥运会比赛 × 赛 = 来来来来来来来来来（9 个“来”）`,
+    breakthrough: `改写成竖式，利用经典缺 8 数（12345679 × 9 = 111111111）性质直接试算锁定。`,
+    steps: [
+      `把横式改写成八位数乘以一位数得九个相同数字“来”的竖式。`,
+      `观察乘积为 9 个相同数字，即 111111111 × 来。已知 111111111 = 12345679 × 9。`,
+      `由于“赛”是一位数且“来参加奥运会比赛”首位为“来”，试算出唯一算式为 12345679 × 9 = 111111111（其中“来”= 1，“赛”= 9）。`
+    ],
+    answer: `12345679`,
+    quote: `“解析：改写成竖式，很容易可以试算出算式是 12345679 × 9 = 111111111。”`
+  },
+  {
+    id: `wb-3`,
+    code: `练习册 · 第 3 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 3 题`,
+    category: `练习册精选`,
+    module: `改写竖式`,
+    missingAnswer: false,
+    prompt: `在算式 □43 × 2□ = 6□□8 的方框中填入适当的数字，使得等式成立。`,
+    equation: `□43 × 2□ = 6□□8`,
+    breakthrough: `变竖式分析：先由积的个位 8 反推第二个因数的个位数字，再由十位 2 乘第一位三位数的部分积确定首位。`,
+    steps: [
+      `写出三位数乘两位数的竖式：□43 × 2□。`,
+      `看积的个位为 8：3 × □ 的个位是 8，故第二个因数的个位只能填 6（3 × 6 = 18）。`,
+      `看第二个部分积（十位 2 乘以 □43）：2 × 43 = 86，而总积首位是 6，且第一个因数的十位 4 乘 2 得 8，尝试首位填 2 时 243 × 2 = 486。`,
+      `完整计算验证：243 × 6 = 1458，243 × 20 = 4860，相加得 1458 + 4860 = 6318，满足 6□□8。`
+    ],
+    answer: `243 × 26 = 6318`,
+    quote: `“答案：243 × 26 = 6318。解析：变竖式分析：243 × 26 → 1458 + 486 = 6318。”`
+  },
+  {
+    id: `wb-4`,
+    code: `练习册 · 第 4 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 4 题`,
+    category: `练习册精选`,
+    module: `位值原理`,
+    missingAnswer: false,
+    prompt: `算式“喜爱数学 + 爱数学 + 数学 + 学 = 2018”中，不同的汉字表示不同的数字，相同的汉字表示相同的数字，求使算式成立的汉字所表示的数字。`,
+    equation: `喜爱数学 + 爱数学 + 数学 + 学 = 2018`,
+    breakthrough: `根据位值原理合并四数中各个汉字出现的次数，从最高位“喜”到最低位“学”依次确定。`,
+    steps: [
+      `按位值原理展开合并：1000 × 喜 + 200 × 爱 + 30 × 数 + 4 × 学 = 2018。`,
+      `因为首位不能为 0，所以“喜”“爱”“数”都不能等于 0。`,
+      `先看“喜”：喜不能为 2（否则 2000 加上后面非零部分必超 2018），所以 喜 = 1，余下 200 × 爱 + 30 × 数 + 4 × 学 = 1018。`,
+      `再看“爱”：200 × 爱 ≤ 1018 且余数须能由 30×数 + 4×学 凑出；取 爱 = 4 得 30×数 + 4×学 = 218（若爱=5 则 30×数+4×学=18，而数≠0至少为30，超了）。`,
+      `最后看“数”与“学”：取 数 = 7 得 4 × 学 = 8 ⇒ 学 = 2，四个数字 1, 4, 7, 2 互不相同。`
+    ],
+    answer: `喜 = 1，爱 = 4，数 = 7，学 = 2`,
+    quote: `“解析：根据位值原理可得：1000×喜 + 200×爱 + 30×数 + 4×学 = 2018，从“喜”到“学”依次考虑……喜=1, 爱=4, 数=7, 学=2。”`
+  },
+  {
+    id: `wb-5`,
+    code: `练习册 · 第 5 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 5 题`,
+    category: `练习册精选`,
+    module: `数字填空`,
+    missingAnswer: false,
+    prompt: `将 1 至 9 这 9 个数字分别填入方框中，每个数字恰好用一次，使等式成立，现已将 8 填入，则最左边的两个方框中所填的两位数是？`,
+    equation: `□□ ÷ □□ = □□ − □□ = 8`,
+    breakthrough: `把除法 □□ ÷ □□ = 8 转化为乘法 8 × □□ = □□，利用“8 乘两位数积仍为两位数”极大压缩除数的候选范围。`,
+    steps: [
+      `□□ ÷ □□ = 8 可化为 8 × □□ = □□。`,
+      `因为 8 乘以一个两位数积还是两位数（≤ 99），所以这个两位数只能是 10, 11, 12。`,
+      `由于只能填 1~9 不能填 0，故 10 舍去；数字不能重复，故 11 舍去；只有 8 × 12 = 96 符合条件。`,
+      `已用去 1, 2, 6, 8, 9，还剩 3, 4, 5, 7 四个数字，凑减法得 45 − 37 = 8 满足要求。`,
+      `综上：96 ÷ 12 = 45 − 37 = 8，最左边的两位数为 96。`
+    ],
+    answer: `96`,
+    quote: `“解析：□□÷□□=8 可化为 8×□□=□□……只有 8×12=96 符合条件……综上 96÷12=45-37=8。”`
+  },
+  {
+    id: `wb-6`,
+    code: `练习册 · 第 6 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 6 题`,
+    category: `练习册精选`,
+    module: `乘除特征`,
+    missingAnswer: false,
+    prompt: `已知算式：好好 × 学习 = 5□7（原文 OCR 为“好好学习=507”），相同汉字代表相同数字，不同汉字代表不同数字，那么这个算式的积为？`,
+    equation: `好好 × 学习 = 5□7`,
+    breakthrough: `因乘数中包含叠字两位数“好好”（即 11 × 好），乘积必然是 11 的倍数，直接套用 11 的整除特征求中间方框数字。`,
+    steps: [
+      `两位数“好好”等于 11 × 好，所以算式的乘积一定是 11 的倍数。`,
+      `根据 11 的整除特征，三位数 5□7 奇数位数字和与偶数位数字和的差是 11 的倍数。`,
+      `计算得 5 + 7 − □ = 11（不可能等于 0，因 □ 为一位数），故 □ = 12 − 11 = 1。`,
+      `因此这个算式的积为 517（对应 11 × 47 = 517）。`
+    ],
+    answer: `517`,
+    quote: `“答案：517。解析：乘积是 11 的倍数，根据 11 的整除特征，5+7-1=11，所以 □=1。”`
+  },
+  {
+    id: `wb-7`,
+    code: `练习册 · 第 7 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 7 题`,
+    category: `练习册精选`,
+    module: `改写竖式`,
+    missingAnswer: false,
+    prompt: `在算式 2 × □□□ = □□□ 的六个方框中，分别填入 4, 5, 6, 7, 8, 9 这六个数字，使算式成立，那么这个乘积是？`,
+    equation: `2 × □□□ = □□□（填入 4, 5, 6, 7, 8, 9）`,
+    breakthrough: `2 乘一个三位数仍得三位数，故三位数的首位一定小于 5（只能是 4），从而一步步锁死乘积首位与末位。`,
+    steps: [
+      `因为 2 乘一个三位数等于一个三位数，而在 4, 5, 6, 7, 8, 9 中只有 4 小于 5，所以因数中三位数的首位一定是 4。`,
+      `此时乘积的首位只可能是 8 或 9。同时观察末位：若因数的末位是 8，则乘积的末位是 6（原文推理：乘积末位为 6，因数末位为 8，从而乘积首位为 9）。`,
+      `剩余数字为 5 和 7，经尝试可知因数的十位是 7，乘积的十位是 5（因 7×2+1 = 15 向百位进 1，4×2+1 = 9）。`,
+      `得到算式 2 × 478 = 956，六个数字 4, 5, 6, 7, 8, 9 恰好各用一次。`
+    ],
+    answer: `956（2 × 478 = 956）`,
+    quote: `“解析：因数中三位数的首位一定是 4……因数的末位一定是 8，乘积的首位就是 9……这个算式就是 2 × 478 = 956。”`
+  },
+  {
+    id: `wb-8`,
+    code: `练习册 · 第 8 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 8 题`,
+    category: `练习册精选`,
+    module: `乘除特征`,
+    missingAnswer: false,
+    prompt: `将 1~9 这九个数字分别填入下面三个算式的九个 □ 中，使每个算式都成立：□+□=□，□−□=□，□×□=□。`,
+    equation: `□ + □ = □；□ − □ = □；□ × □ = □（1~9 填入）`,
+    breakthrough: `乘法算式要求最高（两数积为一位数且不重复），只可能有 2×3=6 或 2×4=8；再利用剩下六个数字的奇偶个数一举排除 2×4=8。`,
+    steps: [
+      `① 审题：从 1~9 中选两数相乘积仍为一位数且三个数字不重复，候选乘法式只有 2 × 3 = 6 和 2 × 4 = 8。`,
+      `② 奇偶分析排除：若第三式填 2 × 4 = 8，剩下 1, 3, 5, 6, 7, 9 共 1 个偶数和 5 个奇数。加减法中要使三数成立，每式至少需 0 个或 2 个偶数（奇±奇=偶），1 个偶数无法同时配平两个加减式，故排除！`,
+      `③ 确定乘法为 2 × 3 = 6，剩下 1, 4, 5, 7, 8, 9 共 2 个偶数和 4 个奇数，两个偶数分别放入加式和减式各一个。`,
+      `④ 配平前两式：得 4 + 5 = 9 和 8 − 7 = 1（注：原文说明答案非唯一，此处给出其中一组标准解）。`
+    ],
+    answer: `4 + 5 = 9；8 − 7 = 1；2 × 3 = 6`,
+    quote: `“满足乘法算式的只有 2×3=6 和 2×4=8……如果填 2×4=8，剩下一个偶数和五个奇数，无论怎样组合都不能填出前两个算式。”`
+  },
+  {
+    id: `wb-9`,
+    code: `练习册 · 第 9 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 9 题`,
+    category: `练习册精选`,
+    module: `乘除特征`,
+    missingAnswer: false,
+    prompt: `在下式中，A、B、C、D、E、F 各代表不同的数字，那么，六位数 ABCDEF 是多少？`,
+    equation: `AB + CC = DEE = C × C × F × F`,
+    breakthrough: `观察右侧 DEE = (C × F)² 是一个末两位相同的三位完全平方数，再结合左侧是两个两位数相加（和小于 200），直接锁定 DEE 只能是 144 或 100。`,
+    steps: [
+      `由 DEE = C × C × F × F = (C × F)²，末尾两位相同的三位完全平方数可能是 100, 144, 400 或 900。`,
+      `因为 DEE = AB + CC 是两个两位数之和，和必然小于 200，所以只有 144 和 100 可能符合。`,
+      `情况一（DEE = 144）：此时 C × F = 12，且 C, F 为一位数，故 C, F 组合可能是 2, 6 或 3, 4（原文讨论 2 或 6）：若 C=2，144 − 22 = 122 非两位数；若 C=6，144 − 66 = 78 符合，此时 F=2，得 ABCDEF = 786142。`,
+      `情况二（DEE = 100）：此时 C × F = 10，故 C, F 为 2 或 5：若 C=5，100 − 55 = 45 出现数字 5 重复，不符；若 C=2，100 − 22 = 78 符合，此时 F=5，得 ABCDEF = 782105。`
+    ],
+    answer: `786142 或 782105（备选答案：782105）`,
+    quote: `“DEE = (C×F)²，则 DEE 可能是 100 或 144 或 400 或 900，又因为 DEE 是两个两位数相加，所以只有 144 和 100 可能符合……故答案为 786142 或 782105。”`
+  },
+  {
+    id: `wb-10`,
+    code: `练习册 · 第 10 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 10 题`,
+    category: `练习册精选`,
+    module: `数字填空`,
+    missingAnswer: false,
+    prompt: `把 1, 2, 3, 4, 5, 6, 11, 12 这 8 个数分别填入图中 8 个空格中，组成加、减、乘、除四个等式（含固定数 11）。`,
+    equation: `四边图：12 ÷ 4 = 3（上），3 × 2 = 6（右），1 + 5 = 6（下），12 − 11 = 1（左）`,
+    breakthrough: `原文标注“解析略”，未附步骤推导；直接给出了最终填表答案。`,
+    steps: [
+      `原文标注为「解析略」，具体推导步骤在来源中未提及。`,
+      `原文给出表格最终填入结果：上行 12 ÷ 4 = 3；右列 3 × 2 = 6；下行 1 + 5 = 6；左列由 12、11、1 组成减法 12 − 11 = 1。`
+    ],
+    answer: `12 ÷ 4 = 3；3 × 2 = 6；1 + 5 = 6；12 − 11 = 1`,
+    quote: `“答案：12 ÷ 4 = 3 | × 2 | 11 | 1 + 5 = 6。解析略。”`
+  },
+  {
+    id: `wb-11`,
+    code: `练习册 · 第 11 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 11 题`,
+    category: `练习册精选`,
+    module: `数字填空`,
+    missingAnswer: false,
+    prompt: `将 0, 1, 2, 3, 4, 5, 6 这七个数字填在方格内，每个数字恰好出现一次，组成只有一位数和两位数的整数算式。问填在方格内的数是多少？`,
+    equation: `□ × □ = □□ = □□ ÷ □`,
+    breakthrough: `先确定“0 放在哪一位”：首位和除数不能为 0，若积的个位为 0 则与被除数个位冲突，因此 0 只能是被除数的个位！`,
+    steps: [
+      `7 个数字组成 5 个数，说明其中有 2 个两位数（即中间乘积和被除数），写成 a × b = cd = ef ÷ g。`,
+      `排除 0 的位置：a, b, c, e, g 均不能为 0；d 也不能为 0（否则被除数 ef = cd × g 的个位 f 也是 0，造成 0 重复），因此唯一只能 f = 0。`,
+      `在 1~6 中找两个一位数相乘得不含 0 且数字不重复的两位数：只有 3 × 4 = 12（1×2、2×3 是一位数，2×6=12 重复 2，3×5=15 重复 5，4×5=20 含 0 等）。`,
+      `余下数字为 5, 6（和 0），凑除法得 60 ÷ 5 = 12，完全成立。`
+    ],
+    answer: `3 × 4 = 12 = 60 ÷ 5`,
+    quote: `“解析：a,b,c,e,g 均不能为 0，d 也不能为 0……只能 f = 0；两个一位数乘积为两位数，无重复数字，且乘积不含 0，只有 3 × 4 = 12。”`
+  },
+  {
+    id: `wb-12`,
+    code: `练习册 · 第 12 题`,
+    sourceFile: `Lesson 9-横式数字谜-练习册.pdf`,
+    sourceSection: `第 12 题`,
+    category: `练习册精选`,
+    module: `乘除特征`,
+    missingAnswer: false,
+    prompt: `在算式 2 × □□□ = □□□ 的 6 个空格中，分别填入 2, 3, 4, 5, 6, 7 这六个数字，使算式成立，并且乘积是 13 的倍数，那么这个乘积是？`,
+    equation: `2 × ABC = DEF（填入 2~7，且 DEF 为 13 的倍数）`,
+    breakthrough: `先由乘积为偶数确定 F 只能是 2, 4, 6 并分类枚举全部成立的等式，最后利用“乘积是 13 的倍数”一锤定音。`,
+    steps: [
+      `把算式写为 2 × ABC = DEF，因乘积为偶数，个位 F 只能是 2, 4, 6。`,
+      `若 F = 2：则 C 只能是 6，且百位 A 不能大于 3（否则 D ≥ 8 超出 2~7），故 A = 3；由 C=6 进位得 D = 7，即 2 × 3B6 = 7E2，剩余 4, 5 无法使之成立。`,
+      `若 F = 4：则 C 是 2 或 7。C=2 时 A=3 无法凑出 D；C=7 时可分别试出两组解：2 × 267 = 534 和 2 × 327 = 654。`,
+      `若 F = 6：则 C 只能是 3，A 只能是 2，试验得出 2 × 273 = 546。`,
+      `检验 13 的整除条件：534 ÷ 13 = 41……1，654 ÷ 13 = 50……4，546 ÷ 13 = 42（整除），故乘积只能是 546。`
+    ],
+    answer: `546（2 × 273 = 546）`,
+    quote: `“最后由乘积能被 13 除尽，得乘积只能是 546。”`
+  }
+];
+
+const MODULE_STYLE_MAP = {
+  '位值原理': { accent: `blue`, tagClass: `tag--blue` },
+  '改写竖式': { accent: `red`, tagClass: `tag--red` },
+  '乘除特征': { accent: `yellow`, tagClass: `tag--yellow` },
+  '数字填空': { accent: `black`, tagClass: `tag--black` }
+};
+
+// ========================
+// 3. Application State
+// ========================
+const appState = {
+  searchQuery: ``,
+  moduleFilter: `all`,
+  sourceFilter: `all`,
+  statusFilter: `all`,
+  activeStrategy: `place`,
+  simScenario: `place`,
+  simTransformed: false,
+  masteredIds: [],
+  expandedIds: [],
+  highlightedId: null
+};
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, `&amp;`)
+    .replace(/</g, `&lt;`)
+    .replace(/>/g, `&gt;`)
+    .replace(/"/g, `&quot;`);
+}
+
+function formatMathText(str) {
+  return escapeHtml(str)
+    .replace(/\n/g, `<br>`)
+    .replace(/²/g, `<sup>2</sup>`)
+    .replace(/⇒/g, `<span class="math-arrow">⇒</span>`)
+    .replace(/△/g, `<span class="sym-tri">△</span>`)
+    .replace(/○/g, `<span class="sym-cir">○</span>`);
+}
+
+function formatEquationHTML(str) {
+  return escapeHtml(str)
+    .replace(/²/g, `<sup>2</sup>`)
+    .replace(/⇒/g, `<span class="math-arrow">⇒</span>`)
+    .replace(/□/g, `<span class="sym-box" aria-label="方框">□</span>`)
+    .replace(/△/g, `<span class="sym-tri">△</span>`)
+    .replace(/○/g, `<span class="sym-cir">○</span>`);
+}
+
+function getFilteredProblems() {
+  const q = appState.searchQuery.trim().toLowerCase();
+  return PROBLEMS.filter(function(p) {
+    if (appState.moduleFilter !== `all` && p.module !== appState.moduleFilter) return false;
+    if (appState.sourceFilter !== `all` && p.category !== appState.sourceFilter) return false;
+    const isMastered = appState.masteredIds.indexOf(p.id) !== -1;
+    if (appState.statusFilter === `mastered` && !isMastered) return false;
+    if (appState.statusFilter === `review` && isMastered) return false;
+    if (q) {
+      const hay = [
+        p.code, p.sourceFile, p.sourceSection, p.category,
+        p.module, p.prompt, p.equation, p.breakthrough,
+        p.steps.join(` `), p.answer, p.quote
+      ].join(` `).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+}
+
+// ========================
+// 4. Persistence Helpers
+// ========================
+async function persistState() {
+  if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+    try {
+      await window.notebookAppApi.setAppState({
+        masteredIds: appState.masteredIds,
+        expandedIds: appState.expandedIds,
+        activeStrategy: appState.activeStrategy,
+        simScenario: appState.simScenario,
+        moduleFilter: appState.moduleFilter,
+        sourceFilter: appState.sourceFilter,
+        statusFilter: appState.statusFilter
+      });
+    } catch (e) {
+      // Safe fallback if host rejects
+    }
+  }
+}
+
+async function loadInitialState() {
+  if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+    try {
+      const saved = await window.notebookAppApi.getAppState();
+      if (saved && typeof saved === `object`) {
+        if (Array.isArray(saved.masteredIds)) {
+          appState.masteredIds = saved.masteredIds.filter(function(id) {
+            return PROBLEMS.some(function(p) { return p.id === id; });
+          });
+        }
+        if (Array.isArray(saved.expandedIds)) {
+          appState.expandedIds = saved.expandedIds.filter(function(id) {
+            return PROBLEMS.some(function(p) { return p.id === id; });
+          });
+        }
+        if (typeof saved.activeStrategy === `string` && STRATEGIES.some(function(s) { return s.id === saved.activeStrategy; })) {
+          appState.activeStrategy = saved.activeStrategy;
+        }
+        if (typeof saved.simScenario === `string` && SIM_SCENARIOS[saved.simScenario]) {
+          appState.simScenario = saved.simScenario;
+        }
+        if (typeof saved.moduleFilter === `string`) appState.moduleFilter = saved.moduleFilter;
+        if (typeof saved.sourceFilter === `string`) appState.sourceFilter = saved.sourceFilter;
+        if (typeof saved.statusFilter === `string`) appState.statusFilter = saved.statusFilter;
+      }
+    } catch (e) {
+      // Use defaults
+    }
+  }
+}
+
+// ========================
+// 5. Render Functions
+// ========================
+function renderKPIs(filteredCount) {
+  const total = PROBLEMS.length;
+  const masteredCount = appState.masteredIds.length;
+  const reviewCount = total - masteredCount;
+  const pct = total > 0 ? Math.round((masteredCount / total) * 100) : 0;
+
+  const elTotal = document.getElementById(`kpi-total`);
+  const elMastered = document.getElementById(`kpi-mastered`);
+  const elPct = document.getElementById(`kpi-progress-pct`);
+  const elReviewSub = document.getElementById(`kpi-review-sub`);
+  const elFiltered = document.getElementById(`kpi-filtered`);
+  const elBar = document.getElementById(`kpi-progress-bar`);
+
+  if (elTotal) elTotal.textContent = `${total} 题`;
+  if (elMastered) elMastered.textContent = `${masteredCount} / ${total} 题`;
+  if (elPct) elPct.textContent = `已掌握 ${pct}% · 待复习 ${reviewCount} 题`;
+  if (elReviewSub) elReviewSub.textContent = `教材 17 项 · 练习册 12 题（待复习 ${reviewCount} 题）`;
+  if (elFiltered) elFiltered.textContent = `${filteredCount} 题`;
+  if (elBar) elBar.style.width = `${pct}%`;
+}
+
+function renderStrategySection() {
+  const active = STRATEGIES.find(function(s) { return s.id === appState.activeStrategy; }) || STRATEGIES[0];
+
+  STRATEGIES.forEach(function(s) {
+    const tabBtn = document.getElementById(`tab-${s.id}`);
+    if (tabBtn) {
+      const isSelected = s.id === active.id;
+      tabBtn.classList.toggle(`is-active`, isSelected);
+      tabBtn.setAttribute(`aria-selected`, isSelected ? `true` : `false`);
+    }
+  });
+
+  const panel = document.getElementById(`strategy-detail-panel`);
+  if (panel) {
+    const stepsHtml = active.steps.map(function(st) {
+      return `<li>${formatMathText(st)}</li>`;
+    }).join(``);
+
+    panel.innerHTML = `
+      <div class="compare-grid">
+        <div class="compare-col">
+          <div class="compare-col-head">
+            <h3 class="compare-col-title">${escapeHtml(active.num)}：${escapeHtml(active.title)}</h3>
+            <span class="tag tag--blue">破题路径</span>
+          </div>
+          <div class="compare-row">
+            <span class="compare-row-label">核心思想</span>
+            <div class="compare-row-val">${formatMathText(active.coreIdea)}</div>
+          </div>
+          <div class="compare-row">
+            <span class="compare-row-label">标准推导步骤</span>
+            <ol class="strategy-step-list">${stepsHtml}</ol>
+          </div>
+        </div>
+
+        <div class="compare-col compare-col--accent">
+          <div class="compare-col-head">
+            <h3 class="compare-col-title">审题信号与工具箱</h3>
+            <span class="tag tag--yellow">${escapeHtml(active.moduleName)}</span>
+          </div>
+          <div class="compare-row">
+            <span class="compare-row-label">题干识别信号</span>
+            <div class="compare-row-val">${formatMathText(active.signal)}</div>
+          </div>
+          <div class="compare-row">
+            <span class="compare-row-label">核心数学工具</span>
+            <div class="compare-row-val">${formatMathText(active.tool)}</div>
+          </div>
+          <div class="compare-row">
+            <span class="compare-row-label">易错避坑提醒</span>
+            <div class="strategy-warning-box">${formatMathText(active.warning)}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  const jumpList = document.getElementById(`strategy-jump-list`);
+  if (jumpList) {
+    jumpList.innerHTML = active.examples.map(function(ex) {
+      return `<button type="button" class="table-jump-btn" onclick="jumpToProblem('${ex.id}')">${escapeHtml(ex.label)} →</button>`;
+    }).join(``);
+  }
+
+  const tbody = document.getElementById(`strategy-compare-tbody`);
+  if (tbody) {
+    tbody.innerHTML = STRATEGIES.map(function(s) {
+      const isRowActive = s.id === active.id ? `is-active-row` : ``;
+      const exNames = s.examples.map(function(e) { return e.label; }).join(`、`);
+      return `
+        <tr class="${isRowActive}">
+          <td><strong>${escapeHtml(s.title)}</strong></td>
+          <td>${formatMathText(s.tool)}</td>
+          <td>${formatMathText(s.signal)}</td>
+          <td>${escapeHtml(exNames)}</td>
+          <td><button type="button" class="table-jump-btn" onclick="jumpToModule('${s.moduleName}')">筛选${escapeHtml(s.moduleName)}</button></td>
+        </tr>
+      `;
+    }).join(``);
+  }
+}
+
+function renderSimulator() {
+  const scenario = SIM_SCENARIOS[appState.simScenario] || SIM_SCENARIOS.place;
+  const stageEl = document.getElementById(`sim-stage`);
+  const btnEl = document.getElementById(`btn-sim-action`);
+  const verdictEl = document.getElementById(`sim-verdict`);
+  const selectEl = document.getElementById(`sim-scenario-select`);
+
+  if (selectEl) selectEl.value = appState.simScenario;
+
+  if (stageEl) {
+    let visualHtml = ``;
+    if (scenario.type === `vertical`) {
+      if (!appState.simTransformed) {
+        visualHtml = `<div class="equation-box">${formatEquationHTML(`兵炮马卒 + 兵炮车卒 = 车卒马兵卒`)}</div>`;
+      } else {
+        visualHtml = `
+          <div class="vertical-calc" aria-label="竖式对齐视图">
+            <span class="v-cell"></span><span class="v-cell"></span><span class="v-cell">兵</span><span class="v-cell">炮</span><span class="v-cell">马</span><span class="v-cell v-cell--hi">卒</span>
+            <span class="v-cell">+</span><span class="v-cell"></span><span class="v-cell">兵</span><span class="v-cell">炮</span><span class="v-cell">车</span><span class="v-cell v-cell--hi">卒</span>
+            <span class="v-rule"></span>
+            <span class="v-cell"></span><span class="v-cell v-cell--blue">车</span><span class="v-cell v-cell--hi">卒</span><span class="v-cell">马</span><span class="v-cell">兵</span><span class="v-cell v-cell--hi">卒</span>
+          </div>
+          <div style="font-size:0.82rem; color:var(--on-surface-variant);">
+            蓝底 <strong style="color:var(--tertiary);">车 = 1</strong>（最高位进位），黄底 <strong style="color:var(--on-surface);">卒 = 0</strong>（卒+卒尾数仍为卒）
+          </div>
+        `;
+      }
+    } else {
+      const slots = appState.simTransformed ? scenario.slotsAfter : scenario.slotsBefore;
+      visualHtml = `<div class="sim-slots">` + slots.map(function(s) {
+        const cls = s.eliminated
+          ? `sim-slot sim-slot--eliminated`
+          : (appState.simTransformed && s.changed ? `sim-slot sim-slot--swapped` : `sim-slot`);
+        return `
+          <div class="${cls}">
+            <span class="sim-slot-role">${escapeHtml(s.role)}</span>
+            <span>${formatEquationHTML(s.val)}</span>
+          </div>
+        `;
+      }).join(``) + `</div>`;
+    }
+
+    stageEl.innerHTML = `
+      <div>
+        <strong style="font-size:0.95rem;">${escapeHtml(scenario.title)}</strong>
+        <p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--on-surface-variant);">${formatMathText(scenario.desc)}</p>
+      </div>
+      ${visualHtml}
+    `;
+  }
+
+  if (btnEl) {
+    btnEl.textContent = appState.simTransformed ? scenario.resetText : scenario.actionText;
+  }
+
+  if (verdictEl) {
+    verdictEl.className = `sim-verdict ${appState.simTransformed ? `sim-verdict--active` : ``}`;
+    verdictEl.innerHTML = formatMathText(appState.simTransformed ? scenario.verdictAfter : scenario.verdictBefore);
+  }
+}
+
+function updateFilterChipsUI() {
+  const moduleBtns = document.querySelectorAll(`#module-filter-row .pill-btn`);
+  moduleBtns.forEach(function(btn) {
+    const val = btn.textContent === `全部模块` ? `all` : btn.textContent;
+    btn.classList.toggle(`is-active`, val === appState.moduleFilter);
+  });
+
+  const sourceBtns = document.querySelectorAll(`#source-filter-row .pill-btn`);
+  sourceBtns.forEach(function(btn) {
+    const val = btn.textContent === `全部来源` ? `all` : btn.textContent;
+    btn.classList.toggle(`is-active`, val === appState.sourceFilter);
+  });
+
+  const statusEl = document.getElementById(`status-filter`);
+  if (statusEl) statusEl.value = appState.statusFilter;
+}
+
+function renderProblemsList() {
+  const listEl = document.getElementById(`problems-list`);
+  const emptyEl = document.getElementById(`empty-state`);
+  const summaryEl = document.getElementById(`filter-summary-text`);
+  if (!listEl) return;
+
+  const filtered = getFilteredProblems();
+  renderKPIs(filtered.length);
+
+  if (summaryEl) {
+    summaryEl.textContent = `正在显示 ${filtered.length} / ${PROBLEMS.length} 条教材与练习册题目`;
+  }
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = ``;
+    if (emptyEl) emptyEl.classList.add(`is-visible`);
+    return;
+  }
+
+  if (emptyEl) emptyEl.classList.remove(`is-visible`);
+
+  listEl.innerHTML = filtered.map(function(p) {
+    const isMastered = appState.masteredIds.indexOf(p.id) !== -1;
+    const isExpanded = appState.expandedIds.indexOf(p.id) !== -1;
+    const isHighlighted = appState.highlightedId === p.id;
+    const styleInfo = MODULE_STYLE_MAP[p.module] || { accent: `blue`, tagClass: `tag--blue` };
+
+    const cardClasses = [
+      `problem-card`,
+      isMastered ? `is-mastered` : ``,
+      isHighlighted ? `is-highlighted` : ``
+    ].filter(Boolean).join(` `);
+
+    const stepsHtml = p.steps.map(function(st, i) {
+      return `<div class="step-item"><strong>步骤 ${i + 1}：</strong>${formatMathText(st)}</div>`;
+    }).join(``);
+
+    const missingTag = p.missingAnswer
+      ? `<span class="tag tag--muted">原文缺完整答案</span>`
+      : ``;
+
+    return `
+      <article class="${cardClasses}" id="card-${p.id}">
+        <div>
+          <div class="card-accent-bar card-accent-bar--${styleInfo.accent}" aria-hidden="true"></div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <div class="tag-group">
+                <span class="tag ${styleInfo.tagClass}">${escapeHtml(p.module)}</span>
+                <span class="tag">${escapeHtml(p.category)}</span>
+                ${missingTag}
+              </div>
+              <button
+                type="button"
+                class="mastery-btn ${isMastered ? `is-done` : ``}"
+                aria-pressed="${isMastered ? `true` : `false`}"
+                onclick="toggleMastery('${p.id}')"
+                aria-label="标记 ${escapeHtml(p.code)} 为${isMastered ? `待复习` : `已掌握`}"
+              >
+                <span>${isMastered ? `✓ 已掌握` : `○ 待复习`}</span>
+              </button>
+            </div>
+
+            <h3 class="card-title">${escapeHtml(p.code)}</h3>
+            <p class="card-prompt">${formatMathText(p.prompt)}</p>
+
+            <div class="equation-box">${formatEquationHTML(p.equation)}</div>
+
+            <div class="card-meta-line">
+              <span><strong>栏目定位：</strong>${escapeHtml(p.sourceSection)}</span>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                class="accordion-trigger"
+                aria-expanded="${isExpanded ? `true` : `false`}"
+                aria-controls="body-${p.id}"
+                onclick="toggleProblem('${p.id}')"
+              >
+                <span>${isExpanded ? `收起破题解析与原文摘录` : `展开破题解析与答案`}</span>
+                <span aria-hidden="true">${isExpanded ? `▲` : `▼`}</span>
+              </button>
+
+              <div class="accordion-panel ${isExpanded ? `is-open` : ``}" id="body-${p.id}">
+                <div>
+                  <span class="compare-row-label">破题突破口</span>
+                  <div class="breakthrough-callout" style="margin-top:4px;">${formatMathText(p.breakthrough)}</div>
+                </div>
+
+                <div>
+                  <span class="compare-row-label">最终答案</span>
+                  <div class="answer-callout ${p.missingAnswer ? `answer-callout--missing` : ``}" style="margin-top:4px;">
+                    ${formatMathText(p.answer)}
+                  </div>
+                </div>
+
+                <div style="display:grid; gap:var(--space-xs);">
+                  <span class="compare-row-label">逐步推导过程</span>
+                  ${stepsHtml}
+                </div>
+
+                <div class="quote-box">
+                  <strong>原文摘录：</strong>${formatMathText(p.quote)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer class="card-footer">
+          出处：${escapeHtml(p.sourceFile)} · ${escapeHtml(p.sourceSection)}
+        </footer>
+      </article>
+    `;
+  }).join(``);
+}
+
+// ========================
+// 6. Hoisted Event Handlers
+// ========================
+function selectStrategy(strategyId) {
+  appState.activeStrategy = strategyId;
+  if (SIM_SCENARIOS[strategyId]) {
+    appState.simScenario = strategyId;
+    appState.simTransformed = false;
+  }
+  renderStrategySection();
+  renderSimulator();
+  persistState();
+}
+
+function selectSimScenario(key) {
+  if (!SIM_SCENARIOS[key]) return;
+  appState.simScenario = key;
+  appState.simTransformed = false;
+  renderSimulator();
+  persistState();
+}
+
+function toggleSimAction() {
+  appState.simTransformed = !appState.simTransformed;
+  renderSimulator();
+}
+
+function jumpToProblem(problemId) {
+  appState.searchQuery = ``;
+  appState.moduleFilter = `all`;
+  appState.sourceFilter = `all`;
+  appState.statusFilter = `all`;
+  const searchEl = document.getElementById(`search-input`);
+  if (searchEl) searchEl.value = ``;
+
+  if (appState.expandedIds.indexOf(problemId) === -1) {
+    appState.expandedIds.push(problemId);
+  }
+  appState.highlightedId = problemId;
+
+  updateFilterChipsUI();
+  renderProblemsList();
+  persistState();
+
+  const cardEl = document.getElementById(`card-${problemId}`);
+  if (cardEl && typeof cardEl.scrollIntoView === `function`) {
+    cardEl.scrollIntoView({ behavior: `smooth`, block: `center` });
+  }
+}
+
+function jumpToModule(moduleName) {
+  appState.searchQuery = ``;
+  appState.moduleFilter = moduleName || `all`;
+  appState.sourceFilter = `all`;
+  appState.statusFilter = `all`;
+  appState.highlightedId = null;
+
+  const searchEl = document.getElementById(`search-input`);
+  if (searchEl) searchEl.value = ``;
+
+  updateFilterChipsUI();
+  renderProblemsList();
+  persistState();
+
+  const sec = document.getElementById(`sec-explorer-title`);
+  if (sec && typeof sec.scrollIntoView === `function`) {
+    sec.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+}
+
+function handleSearchInput(val) {
+  appState.searchQuery = val || ``;
+  appState.highlightedId = null;
+  renderProblemsList();
+}
+
+function setModuleFilter(mod) {
+  appState.moduleFilter = mod;
+  appState.highlightedId = null;
+  updateFilterChipsUI();
+  renderProblemsList();
+  persistState();
+}
+
+function setSourceFilter(src) {
+  appState.sourceFilter = src;
+  appState.highlightedId = null;
+  updateFilterChipsUI();
+  renderProblemsList();
+  persistState();
+}
+
+function setStatusFilter(status) {
+  appState.statusFilter = status || `all`;
+  appState.highlightedId = null;
+  updateFilterChipsUI();
+  renderProblemsList();
+  persistState();
+}
+
+function resetAllFilters() {
+  appState.searchQuery = ``;
+  appState.moduleFilter = `all`;
+  appState.sourceFilter = `all`;
+  appState.statusFilter = `all`;
+  appState.highlightedId = null;
+  const searchEl = document.getElementById(`search-input`);
+  if (searchEl) searchEl.value = ``;
+  updateFilterChipsUI();
+  renderProblemsList();
+  persistState();
+}
+
+function toggleProblem(problemId) {
+  const idx = appState.expandedIds.indexOf(problemId);
+  if (idx === -1) {
+    appState.expandedIds.push(problemId);
+  } else {
+    appState.expandedIds.splice(idx, 1);
+  }
+  renderProblemsList();
+  persistState();
+}
+
+function expandAllVisible() {
+  const visible = getFilteredProblems();
+  visible.forEach(function(p) {
+    if (appState.expandedIds.indexOf(p.id) === -1) {
+      appState.expandedIds.push(p.id);
+    }
+  });
+  renderProblemsList();
+  persistState();
+}
+
+function collapseAllVisible() {
+  const visibleIds = getFilteredProblems().map(function(p) { return p.id; });
+  appState.expandedIds = appState.expandedIds.filter(function(id) {
+    return visibleIds.indexOf(id) === -1;
+  });
+  renderProblemsList();
+  persistState();
+}
+
+function toggleMastery(problemId) {
+  const idx = appState.masteredIds.indexOf(problemId);
+  if (idx === -1) {
+    appState.masteredIds.push(problemId);
+  } else {
+    appState.masteredIds.splice(idx, 1);
+  }
+  renderProblemsList();
+  persistState();
+}
+
+function exportProgress() {
+  const lines = [
+    `Lesson 9 横式数字谜 — 个人复习进度清单`,
+    `=========================================`,
+    `总题数：${PROBLEMS.length} 题 | 已掌握：${appState.masteredIds.length} 题 | 待复习：${PROBLEMS.length - appState.masteredIds.length} 题`,
+    ``
+  ];
+  PROBLEMS.forEach(function(p) {
+    const status = appState.masteredIds.indexOf(p.id) !== -1 ? `[已掌握]` : `[待复习]`;
+    lines.push(`${status} ${p.code}（${p.module}）| 算式：${p.equation} | 答案：${p.answer} | 出处：${p.sourceFile} ${p.sourceSection}`);
+  });
+  const content = lines.join(`\n`);
+
+  const toastEl = document.getElementById(`kpi-toast`);
+  if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+    window.notebookAppApi.triggerFileDownload({
+      content: content,
+      contentType: `text/plain`,
+      encoding: `UTF-8`,
+      filename: `Lesson9-横式数字谜-复习清单.txt`
+    });
+    if (toastEl) toastEl.textContent = `已触发复习清单文件下载`;
+  } else {
+    const blob = new Blob([content], { type: `text/plain;charset=utf-8` });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement(`a`);
+    a.href = url;
+    a.download = `Lesson9-横式数字谜-复习清单.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    if (toastEl) toastEl.textContent = `已导出本地复习清单`;
+  }
+}
+
+function handleResetProgress(btn) {
+  const toastEl = document.getElementById(`kpi-toast`);
+  if (!btn) return;
+  if (btn.dataset.armed !== `true`) {
+    btn.dataset.armed = `true`;
+    btn.textContent = `再点一次确认清空`;
+    if (toastEl) toastEl.textContent = `再次点击“再点一次确认清空”将重置全部进度`;
+    return;
+  }
+  btn.dataset.armed = `false`;
+  btn.textContent = `重置进度`;
+  appState.masteredIds = [];
+  renderProblemsList();
+  persistState();
+  if (toastEl) toastEl.textContent = `已清空全部“已掌握”标记`;
+}
+
+// ========================
+// 7. Boot Initialization
+// ========================
+async function initApp() {
+  await loadInitialState();
+
+  renderStrategySection();
+  renderSimulator();
+  updateFilterChipsUI();
+  renderProblemsList();
+
+  if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+    window.notebookAppApi.notifyAppReady();
+  }
+}
+
+initApp();
+</script>
+</body>
+</html>

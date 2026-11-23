@@ -1,0 +1,2345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="artifact-type" content="dashboard">
+<meta name="design-style" content="bauhaus">
+<title>运动会筹划：排列组合复习工作台</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+
+  /* 1. Bauhaus surfaces & ink */
+  --background: #f5f0e8;
+  --surface-container-low: #f2ede5;
+  --surface-container: #eee9e0;
+  --surface-container-high: #e8e3da;
+  --surface-white: #ffffff;
+
+  --on-surface: #1a1a1a;
+  --on-surface-variant: #4a4a4a;
+
+  --outline: #1a1a1a;
+  --outline-variant: #d0cbc3;
+
+  --primary: #1a1a1a;
+  --on-primary: #ffffff;
+  --primary-container: #ffcc00;
+  --on-primary-container: #1a1a1a;
+  --secondary: #e63b2e;
+  --tertiary: #0055ff;
+  --on-tertiary: #ffffff;
+  --error: #cc0000;
+  --on-error: #ffffff;
+
+  /* Data series */
+  --data-1: #e63b2e;
+  --data-2: #0055ff;
+  --data-3: #1a1a1a;
+  --data-4: #9a7300;
+  --data-context: #b5afa5;
+
+  /* Fonts (Noto Sans SC listed first for CJK) */
+  --font-headline: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+  --font-body: 'Noto Sans SC', 'Inter', sans-serif;
+  --font-label: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+
+  /* Shape */
+  --rounded: 0.125rem;
+  --rounded-lg: 0.25rem;
+  --rounded-full: 0.75rem;
+
+  /* Style effects */
+  --border-thick: 3px solid var(--outline);
+  --border-medium: 2px solid var(--outline);
+  --offset-shadow: 5px 5px 0 var(--outline);
+  --offset-shadow-sm: 3px 3px 0 var(--outline);
+  --rule-heavy: 6px solid var(--outline);
+
+  /* 2. Shared semantic & scale tokens */
+  --positive: #156d3f;
+  --on-positive: #ffffff;
+  --positive-container: #d8efe0;
+  --on-positive-container: #114b2c;
+  --warning: #8f5800;
+  --warning-container: #fff3c4;
+  --focus: #0055ff;
+
+  /* Type scale (Dashboard / Tool tighter ratio) */
+  --display-size: clamp(1.85rem, 1.4rem + 1.8vw, 2.75rem);
+  --headline-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.2rem);
+  --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+  --label-size: 0.75rem;
+
+  /* Spacing scale (4pt base) */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+}
+
+/* Base reset */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; margin: 0; padding: 0; }
+header { position: static !important; }
+
+body {
+  background-color: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.page-grid {
+  display: grid;
+  gap: var(--space-xl);
+  padding: var(--space-lg);
+  max-width: 1240px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.page-grid * { min-width: 0; }
+
+/* Masthead / Header */
+.masthead {
+  border-top: var(--rule-heavy);
+  border-bottom: var(--border-thick);
+  padding: var(--space-lg) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: end;
+}
+
+.kicker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.kicker-block {
+  display: inline-block;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  background: var(--primary);
+  color: var(--on-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-medium);
+}
+
+.kicker-block--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.kicker-block--yellow {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.flag-trio {
+  display: inline-flex;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.flag-swatch {
+  width: 14px;
+  height: 18px;
+  border: var(--border-medium);
+  display: inline-block;
+}
+.flag-swatch--red { background: var(--secondary); }
+.flag-swatch--yellow { background: var(--primary-container); }
+.flag-swatch--blue { background: var(--tertiary); }
+
+.title {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: var(--display-size);
+  line-height: 1.12;
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--on-surface);
+}
+
+.title mark {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: 0 var(--space-xs);
+  box-decoration-break: clone;
+}
+
+.lede {
+  margin: 0;
+  color: var(--on-surface-variant);
+  max-width: 65ch;
+}
+
+.source-pill-box {
+  background: var(--surface-container-low);
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  padding: var(--space-md);
+}
+
+.source-pill-title {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  margin: 0 0 var(--space-xs) 0;
+  color: var(--on-surface);
+}
+
+.source-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+}
+
+/* KPI Summary Row */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+
+.kpi-block {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container-low);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.kpi-block--highlight {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.kpi-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+}
+
+.kpi-block--highlight .kpi-label {
+  color: var(--on-primary-container);
+}
+
+.kpi-value {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-sub {
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+.kpi-block--highlight .kpi-sub {
+  color: var(--on-primary-container);
+}
+
+.progress-track {
+  width: 100%;
+  height: 12px;
+  border: var(--border-medium);
+  background: var(--surface-white);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--tertiary);
+  transition: width var(--dur-short) var(--ease-out);
+}
+
+/* Section Openings (One-accent rule) */
+.section-open {
+  border-top: var(--space-sm) solid var(--section-accent, var(--tertiary));
+  padding-top: var(--space-lg);
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.section-open--blue { --section-accent: var(--tertiary); }
+.section-open--red { --section-accent: var(--secondary); }
+.section-open--yellow { --section-accent: var(--primary-container); }
+.section-open--black { --section-accent: var(--primary); }
+
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-md);
+}
+
+.section-heading {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--headline-size);
+  line-height: 1.2;
+  margin: var(--space-xs) 0 0 0;
+}
+
+.section-desc {
+  margin: var(--space-xs) 0 0 0;
+  color: var(--on-surface-variant);
+  max-width: 65ch;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--background);
+  color: var(--on-surface);
+  cursor: pointer;
+  transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+
+.btn:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+.btn--primary {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.btn--primary:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.btn--blue:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn--small {
+  min-height: 36px;
+  padding: 0 var(--space-sm);
+  font-size: 0.8125rem;
+}
+
+/* Comparison Tabs & Panel */
+.tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.tab-btn {
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  cursor: pointer;
+  box-shadow: var(--offset-shadow-sm);
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.tab-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.tab-btn.is-active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.comparison-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.panel-block {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container-low);
+  padding: var(--space-lg);
+}
+
+.panel-block--white {
+  background: var(--surface-white);
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.compare-col {
+  border: var(--border-medium);
+  background: var(--surface-white);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.compare-col--accent {
+  background: var(--surface-container);
+}
+
+.compare-col-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--border-medium);
+  padding-bottom: var(--space-xs);
+  gap: var(--space-sm);
+}
+
+.compare-col-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+}
+
+.compare-row {
+  border-bottom: 1px solid var(--outline-variant);
+  padding-bottom: var(--space-xs);
+}
+.compare-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.compare-row-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--on-surface-variant);
+  display: block;
+}
+
+.compare-row-val {
+  font-size: 0.9375rem;
+  margin-top: 2px;
+}
+
+/* Interactive Swap Test Simulator */
+.sim-box {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.sim-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+}
+
+.sim-stage {
+  border: var(--border-medium);
+  background: var(--background);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.sim-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.sim-slot {
+  border: var(--border-medium);
+  background: var(--surface-white);
+  padding: var(--space-xs) var(--space-sm);
+  min-width: 84px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.sim-slot--swapped {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.sim-slot-role {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+}
+
+.sim-verdict {
+  padding: var(--space-sm) var(--space-md);
+  border-left: 5px solid var(--tertiary);
+  background: var(--surface-container-low);
+  font-size: 0.9rem;
+}
+
+.sim-verdict--perm {
+  border-left-color: var(--tertiary);
+}
+
+.sim-verdict--comb {
+  border-left-color: var(--positive);
+}
+
+/* Stacked Combinatorial Symbols A_n^m / C_n^m */
+.math-expr {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface-container);
+  border: 1px solid var(--outline-variant);
+  padding: 1px 6px;
+  border-radius: var(--rounded);
+  line-height: 1.2;
+}
+
+.comb-sym {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-label);
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.comb-indices {
+  display: inline-flex;
+  flex-direction: column;
+  font-size: 0.68em;
+  line-height: 0.95;
+  margin-left: 1px;
+  text-align: left;
+}
+
+/* Search & Filter Toolbar */
+.toolbar-panel {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.toolbar-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: var(--space-md);
+  align-items: end;
+}
+
+.field-group {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.field-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--on-surface);
+}
+
+.input-control, .select-control {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-sm);
+  border: 0;
+  border-bottom: var(--border-thick);
+  background: var(--surface-white);
+  font-size: var(--body-size);
+  border-radius: 0;
+}
+
+.select-control {
+  padding-right: var(--space-lg);
+}
+
+.input-control:focus-visible, .select-control:focus-visible {
+  border-bottom-color: var(--tertiary);
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.pill-btn {
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  background: var(--surface-white);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.pill-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.pill-btn.is-active {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  box-shadow: var(--offset-shadow-sm);
+}
+
+.results-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+}
+
+/* Problem Cards Grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  gap: var(--space-lg);
+}
+
+.problem-card {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.problem-card.is-mastered {
+  background: var(--surface-container-low);
+}
+
+.card-accent-bar {
+  height: 8px;
+  width: 100%;
+  border-bottom: var(--border-medium);
+}
+.card-accent-bar--blue { background: var(--tertiary); }
+.card-accent-bar--red { background: var(--secondary); }
+.card-accent-bar--yellow { background: var(--primary-container); }
+.card-accent-bar--black { background: var(--primary); }
+
+.card-body {
+  padding: var(--space-md) var(--space-lg);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.card-top-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.tag {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  border: var(--border-medium);
+  padding: 2px 8px;
+  border-radius: var(--rounded);
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+.tag--blue {
+  background: var(--tertiary);
+  color: var(--on-tertiary);
+}
+
+.tag--yellow {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.mastery-btn {
+  min-height: 44px;
+  padding: 0 var(--space-sm);
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  background: var(--surface-white);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mastery-btn:hover {
+  background: var(--surface-container-high);
+}
+
+.mastery-btn.is-done {
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+}
+
+.card-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+  line-height: 1.3;
+}
+
+.card-prompt {
+  margin: 0;
+  color: var(--on-surface);
+  font-size: 0.95rem;
+}
+
+.card-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  font-size: 0.8125rem;
+  color: var(--on-surface-variant);
+  border-top: 1px dashed var(--outline-variant);
+  padding-top: var(--space-xs);
+}
+
+/* Accordion inside card */
+.accordion-trigger {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
+  border: var(--border-medium);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  text-align: left;
+}
+
+.accordion-trigger:hover {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.accordion-panel {
+  border: var(--border-medium);
+  border-top: 0;
+  background: var(--background);
+  padding: var(--space-md);
+  display: none;
+  gap: var(--space-sm);
+}
+
+.accordion-panel.is-open {
+  display: grid;
+}
+
+.step-item {
+  border-left: 4px solid var(--tertiary);
+  padding-left: var(--space-sm);
+  font-size: 0.9rem;
+}
+
+.quote-box {
+  background: var(--surface-container);
+  border-left: 4px solid var(--primary);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.83rem;
+  color: var(--on-surface-variant);
+}
+
+.card-footer {
+  border-top: var(--border-medium);
+  background: var(--surface-container);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.78rem;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+}
+
+/* Empty State */
+.empty-state {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-xl);
+  display: none;
+  gap: var(--space-md);
+  justify-items: start;
+}
+
+.empty-state.is-visible {
+  display: grid;
+}
+
+/* SOP & Formula Strip */
+.sop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.sop-card {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-xs);
+  align-content: start;
+}
+
+.sop-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.sop-title {
+  margin: var(--space-xs) 0 0 0;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.mantra-banner {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: var(--space-lg);
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.mantra-quote {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.45rem);
+  line-height: 1.45;
+}
+
+.formula-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-xs);
+  font-size: 0.9rem;
+}
+
+.formula-list li {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  padding: var(--space-xs) var(--space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+
+/* Pitfall Checklist Cards */
+.pitfall-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+
+.pitfall-card {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-sm);
+  border-left: 10px solid var(--secondary);
+}
+
+.pitfall-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.pitfall-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--subhead-size);
+}
+
+.pitfall-row {
+  font-size: 0.9rem;
+  border-top: 1px solid var(--outline-variant);
+  padding-top: var(--space-xs);
+}
+
+/* Variant Table */
+.table-wrap {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  overflow-x: auto;
+}
+
+.variant-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.variant-table thead th {
+  background: var(--surface-container-high);
+  border-bottom: var(--border-thick);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  white-space: nowrap;
+}
+
+.variant-table tbody td {
+  border-bottom: 1px solid var(--outline-variant);
+  padding: var(--space-sm) var(--space-md);
+  vertical-align: top;
+}
+
+.variant-table tbody tr:hover {
+  background: var(--surface-container-low);
+}
+
+.table-jump-btn {
+  min-height: 36px;
+  padding: 2px 10px;
+  border: var(--border-medium);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.table-jump-btn:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+/* Footer */
+.site-footer {
+  border-top: var(--rule-heavy);
+  padding: var(--space-lg) 0 var(--space-xl) 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 960px) {
+  .masthead { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .comparison-shell { grid-template-columns: 1fr; }
+  .sop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mantra-banner { grid-template-columns: 1fr; }
+  .pitfall-grid { grid-template-columns: 1fr; }
+  .toolbar-inputs { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .page-grid {
+    grid-template-columns: 1fr;
+    padding: var(--space-md);
+    gap: var(--space-lg);
+  }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .compare-grid { grid-template-columns: 1fr; }
+  .sop-grid { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="page-grid">
+
+  <!-- Masthead -->
+  <header class="masthead">
+    <div>
+      <div class="kicker-row">
+        <span class="kicker-block">四年级秋季 · 第02讲</span>
+        <span class="kicker-block kicker-block--blue">排列组合专题</span>
+        <span class="flag-trio" aria-hidden="true">
+          <span class="flag-swatch flag-swatch--red"></span>
+          <span class="flag-swatch flag-swatch--yellow"></span>
+          <span class="flag-swatch flag-swatch--blue"></span>
+        </span>
+      </div>
+      <h1 class="title">运动会筹划：<mark>排列与组合</mark>复习工作台</h1>
+      <p class="lede">化身运动会筹备员，在开场信号旗、入场列队、接力棒次、物资采购、圆桌休整与团体对抗赛等真实赛事任务中，掌握排列数与组合数的模型识别、算理推导与分组消重规律。</p>
+    </div>
+
+    <div class="source-pill-box">
+      <p class="source-pill-title">本工作台唯一内容来源</p>
+      <ul class="source-list">
+        <li>《【素养】26秋-4C+-第02讲-运动会筹备-手写解析.pdf》（第026–047页及巩固拓展第15–28页）</li>
+        <li>《小学奥数排列组合知识点梳理》（核心模型、4步SOP、口诀、避坑清单与8类变式表）</li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- KPI Summary Row -->
+  <section aria-label="复习概览指标" class="kpi-grid">
+    <div class="kpi-block kpi-block--highlight">
+      <span class="kpi-label">当前复习进度</span>
+      <div class="kpi-value" id="kpi-progress-text">0 / 16 题</div>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="kpi-progress-bar"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-sm); margin-top:var(--space-xs);">
+        <span class="kpi-sub" id="kpi-progress-pct">已掌握 0%</span>
+        <button type="button" class="btn btn--small" id="btn-reset-progress" onclick="handleResetProgress(this)">重置进度</button>
+      </div>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">两大基础计数模型</span>
+      <div class="kpi-value">A 与 C</div>
+      <span class="kpi-sub">交换顺序变了用排列 A；交换顺序不变用组合 C</span>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">进阶综合模型</span>
+      <div class="kpi-value">先选再排 · 消重</div>
+      <span class="kpi-sub">先选再排 = 直接排列；无组名分组需除以组名全排列</span>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">高危丢分预警</span>
+      <div class="kpi-value">4 大避坑点</div>
+      <span class="kpi-sub">顺序错判、忘除组名、0在首位、组合数大数硬算</span>
+    </div>
+  </section>
+
+  <!-- Section 1: Switchable Comparison Tabs & Swap Test Simulator -->
+  <section class="section-open section-open--blue" aria-labelledby="sec-compare-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--blue">核心维度对比台</span>
+        <h2 class="section-heading" id="sec-compare-title">三大易混维度对比与「交换测试」交互验证</h2>
+        <p class="section-desc">切换下方对比标签页，直接比对定义、算式、关键词与讲义原题；右侧可对讲义真实场景进行“位置互换”，观察为什么结果会不同。</p>
+      </div>
+    </div>
+
+    <div class="tab-bar" role="tablist" aria-label="核心维度对比切换">
+      <button type="button" role="tab" class="tab-btn is-active" id="tab-perm-comb" aria-selected="true" onclick="switchCompareTab('perm_comb')">1. 排列 A vs 组合 C 对比</button>
+      <button type="button" role="tab" class="tab-btn" id="tab-group-name" aria-selected="false" onclick="switchCompareTab('group_name')">2. 有组名 vs 无组名分组对比</button>
+      <button type="button" role="tab" class="tab-btn" id="tab-direct-conv" aria-selected="false" onclick="switchCompareTab('direct_conv')">3. 直接法 vs 转化法对比</button>
+    </div>
+
+    <div class="comparison-shell">
+      <!-- Dynamic Comparison Panel -->
+      <div class="panel-block" id="compare-panel" role="tabpanel" aria-live="polite">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Swap Test & Rotation Simulator -->
+      <aside class="sim-box" aria-label="讲义场景交换测试演示">
+        <div class="field-group">
+          <label class="field-label" for="sim-scenario-select">选择讲义真实场景做测试</label>
+          <select id="sim-scenario-select" class="select-control" onchange="selectSimScenario(this.value)">
+            <option value="signal">活动一试一试（P027）：红黄蓝3旗选2面举旗</option>
+            <option value="relay">活动三试一试（P037）：4×100米接力分配</option>
+            <option value="purchase">活动三试一试（P037）：采购小队名单</option>
+            <option value="roundtable">高能时刻1（P043）：圆桌休整旋转重合</option>
+          </select>
+        </div>
+
+        <div class="sim-stage" id="sim-stage">
+          <!-- Populated by JS -->
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
+          <button type="button" class="btn btn--primary" id="btn-sim-action" onclick="toggleSimAction()">执行交换测试</button>
+        </div>
+
+        <div class="sim-verdict" id="sim-verdict">
+          <!-- Populated by JS -->
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Section 2: Searchable & Filterable Problem Explorer -->
+  <section class="section-open section-open--red" aria-labelledby="sec-explorer-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block">题型检索与复习打卡</span>
+        <h2 class="section-heading" id="sec-explorer-title">运动会筹备全讲义例题与拓展题库</h2>
+        <p class="section-desc">支持按模型标签筛选、按题干或页码关键词搜索，并可切换复习状态。展开每张卡片可查看「几选几判断 → 算式推演 → 算理拆解 → 讲义原文引用」。</p>
+      </div>
+    </div>
+
+    <div class="toolbar-panel">
+      <div class="toolbar-inputs">
+        <div class="field-group">
+          <label class="field-label" for="search-input">关键词搜索（题干场景、人物、算式、页码如 P045）</label>
+          <input type="search" id="search-input" class="input-control" oninput="handleSearchInput(this.value)" placeholder="输入：接力、圆桌、上升数、P042、羽毛球...">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="status-filter">按复习状态筛选</label>
+          <select id="status-filter" class="select-control" onchange="handleStatusFilter(this.value)">
+            <option value="all">全部题目</option>
+            <option value="unmastered">待复习</option>
+            <option value="mastered">已掌握</option>
+          </select>
+        </div>
+        <div>
+          <button type="button" class="btn" onclick="clearAllFilters()">清空筛选</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="field-label" style="display:block; margin-bottom:var(--space-xs);">按核心模型分类筛选</span>
+        <div class="filter-pills" id="category-pills">
+          <button type="button" class="pill-btn is-active" onclick="setCategory('全部')">全部模型</button>
+          <button type="button" class="pill-btn" onclick="setCategory('概念辨析')">概念辨析</button>
+          <button type="button" class="pill-btn" onclick="setCategory('排列数A')">排列数 A</button>
+          <button type="button" class="pill-btn" onclick="setCategory('组合数C')">组合数 C</button>
+          <button type="button" class="pill-btn" onclick="setCategory('先选再排')">先选再排</button>
+          <button type="button" class="pill-btn" onclick="setCategory('分组消重问题')">分组消重问题</button>
+          <button type="button" class="pill-btn" onclick="setCategory('拓展变式')">拓展变式</button>
+        </div>
+      </div>
+
+      <div class="results-meta">
+        <span id="results-count">正在显示 16 / 16 条讲义题目</span>
+        <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+          <button type="button" class="btn btn--small" onclick="expandAllVisible(true)">全部展开解析</button>
+          <button type="button" class="btn btn--small" onclick="expandAllVisible(false)">全部收起解析</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="empty-state" role="status">
+      <h3 style="margin:0; font-size:var(--subhead-size);">没有找到符合条件的题目</h3>
+      <p style="margin:0; color:var(--on-surface-variant);">当前搜索关键词、模型分类或复习状态组合下没有匹配的讲义题。你可以清空筛选条件重新浏览全部 16 道讲义精讲与巩固题。</p>
+      <button type="button" class="btn btn--primary" onclick="clearAllFilters()">显示全部题目</button>
+    </div>
+
+    <!-- Cards Container -->
+    <div class="card-grid" id="problem-cards-grid">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- Section 3: 4-Step SOP, Formulas & Mantra -->
+  <section class="section-open section-open--yellow" aria-labelledby="sec-sop-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--yellow">小学阶段标准解题流程</span>
+        <h2 class="section-heading" id="sec-sop-title">4步标准解题 SOP、必背公式与口诀</h2>
+        <p class="section-desc">严格贴合小学阶段算理，不超纲、不套用复杂代数变形，每一步都有大白话原因解释。</p>
+      </div>
+    </div>
+
+    <div class="sop-grid">
+      <article class="sop-card">
+        <span class="sop-num">01</span>
+        <h3 class="sop-title">找准“几选几”</h3>
+        <p style="margin:0; font-size:0.9rem;">先找出总数 <span class="math-expr">n</span> 写在字母右下角，再找出挑出的个数 <span class="math-expr">m</span> 写在右上角（<span class="comb-sym">A<span class="comb-indices"><span>m</span><span>n</span></span></span> 或 <span class="comb-sym">C<span class="comb-indices"><span>m</span><span>n</span></span></span>）。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>算理：</strong>这是搭好算式的地基，先定范围与数量。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">02</span>
+        <h3 class="sop-title">做“交换测试”定 A 或 C</h3>
+        <p style="margin:0; font-size:0.9rem;">随便挑出选好的 2 人或 2 物互换位置：变成新方法用排列 <span class="math-expr">A</span>；还是同一种方法用组合 <span class="math-expr">C</span>。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>算理：</strong>排列与组合唯一区别就是“顺序重不重要”，亲手换位最不易被绕晕。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">03</span>
+        <h3 class="sop-title">代入算式巧计算</h3>
+        <p style="margin:0; font-size:0.9rem;">算 <span class="math-expr">A</span> 从 <span class="math-expr">n</span> 倒着连乘 <span class="math-expr">m</span> 个数；算 <span class="math-expr">C</span> 用 <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>n</span></span></span> ÷ <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>m</span></span></span>，若 <span class="math-expr">m</span> 较大先“大转小”。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>算理：</strong>直接排列会把同一组人自己排队的 <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>m</span></span></span> 种重复全算进去，所以要除以它。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num">04</span>
+        <h3 class="sop-title">复杂题分步拆解再相乘</h3>
+        <p style="margin:0; font-size:0.9rem;">遇“先选再分”“分组”“0不在首位”，拆成几小步各算各的再相乘；无组名分组最后除以组名乱排倍数。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>算理：</strong>分步完成用乘法；无组名消重对应 P045 高能时刻 2。</p>
+      </article>
+    </div>
+
+    <div class="mantra-banner">
+      <div>
+        <span class="kicker-block" style="margin-bottom:var(--space-sm);">必背解题口诀（知识点梳理 第3模块）</span>
+        <p class="mantra-quote">“选人排排站，交换变不变？<br>变了就用 A，倒乘 m 个数；<br>不变就用 C，除以小排列。”</p>
+      </div>
+      <ul class="formula-list">
+        <li>
+          <span><strong>排列数公式（P028）</strong></span>
+          <span class="math-expr"><span class="comb-sym">A<span class="comb-indices"><span>m</span><span>n</span></span></span> = n × (n-1) × …（连乘 m 个数）</span>
+        </li>
+        <li>
+          <span><strong>组合数公式（P032 / P15）</strong></span>
+          <span class="math-expr"><span class="comb-sym">C<span class="comb-indices"><span>m</span><span>n</span></span></span> = <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>n</span></span></span> ÷ <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>m</span></span></span></span>
+        </li>
+        <li>
+          <span><strong>大转小速算（P034）</strong></span>
+          <span class="math-expr"><span class="comb-sym">C<span class="comb-indices"><span>m</span><span>n</span></span></span> = <span class="comb-sym">C<span class="comb-indices"><span>n-m</span><span>n</span></span></span></span>
+        </li>
+        <li>
+          <span><strong>必背特殊值（P034）</strong></span>
+          <span class="math-expr"><span class="comb-sym">C<span class="comb-indices"><span>0</span><span>n</span></span></span> = 1， <span class="comb-sym">C<span class="comb-indices"><span>n</span><span>n</span></span></span> = 1， <span class="comb-sym">C<span class="comb-indices"><span>1</span><span>n</span></span></span> = n</span>
+        </li>
+        <li>
+          <span><strong>先选再排规律（P038 / P042）</strong></span>
+          <span class="math-expr"><span class="comb-sym">C<span class="comb-indices"><span>m</span><span>n</span></span></span> × <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>m</span></span></span> = <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>n</span></span></span></span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 4: 4 Major Pitfalls -->
+  <section class="section-open section-open--black" aria-labelledby="sec-pitfall-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block">易错难点与避坑清单</span>
+        <h2 class="section-heading" id="sec-pitfall-title">4 大高频丢分坑：常见错法 → 错因 → 避坑检查动作</h2>
+        <p class="section-desc">整理自《小学奥数排列组合知识点梳理》第4模块与讲义巩固拓展题。</p>
+      </div>
+    </div>
+
+    <div class="pitfall-grid">
+      <article class="pitfall-card">
+        <div class="pitfall-head">
+          <h3 class="pitfall-title">坑 1：分不清“有顺序”还是“无顺序”</h3>
+          <span class="tag">自我巩固 第7、8题 / P21</span>
+        </div>
+        <div class="pitfall-row"><strong>【常见错法】</strong> 看到“选 2 种”就一律用组合 <span class="math-expr">C</span>，如把“14 个车站往返车票”或“兄弟俩各挑 1 种不同棒棒糖”错算成 <span class="math-expr">C</span>。</div>
+        <div class="pitfall-row"><strong>【错因剖析】</strong> 没有看清选出来的东西有没有“对应到不同的人、角色或起点终点”。</div>
+        <div class="pitfall-row"><strong>【避坑检查动作】</strong> 动笔前强制做一次<strong>“交换测试”</strong>——把哥哥和弟弟选的口味互换，一样吗？不一样！所以必须用 <span class="math-expr">A</span>。</div>
+      </article>
+
+      <article class="pitfall-card">
+        <div class="pitfall-head">
+          <h3 class="pitfall-title">坑 2：分组问题中，忽略“有没有组名”</h3>
+          <span class="tag">高能时刻 2 / P045</span>
+        </div>
+        <div class="pitfall-row"><strong>【常见错法】</strong> 把 10 人分成 3人、3人、4人三组（不区分组名），直接照搬有组名的答案 <span class="math-expr">12600</span> 或漏除重复倍数。</div>
+        <div class="pitfall-row"><strong>【错因剖析】</strong> 分 A、B、C 三组时，同一批人换个组名算新方法；若不区分组名，A、B、C 这 3 个组名自己排队产生的 <span class="comb-sym">A<span class="comb-indices"><span>3</span><span>3</span></span></span> = 6 种情况其实是同一种分法。</div>
+        <div class="pitfall-row"><strong>【避坑检查动作】</strong> 圈出题目里有没有“甲乙丙 / A、B、C 组”字样。有组名先定特殊人数归哪组；无组名算完有组名结果后，记得除以组名排列数（3 个组就除以 6）。</div>
+      </article>
+
+      <article class="pitfall-card">
+        <div class="pitfall-head">
+          <h3 class="pitfall-title">坑 3：数字组数时，忘记“0 不能在最高位”</h3>
+          <span class="tag">专属探索 第3、4题 / P26</span>
+        </div>
+        <div class="pitfall-row"><strong>【常见错法】</strong> 用 0、1、3、5、7、9 组三位数直接算 <span class="comb-sym">A<span class="comb-indices"><span>3</span><span>6</span></span></span> = 120；或算四位“上升数”时把 0 算进去写成 <span class="comb-sym">C<span class="comb-indices"><span>4</span><span>10</span></span></span>。</div>
+        <div class="pitfall-row"><strong>【错因剖析】</strong> 0 放在最左边（首位）就不再是原来的位数了（例如 0123 是三位数，不是四位数）。</div>
+        <div class="pitfall-row"><strong>【避坑检查动作】</strong> 只要给的数字里<strong>包含 0</strong>，立刻在 0 下面画圈！算最高位或“上升数”时先排除 0；算“下降数”时 0 排在最后一位（个位）合法，可以选。</div>
+      </article>
+
+      <article class="pitfall-card">
+        <div class="pitfall-head">
+          <h3 class="pitfall-title">坑 4：算组合数时硬算大数，导致计算丢分</h3>
+          <span class="tag">任务2 · 实践2 / P034</span>
+        </div>
+        <div class="pitfall-row"><strong>【常见错法】</strong> 计算 <span class="comb-sym">C<span class="comb-indices"><span>8</span><span>10</span></span></span> 或 <span class="comb-sym">C<span class="comb-indices"><span>5</span><span>7</span></span></span> 时，老老实实倒着乘 8 个数或 5 个数，结果乘错或除错。</div>
+        <div class="pitfall-row"><strong>【错因剖析】</strong> 忘记了组合数的“大转小”速算规律（选 8 个带走等于选 2 个留下）。</div>
+        <div class="pitfall-row"><strong>【避坑检查动作】</strong> 看到右上角数字 <span class="math-expr">m</span> 超过总数 <span class="math-expr">n</span> 的一半，立刻把它变成 <span class="math-expr">n - m</span> 再动笔算。</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Section 5: 8-Type Variant Table -->
+  <section class="section-open section-open--blue" aria-labelledby="sec-table-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--blue">全讲义变式总览</span>
+        <h2 class="section-heading" id="sec-table-title">8 类题型变式对照表（点击定位对应例题）</h2>
+        <p class="section-desc">完整对照《小学奥数排列组合知识点梳理》第5模块，点击每行右侧按钮可直接在上方题库筛选查看该类题型的详细算式。</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="variant-table">
+        <thead>
+          <tr>
+            <th>变式类型</th>
+            <th>题目条件怎么变了</th>
+            <th>解题步骤需要怎么调整</th>
+            <th>对应讲义例题</th>
+            <th>快速定位</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>基础排列</strong></td>
+            <td>明确要求排成一排、按顺序举旗、分先后棒次</td>
+            <td>找准 <span class="math-expr">n</span> 和 <span class="math-expr">m</span>，直接用 <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>n</span></span></span> 倒着连乘 <span class="math-expr">m</span> 个数</td>
+            <td>活动一 / P027<br>任务1 / P030</td>
+            <td><button type="button" class="table-jump-btn" onclick="jumpToCategory('排列数A', '')">筛选排列题</button></td>
+          </tr>
+          <tr>
+            <td><strong>基础组合</strong></td>
+            <td>只要求选出名单、挑选动作/衣服，不区分先后</td>
+            <td>找准 <span class="math-expr">n</span> 和 <span class="math-expr">m</span>，用 <span class="comb-sym">C<span class="comb-indices"><span>m</span><span>n</span></span></span> = <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>n</span></span></span> ÷ <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>m</span></span></span> 计算</td>
+            <td>活动二 / P032<br>任务3 / P036</td>
+            <td><button type="button" class="table-jump-btn" onclick="jumpToCategory('组合数C', '')">筛选组合题</button></td>
+          </tr>
+          <tr>
+            <td><strong>先选再排</strong></td>
+            <td>先从大群体选出几人，再一对一分给不同教练或职位</td>
+            <td>先算组合 <span class="comb-sym">C<span class="comb-indices"><span>m</span><span>n</span></span></span>，再乘全排列 <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>m</span></span></span>（其实等于直接算 <span class="comb-sym">A<span class="comb-indices"><span>m</span><span>n</span></span></span>）</td>
+            <td>活动三任务5 / P042<br>自我巩固9、10 / P22</td>
+            <td><button type="button" class="table-jump-btn" onclick="jumpToCategory('先选再排', '')">筛选先选再排</button></td>
+          </tr>
+          <tr>
+            <td><strong>有组名分组</strong></td>
+            <td>把人分成人数不同的若干组，且每组有固定名字（A/B/C组或甲乙丙）</td>
+            <td>第1步先确定特殊人数归哪组；第2步依次用 <span class="math-expr">C</span> 选人；最后各步相乘</td>
+            <td>高能时刻2① / P045<br>专属探索2 / P25</td>
+            <td><button type="button" class="table-jump-btn" onclick="jumpToCategory('分组消重问题', '组')">查看有组名题</button></td>
+          </tr>
+          <tr>
+            <td><strong>无组名分组</strong></td>
+            <td>把所有人分成若干组，但<strong>没有组名</strong>（只看谁和谁在一组）</td>
+            <td>先按“有组名”算出总数，再除以组名重复排列的次数（3组除以 <span class="comb-sym">A<span class="comb-indices"><span>3</span><span>3</span></span></span> = 6）</td>
+            <td>高能时刻2② / P045</td>
+            <td><button type="button" class="table-jump-btn" onclick="jumpToCategory('分组消重问题', '高能时刻2')">查看无组名题</button></td>
+          </tr>
+          <tr>
+            <td><strong>几何数角</strong></td>
+            <td>给一个端点引出的多条射线，问一共能组成多少个锐角</td>
+            <td>任意选 2 条射线就能组成 1 个角，交换顺序还是同一个角，直接用 <span class="comb-sym">C<span class="comb-indices"><span>2</span><span>n</span></span></span></td>
+            <td>专属探索1 / P25</td>
+            <td><button type="button" class="table-jump-btn" onclick="jumpToCategory('拓展变式', '锐角')">定位数锐角</button></td>
+          </tr>
+          <tr>
+            <td><strong>上升数 / 下降数</strong></td>
+            <td>要求多位数的每一位从左到右越来越大（或越来越小）</td>
+            <td>选出数字后顺序就唯一确定，转化为组合 <span class="math-expr">C</span>！上升数不能选 0（9选），下降数可选 0（10选）</td>
+            <td>专属探索3 / P26</td>
+            <td><button type="button" class="table-jump-btn" onclick="jumpToCategory('拓展变式', '上升数')">定位上升下降数</button></td>
+          </tr>
+          <tr>
+            <td><strong>含 0 组数</strong></td>
+            <td>给出一堆含 0 的数字，求能组成多少个无重复数字的多位数</td>
+            <td>首位不能为 0！先从非 0 数字选 1 个放首位（<span class="math-expr">C</span>），剩下位置用剩余数字全排列（<span class="math-expr">A</span>），两步相乘</td>
+            <td>专属探索4(2) / P26</td>
+            <td><button type="button" class="table-jump-btn" onclick="jumpToCategory('拓展变式', '三位数')">定位含0组数</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div>
+      <strong>来源声明：</strong>本页面所有模型分类、题目数值、计算过程及易错剖析均严格依据《【素养】26秋-4C+-第02讲-运动会筹备-手写解析.pdf》与《小学奥数排列组合知识点梳理》整理，未引入讲义外公式或虚构条件；缺失细节均已标注「来源未提及」。
+    </div>
+    <div>
+      体系衔接：三春《搭配的智慧》 → 四秋《运动会筹划》 → 四秋《城市生态绿化》（P026）
+    </div>
+  </footer>
+
+</div>
+
+<api-shim></api-shim>
+<script>
+// Helper to format combinatorial symbols cleanly without inner HTML vulnerabilities
+function fmtMath(str) {
+  return str;
+}
+
+// ============================================================
+// Grounded Datasets (100% traced to the two uploaded sources)
+// ============================================================
+const COMPARE_TABS = {
+  perm_comb: {
+    leftTitle: `排列模型（符号 A）`,
+    leftTag: `与顺序有关`,
+    leftAccent: false,
+    leftRows: [
+      { label: `核心定义（P028）`, val: `选出几个排一行，交换顺序就不同。` },
+      { label: `排列数公式（P028）`, val: `A(n, m) = 从 n 开始倒着乘，连续乘 m 个数。` },
+      { label: `交换测试判定（P038）`, val: `互换两个人的位置后，变成一种新方法 → 用 A。` },
+      { label: `一眼识别关键词（梳理第1模块）`, val: `站成一排照相、按顺序举信号旗、接力赛分第一二三四棒、分配不同床位/早午饭/班委职位、两地往返车票。` },
+      { label: `典型讲义原题`, val: `6人选4人跑4×100米接力：A(6,4) = 6×5×4×3 = 360（种）（P037）；8人选3人任早中晚裁判：A(8,3) = 336（种）（P040）。` }
+    ],
+    rightTitle: `组合模型（符号 C）`,
+    rightTag: `与顺序无关`,
+    rightAccent: true,
+    rightRows: [
+      { label: `核心定义（P031）`, val: `选出几个成一组，交换顺序还一样。` },
+      { label: `组合数公式（P032 / P15）`, val: `C(n, m) = A(n, m) ÷ A(m, m)；大转小：C(n, m) = C(n, n-m)。` },
+      { label: `交换测试判定（P038）`, val: `互换两个人的位置后，还是同一种方法 → 用 C。` },
+      { label: `一眼识别关键词（梳理第1模块）`, val: `确定名单、选代表、挑热身动作、打包衣服、买水果、数射线组成的角、上升数与下降数。` },
+      { label: `典型讲义原题`, val: `6人选4人采购物资：C(6,4) = C(6,2) = 15（种）（P037）；8人选3人参加团体比拼名单：C(8,3) = 56（种）（P040）。` }
+    ]
+  },
+  group_name: {
+    leftTitle: `有组名分组（区分组名）`,
+    leftTag: `分步归属`,
+    leftAccent: false,
+    leftRows: [
+      { label: `题目特征（P045 / P25）`, val: `分组时明确指出了 A、B、C 三组或甲、乙、丙等不同对象。` },
+      { label: `核心思路（P045 高能时刻2①）`, val: `第1步：先确定特殊人数（如4人组）归哪一组；第2步：依次用 C 选人；第3步：分步相乘。` },
+      { label: `典型算式（P045）`, val: `10人分A、B、C三组（两组3人、一组4人）：3 × C(10,4) × C(6,3) × C(3,3) = 3 × 210 × 20 × 1 = 12600（种）。` },
+      { label: `变式关联（P25 专属探索2）`, val: `3人借8本漫画书（1人借2本、另2人各借3本）：先从3人选1人拿2本 C(3,1)=3，再依次选书，共 3 × 28 × 20 × 1 = 1680（种）。` },
+      { label: `额外特例说明`, val: `来源未提及（本节仅讨论“两组3人、一组4人”与“1人2本、2人3本”两种分配结构）。` }
+    ],
+    rightTitle: `无组名分组（不区分组名）`,
+    rightTag: `消重除以全排列`,
+    rightAccent: true,
+    rightRows: [
+      { label: `题目特征（P045 / 梳理第5模块）`, val: `只把所有人分成若干组对抗，不标注组名（只看谁和谁在一组）。` },
+      { label: `重复原因剖析（P045 / 梳理坑2）`, val: `同一批分组方案（如AABBCC、ABCABC等），把3个组名互相调换会产生 A(3,3) = 6 种重复，其实这 6 种算同一种分法。` },
+      { label: `典型算式（P045 高能时刻2②）`, val: `10人分三组（两组3人、一组4人，不考虑组名）：先按有组名算得 12600，再除以 6，得 12600 ÷ 6 = 2100（种）。` },
+      { label: `避坑检查动作`, val: `圈出题干有无“A、B、C组 / 甲乙丙”字样；若无组名，算完有组名总数后必须除以重复排列倍数。` },
+      { label: `圆排列类比消重（P043）`, val: `7人围圆桌旋转重合算同一种，同样用排列数除以旋转重复次数 7：A(7,7) ÷ 7 = 720（种）。` }
+    ]
+  },
+  direct_conv: {
+    leftTitle: `直接思考 / 直接排列法`,
+    leftTag: `直观顺推`,
+    leftAccent: false,
+    leftRows: [
+      { label: `场景 1：直接排列（P042 任务5）`, val: `12名运动员选4人分给4位小组负责人：直接算 A(12,4) = 12×11×10×9 = 11880（种）。` },
+      { label: `场景 2：大数组合硬算（梳理坑4）`, val: `直接按定义算 C(10,8) = A(10,8) ÷ A(8,8)，要连乘 8 个数再除，计算量大且容易出错。` },
+      { label: `场景 3：数数字/数角硬数（P25–P26）`, val: `若逐个枚举所有四位上升数或一条条数射线组成的锐角，容易漏数或重复。` },
+      { label: `场景 4：含 0 三位数（P26）`, val: `若误用直接排列 A(6,3)=120，会把 0 排在百位的无效数也算进去。` }
+    ],
+    rightTitle: `转化法 / 分步策略`,
+    rightTag: `等价巧算`,
+    rightAccent: true,
+    rightRows: [
+      { label: `先选再排等价（P042 任务5）`, val: `先从12人选4人 C(12,4)=495，再分给4位负责人 A(4,4)=24，495×24=11880。结论：先选再排 = 直接排列。` },
+      { label: `大转小偷懒公式（P034 任务2）`, val: `从10个里选8个带走等于选2个留下：C(10,8) = C(10,2) = (10×9)÷(2×1) = 45。` },
+      { label: `顺序唯一转化为组合（P25–P26）`, val: `四位上升数只要从 1–9 选出4个数字，大小顺序就唯一确定：C(9,4)=126；7条射线任选2条成锐角：C(7,2)=21。` },
+      { label: `首位受限分步法（P26 探索4(2)）`, val: `0不能在百位：第1步从非0数字5个里选1个放百位 C(5,1)=5，第2步十个位用剩下5个数字排 A(5,2)=20，共 5×20=100（个）。` }
+    ]
+  }
+};
+
+const SIM_SCENARIOS = {
+  signal: {
+    title: `信号旗举旗（活动一试一试 · P027）`,
+    desc: `从红、黄、蓝 3 面旗中选 2 面按前后顺序举起。`,
+    actionText: `互换两面信号旗的举旗顺序`,
+    resetText: `还原初始顺序`,
+    slotsBefore: [
+      { role: `第1面举起`, val: `红旗` },
+      { role: `第2面举起`, val: `黄旗` }
+    ],
+    slotsAfter: [
+      { role: `第1面举起`, val: `黄旗`, changed: true },
+      { role: `第2面举起`, val: `红旗`, changed: true }
+    ],
+    isPerm: true,
+    verdictBefore: `当前信号为「先红后黄」。点击上方按钮试试交换两面旗的先后顺序。`,
+    verdictAfter: `变成「先黄后红」！讲义明确指出“不同的举旗顺序代表不一样的提示信号”，所以交换顺序后是新方法 → 排列模型 A(3,2) = 3×2 = 6（种）。`
+  },
+  relay: {
+    title: `4×100米接力分配（活动三试一试 · P037）`,
+    desc: `从 6 名同学中选 4 人分配到第一棒至第四棒。`,
+    actionText: `将第一棒「小高」与第二棒「小明」互换`,
+    resetText: `还原接力棒次`,
+    slotsBefore: [
+      { role: `第一棒`, val: `小高` },
+      { role: `第二棒`, val: `小明` },
+      { role: `第三棒`, val: `东东` },
+      { role: `第四棒`, val: `奇奇` }
+    ],
+    slotsAfter: [
+      { role: `第一棒`, val: `小明`, changed: true },
+      { role: `第二棒`, val: `小高`, changed: true },
+      { role: `第三棒`, val: `东东` },
+      { role: `第四棒`, val: `奇奇` }
+    ],
+    isPerm: true,
+    verdictBefore: `当前安排：第一棒小高、第二棒小明、第三棒东东、第四棒奇奇。`,
+    verdictAfter: `互换后第一棒变成小明、第二棒变成小高！讲义结论：“是”一种新方法 → 排列问题 A(6,4) = 6×5×4×3 = 360（种）。`
+  },
+  purchase: {
+    title: `采购小队名单（活动三试一试 · P037）`,
+    desc: `从 6 名同学中挑选 4 人外出采购运动用品，仅确定成员名单。`,
+    actionText: `将名单中「小高」与「笑笑」顺序互换`,
+    resetText: `还原名单顺序`,
+    slotsBefore: [
+      { role: `采购成员`, val: `小高` },
+      { role: `采购成员`, val: `笑笑` },
+      { role: `采购成员`, val: `依依` },
+      { role: `采购成员`, val: `萱萱` }
+    ],
+    slotsAfter: [
+      { role: `采购成员`, val: `笑笑`, changed: true },
+      { role: `采购成员`, val: `小高`, changed: true },
+      { role: `采购成员`, val: `依依` },
+      { role: `采购成员`, val: `萱萱` }
+    ],
+    isPerm: false,
+    verdictBefore: `当前采购组名单：小高、笑笑、依依、萱萱。`,
+    verdictAfter: `互换小高和笑笑后，还是这 4 个人去采购！讲义结论：“不是”一种新方法 → 组合问题 C(6,4) = C(6,2) = (6×5)÷(2×1) = 15（种）。`
+  },
+  roundtable: {
+    title: `圆桌休整座位（高能时刻1 · P043）`,
+    desc: `7 名运动员 A–G 围着圆桌坐成一圈，规定座位旋转后重合视为同一种坐法。`,
+    actionText: `全体顺时针旋转 1 个座位`,
+    resetText: `还原旋转前位置`,
+    slotsBefore: [
+      { role: `圈位1`, val: `A` },
+      { role: `圈位2`, val: `B` },
+      { role: `圈位3`, val: `C` },
+      { role: `圈位4`, val: `D` },
+      { role: `圈位5`, val: `E` },
+      { role: `圈位6`, val: `F` },
+      { role: `圈位7`, val: `G` }
+    ],
+    slotsAfter: [
+      { role: `圈位1`, val: `G`, changed: true },
+      { role: `圈位2`, val: `A`, changed: true },
+      { role: `圈位3`, val: `B`, changed: true },
+      { role: `圈位4`, val: `C`, changed: true },
+      { role: `圈位5`, val: `D`, changed: true },
+      { role: `圈位6`, val: `E`, changed: true },
+      { role: `圈位7`, val: `F`, changed: true }
+    ],
+    isPerm: false,
+    verdictBefore: `当前顺时针序列：ABCDEFG。点击按钮观察旋转后是否改变坐法。`,
+    verdictAfter: `旋转后变成 GABCDEF，左右邻居关系完全相同！7 种旋转（ABCDEFG、BCDEFGA…GABCDEF）只算 1 种坐法，故总数 = A(7,7) ÷ 7 = 720（种）。`
+  }
+};
+
+const PROBLEMS = [
+  {
+    id: `p027-signal`,
+    category: `排列数A`,
+    stage: `活动一 · 试一试`,
+    accent: `blue`,
+    title: `信号旗颜色搭配（3选2）`,
+    prompt: `后勤组备有红、黄、蓝 3 面颜色完全不同的信号旗。比赛时会挑选 2 面旗子按前后顺序举起，不同的举旗顺序代表不一样的提示信号。一共能搭配出多少种不一样的提示信号？`,
+    specialNote: `科普小贴士：信号旗起源于海上航海旗语，不同色彩、顺序的组合可传递开赛、暂停、换人、终点冲刺等数十种指令。`,
+    formula: `A(3,2) = 3 × 2 = 6（种）`,
+    steps: [
+      `① 找准几选几：总数 n = 3（红、黄、蓝 3 面旗），选出 m = 2 面。`,
+      `② 交换测试：前后举旗顺序不同代表不同信号，交换两面旗即产生新信号 → 与顺序有关，用排列 A。`,
+      `③ 算式计算：从 3 开始倒着连乘 2 个数，A(3,2) = 3 × 2 = 6（种）。`
+    ],
+    quote: `“排列：选出几个排一行，交换顺序就不同。A(n,m)：从 n 开始倒着乘，连续乘 m 个数。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第027–028页 活动一试一试`
+  },
+  {
+    id: `p030-photo`,
+    category: `排列数A`,
+    stage: `活动一 · 任务1 & 实践1`,
+    accent: `blue`,
+    title: `引导员入场列队拍摄 & 7面彩旗信号`,
+    prompt: `任务1：琪琪、卓卓、瑞瑞、莉莉 4 名引导员配合入场拍摄，每次挑选 3 人站成一排举牌列队，剩余 1 人手持相机记录，一共能拍出多少种不同照片？\n实践1：明明备有 7 面花纹、色彩各不相同的引导彩旗，每次取出 5 面横向依次排列代表不同信号，共可搭配多少种？`,
+    specialNote: `科普提示（P030）：集体合影一般会让个子偏高的同学站后排，露天赛场拍照还要避开阳光直射方向。`,
+    formula: `任务1：A(4,3) = 24（张）；实践1：A(7,5) = 2520（种）`,
+    steps: [
+      `任务1：① 4 选 3；② 站成一排交换顺序就是不同照片（与顺序有关）；③ A(4,3) = 4 × 3 × 2 = 24（张）。`,
+      `实践1：① 7 选 5；② 摆放前后顺序不同代表不同信号（与顺序有关）；③ A(7,5) = 7 × 6 × 5 × 4 × 3 = 42 × 60 = 2520（种）。`
+    ],
+    quote: `“每次挑选三人站成一排举牌列队… ①4选3 ②与顺序有关 A(4,3) = 4×3×2 = 24（张）。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第030页 任务1与实践1`
+  },
+  {
+    id: `p032-calc`,
+    category: `组合数C`,
+    stage: `活动二 · 试一试 & 任务2 & 实践2`,
+    accent: `yellow`,
+    title: `组合公式推导与“大转小”速算`,
+    prompt: `柯西用 C 表示只选出不排顺序的组合数。请计算：\n任务2（运动员名单）：C(5,2)、C(6,1)、C(6,5)、C(10,8)、C(100,0)、C(100,100)。\n实践2（物资种类）：C(9,3)、C(8,4)、C(7,5)。`,
+    specialNote: `包含必背特殊值与“大转小”速算规则（梳理第3模块、避坑第4条）。`,
+    formula: `C(5,2)=10；C(6,5)=6；C(10,8)=45；C(100,0)=1；C(9,3)=84；C(8,4)=70；C(7,5)=21`,
+    steps: [
+      `组合数核心公式：C(n,m) = A(n,m) ÷ A(m,m)。因为 m 个元素内部排队有 A(m,m) 种重复情况，需除以 A(m,m) 去重。`,
+      `“大转小”技巧：当右上角 m 超过总数一半时，用 C(n,m) = C(n, n-m)。如 C(10,8) = C(10,2) = (10×9)÷(2×1) = 45；C(7,5) = C(7,2) = (7×6)÷(2×1) = 21；C(6,5) = C(6,1) = 6。`,
+      `必背特殊值：C(100,0) = 1，C(100,100) = 1。常规计算：C(9,3) = (9×8×7)÷(3×2×1) = 84；C(8,4) = (8×7×6×5)÷(4×3×2×1) = 70。`
+    ],
+    quote: `“C(10,8) = C(10,2) = A(10,2) ÷ A(2,2) = (10×9) ÷ (2×1) = 45；C(100,0) = 1；C(100,100) = 1。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第032–034页 试一试/任务2/实践2`
+  },
+  {
+    id: `p036-warmup`,
+    category: `组合数C`,
+    stage: `活动二 · 任务3 & 实践3`,
+    accent: `yellow`,
+    title: `热身动作挑选 & 游泳队开场亮相`,
+    prompt: `任务3：教练准备从 10 套热身动作里选出 3 套给运动员赛前练习，不区分练习先后顺序，有多少种挑选方案？\n实践3：游泳队共有 8 名运动员，教练从中挑选 3 人参与开场亮相，只确定入选人员、不安排出场顺序，有多少种选人方式？`,
+    specialNote: `科学热身提示（P036）：先慢跑慢走提升体温，再拉伸肩颈、腰腿、手腕脚踝各处关节，避免抽筋扭伤。`,
+    formula: `任务3：C(10,3) = 120（种）；实践3：C(8,3) = 56（种）`,
+    steps: [
+      `任务3：① 10 选 3；② 不区分先后顺序（交换动作顺序还是选这 3 套）→ 组合 C(10,3) = (10×9×8) ÷ (3×2×1) = 120（种）。`,
+      `实践3：① 8 选 3；② 只定入选人员、不安排出场顺序 → 组合 C(8,3) = (8×7×6) ÷ (3×2×1) = 56（种）。`
+    ],
+    quote: `“只确定入选人员、不安排出场顺序。① 8选3 ②与顺序无关 C(8,3) = A(8,3) ÷ A(3,3) = 56（种）。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第036页 任务3与实践3`
+  },
+  {
+    id: `p037-relay`,
+    category: `概念辨析`,
+    stage: `活动三 · 试一试`,
+    accent: `red`,
+    title: `接力赛棒次 vs 采购小队（同数对比辨析）`,
+    prompt: `同样是从 6 名同学中选 4 人：\n① 分配到 4×100 米接力第一至第四棒赛道，交换小高和小明顺序，算新方法吗？共有多少种？\n② 组建 4 人采购小队仅确定成员名单，交换小高和笑笑顺序，算新方法吗？共有多少种？`,
+    specialNote: `科普小贴士（P037）：4×100 米接力第一棒擅长起跑加速，最后一棒冲刺更强，中途两棒侧重稳定交接。`,
+    formula: `接力（排列）：A(6,4) = 360（种）；采购（组合）：C(6,4) = C(6,2) = 15（种）`,
+    steps: [
+      `① 接力问题：交换第一棒小高与第二棒小明，“是”一种新方法（棒次分工不同），属于排列问题 → A(6,4) = 6×5×4×3 = 360（种）。`,
+      `② 采购问题：交换名单里小高与笑笑，“不是”一种新方法（还是这 4 个人），属于组合问题 → C(6,4) = C(6,2) = (6×5) ÷ (2×1) = 15（种）。`
+    ],
+    quote: `“我发现了：交换顺序就不同，是排列；交换顺序还一样，是组合。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第037–038页 活动三试一试`
+  },
+  {
+    id: `p040-badminton`,
+    category: `概念辨析`,
+    stage: `活动三 · 任务4 & 实践4`,
+    accent: `red`,
+    title: `羽毛球时段裁判 vs 团体名单 & 跳远选拔`,
+    prompt: `任务4：羽毛球预备队共 8 名同学，一是选 3 人分早、中、晚三时段做裁判；二是选 3 人组队参加团体比拼只定名单，各有多少种？\n实践4：跳远项目 7 名候选人，rule1 选 2 人进后备名单不区分优先级；rule2 选 1 名正式主力、1 名替补，各有多少种？`,
+    specialNote: `项目提示（P040）：羽毛球分单打、双打两类，考验反应速度与跑动耐力。`,
+    formula: `任务4：裁判 336 种 / 团体名单 56 种；实践4：后备 21 种 / 主力替补 42 种`,
+    steps: [
+      `任务4（早中晚裁判）：对应早、中、晚三个不同时段，与顺序有关 → A(8,3) = 8×7×6 = 336（种）。`,
+      `任务4（团体只定名单）：与顺序无关 → C(8,3) = (8×7×6) ÷ (3×2×1) = 56（种）。`,
+      `实践4（rule1 后备名单）：不区分优先级，与顺序无关 → C(7,2) = (7×6) ÷ (2×1) = 21（种）。`,
+      `实践4（rule2 1主力+1替补）：岗位角色不同，与顺序有关 → A(7,2) = 7×6 = 42（种）。`
+    ],
+    quote: `“第一种只是选出2名选手进入后备名单，不区分参赛优先级…第二种选定1名正式主力、1名替补。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第040页 任务4与实践4`
+  },
+  {
+    id: `p042-select-arrange`,
+    category: `先选再排`,
+    stage: `活动三 · 任务5 & 实践5`,
+    accent: `black`,
+    title: `综合项目与田径项目：先选人再分给负责人/教练`,
+    prompt: `任务5：12 名特长互不相同的候选运动员，王老师等 4 位小组负责人每人单独跟进 1 人：(1) 先选出 4 名运动员有多少种选法？(2) 再分给 4 位负责人有多少种分法？(3) 一共有多少种可能？\n实践5：6 名报名选手选 4 人分给 4 位专项教练，每位对接 1 名，共多少种可能？`,
+    specialNote: `核心规律：先选再排 = 直接排列，即 C(n,m) × A(m,m) = A(n,m)。`,
+    formula: `任务5：495 × 24 = 11880（种）；实践5：15 × 24 = 360（种）`,
+    steps: [
+      `任务5(1) 选4人（与顺序无关）：C(12,4) = (12×11×10×9) ÷ (4×3×2×1) = 495（种）。`,
+      `任务5(2) 4位负责人分配（与顺序有关）：A(4,4) = 4×3×2×1 = 24（种）。`,
+      `任务5(3) 分步相乘：495 × 24 = 11880（种）；直接排列验证：A(12,4) = 12×11×10×9 = 11880（种）。`,
+      `实践5：(1) C(6,4) = C(6,2) = 15（种）；(2) A(4,4) = 24（种）；(3) 先选再分 15 × 24 = 360（种）。`
+    ],
+    quote: `“分步相乘 495×24 = 11880，直接排列 A(12,4) = 11880。先选再排 = 直接排列。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第042页 任务5与实践5`
+  },
+  {
+    id: `p043-roundtable`,
+    category: `分组消重问题`,
+    stage: `附加活动 · 高能时刻 1`,
+    accent: `black`,
+    title: `圆桌休整讨论（圆排列旋转消重）`,
+    prompt: `志愿者安排 7 名运动员在圆桌休整讨论策略，规定座位旋转后重合就视为同一种坐法。\n(1) 7 个人围着圆桌坐成一圈，有多少种不同的坐法？\n(2) 从 7 个人中选出 5 个人围着圆桌坐成一圈，有多少种不同的坐法？`,
+    specialNote: `圆桌模型易错点：线性排列拉直有 7 个起点，围成一圈旋转后这 7 种算同一种坐法。`,
+    formula: `(1) A(7,7) ÷ 7 = 720（种）；(2) A(7,5) ÷ 5 = 504（种）`,
+    steps: [
+      `(1) 7人围坐一圈：比如 ABCDEFG、BCDEFGA … GABCDEF 这 7 种线性排列旋转后重合，算同一种。所以用 A(7,7) ÷ 7 = (7×6×5×4×3×2×1) ÷ 7 = 720（种）。`,
+      `(2) 7人选5人围坐一圈：先按线性选排 5 人有 A(7,5) 种，每 5 种旋转（如 ABCDE、BCDEA … EABCD）重合算 1 种，因此除以 5：(7×6×5×4×3) ÷ 5 = 7×6×4×3 = 504（种）。`
+    ],
+    quote: `“规定座位旋转后重合就视为同一种坐法…(1) 720；(2) A(7,5) ÷ 5 = 504。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第043–044页 高能时刻1`
+  },
+  {
+    id: `p045-grouping`,
+    category: `分组消重问题`,
+    stage: `附加活动 · 高能时刻 2`,
+    accent: `black`,
+    title: `10人团体对抗赛分组（有组名 vs 无组名）`,
+    prompt: `运动会团体对抗赛要把 10 名运动员分成几个小组来比拼，有两种分组规则：\n① 分为 A、B、C 三组进行对抗，其中有两组分别是 3 人，另一组 4 人；\n② 分三组进行对抗（不区分组名），其中有两组分别是 3 人，另一组 4 人。\n各有多少种不同的分组方法？`,
+    specialNote: `重难点预警（梳理坑2）：不区分组名时，A/B/C 三个组名自己排队产生的 A(3,3) = 6 种排列其实全都是同一种分组！`,
+    formula: `① 有组名：12600（种）；② 无组名：12600 ÷ 6 = 2100（种）`,
+    steps: [
+      `① 有组名（A、B、C三组）：先定 4 人组归属，可以是 A组4人、B组4人或 C组4人，共 3 种。`,
+      `依次选人：4人组 C(10,4) = (10×9×8×7)÷(4×3×2×1) = 210；第一个3人组 C(6,3) = (6×5×4)÷(3×2×1) = 20；最后3人组 C(3,3) = 1。分步相乘：3 × 210 × 20 × 1 = 12600（种）。`,
+      `② 无组名（不考虑组名）：同一批分好的三组，加上 A、B、C 名字会产生 A(3,3) = 6 种（如AABBCC、BCACAB等 6 种算一种），所以 12600 ÷ 6 = 2100（种）。`
+    ],
+    quote: `“分步相乘：3×210×20 = 12600；不考虑组名：12600 ÷ 6 = 2100（6种算一种）。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第045页 高能时刻2 · 《知识点梳理》第4–5模块`
+  },
+  {
+    id: `p21-tickets`,
+    category: `概念辨析`,
+    stage: `自我巩固 · 第7 & 8题`,
+    accent: `red`,
+    title: `铁路车票问题 & 买水果 vs 挑棒棒糖`,
+    prompt: `第7题：某铁路线共有 14 个车站，共需要多少种不同的车票？（注：北京→天津和天津→北京是不一样的车票）\n第8题：(1) 妈妈从 5 种水果中选 2 种购买，有几种选法？(2) 兄弟两人分别从 5 种口味棒棒糖中选 1 种且约定不选同一种口味，共有多少种选法？`,
+    specialNote: `高频易错坑1：看到“选2种”不要无脑用 C！车票分起点终点、棒棒糖分哥哥弟弟，都要用 A。`,
+    formula: `车票：A(14,2) = 182（种）；水果：C(5,2) = 10（种）；棒棒糖：A(5,2) = 20（种）`,
+    steps: [
+      `第7题（车票）：① 14 选 2；② 起点站与终点站互换是不同车票，与顺序有关 → A(14,2) = 14 × 13 = 182（种）。`,
+      `第8题(1)（水果）：① 5 选 2；② 买回家装一起，交换顺序还一样 → C(5,2) = (5×4)÷(2×1) = 10（种）。`,
+      `第8题(2)（棒棒糖）：① 5 选 2；② 哥哥和弟弟互换口味算不同选法，与顺序有关 → A(5,2) = 5 × 4 = 20（种）。`
+    ],
+    quote: `“(1)①5选2 ②与顺序无关 C(5,2)=10（种）；(2)①5选2 ②与顺序有关 A(5,2)=5×4=20（种）。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第21页 自我巩固第7、8题`
+  },
+  {
+    id: `p22-class-gifts`,
+    category: `先选再排`,
+    stage: `自我巩固 · 第9 & 10题`,
+    accent: `black`,
+    title: `选班委分职位 & 选礼物分同学`,
+    prompt: `第9题：先从 11 名同学中选出 3 人作为班委，再在这 3 人中确定出班长、副班长和学习委员（一人只能担任一个职位），共有多少种不同的可能？\n第10题：从 8 件不同礼物里选 2 件分给 2 名同学，每人一件，选法算式是什么？`,
+    specialNote: `典型“先选再分”结构，对应“先选再排”标准解法。`,
+    formula: `第9题：C(11,3) × A(3,3) = 165 × 6 = 990（种）；第10题：C(8,2) × A(2,2)`,
+    steps: [
+      `第9题：① 先选3名班委（无顺序）：C(11,3) = (11×10×9)÷(3×2×1) = 165；② 再把3个不同职位分给这3人：A(3,3) = 6；③ 分步相乘：165 × 6 = 990（种）。`,
+      `第10题：(1) 从8件选2件：C(8,2)；(2) 2名同学每人挑1件：A(2,2)；(3) 最后结果：C(8,2) × A(2,2)（讲义选A）。`
+    ],
+    quote: `“先选再分：C(11,3) × A(3,3) = 165 × 6 = 990（种）。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第22页 自我巩固第9、10题`
+  },
+  {
+    id: `p23-symmetry`,
+    category: `拓展变式`,
+    stage: `能力落地 · 第23页`,
+    accent: `yellow`,
+    title: `4×4方格网染4格成轴对称图形`,
+    prompt: `在 4×4 的方格网中，任选 4 个小方格染成黑色，构成轴对称图形的染色方式有多少种？`,
+    specialNote: `包含 4 条对称轴（横、纵、主对角线、副对角线）的分类计数与重叠去重。`,
+    formula: `28×2 + 52×2 - (6 + 2 + 6) = 160 - 14 = 146（种）`,
+    steps: [
+      `纵轴对称（左右对称，左边8格选2格即定右边）：C(8,2) = 28（种）；横轴对称同理：C(8,2) = 28（种）。`,
+      `主对角线对称：4块全在对角线上 C(4,4)=1；2块在对角线上且另1对对称选1组 C(4,2)×C(6,1)=36；0块在对角线上 C(6,2)=15，合计 1+36+15 = 52（种）。副对角线同理也是 52（种）。`,
+      `相加得 28×2 + 52×2 = 160，再减去重复算的图形：同时4条轴对称 6 种、仅横纵双对称 2 种、仅两对角线双对称 6 种，最终 160 - (6+2+6) = 146（种）。`
+    ],
+    quote: `“共 28×2 + 52×2 = 160，去重：4条轴对称 6、横纵对称 2、两对角线对称 6，160 - (6+2+6) = 146。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第23页 能力落地`
+  },
+  {
+    id: `p25-rays-books`,
+    category: `拓展变式`,
+    stage: `专属探索 · 第1 & 2题`,
+    accent: `blue`,
+    title: `7条射线数锐角 & 3人借8本漫画书`,
+    prompt: `第1题：从端点 O 出发的射线共有 7 条，图中一共有多少个锐角？\n第2题：3 个人去图书馆借剩下 8 本不同的漫画书，有 1 个人借了 2 本，另外两个人每人借了 3 本，一共有多少种不同的借法？`,
+    specialNote: `第1题为几何数角转化为组合；第2题为有组名（3位借书人不同）的不均等分组问题。`,
+    formula: `第1题：C(7,2) = 21（个）；第2题：3 × 28 × 20 × 1 = 1680（种）`,
+    steps: [
+      `第1题（几何数角）：任意选 2 条射线就能组成 1 个角，交换两条射线顺序还是同一个角 → C(7,2) = (7×6)÷(2×1) = 21（个）。`,
+      `第2题（借漫画书）：① 先从 3 人中选 1 人拿 2 本：C(3,1) = 3（种）；② 第1人从8本拿2本 C(8,2)=28，第2人从剩6本拿3本 C(6,3)=20，第3人拿剩3本 C(3,3)=1；③ 分步相乘：3 × (28×20×1) = 1680（种）。`
+    ],
+    quote: `“先从3人中选1人拿2本：C(3,1)=3（种）…分步完成用乘法：28×20×1 = 560，560×3 = 1680（种）。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第25页 专属探索第1、2题`
+  },
+  {
+    id: `p26-updown`,
+    category: `拓展变式`,
+    stage: `专属探索 · 第3题`,
+    accent: `yellow`,
+    title: `四位“上升数”与五位“下降数”`,
+    prompt: `“上升数”指每个数字都比其左边数字大的多位数（如 1234），“下降数”指每个数字都比其左边数字小的多位数（如 5432）。请问：(1) 四位上升数共有多少个？(2) 五位下降数共有多少个？`,
+    specialNote: `含 0 陷阱（梳理坑3）：上升数首位最小，0不能放首位所以不能选 0；下降数个位最小，0放末位合法所以可以选 0！`,
+    formula: `(1) C(9,4) = 126（个）；(2) C(10,5) = 252（个）`,
+    steps: [
+      `转化思路：只要选出几个互不相同的数字，它们从小到大（或从大到小）的排列顺序就唯一确定了，因此直接转化为组合问题！`,
+      `(1) 四位上升数：0 不能在首位且数字只能递增，所以不能选 0，从 1–9 共 9 个数字里选 4 个 → C(9,4) = (9×8×7×6)÷(4×3×2×1) = 126（个）。`,
+      `(2) 五位下降数：0 若被选中必然排在最后一位（个位），合法！所以可以从 0–9 共 10 个数字里选 5 个 → C(10,5) = (10×9×8×7×6)÷(5×4×3×2×1) = 252（个）。`
+    ],
+    quote: `“从1-9中任选4个数字对应唯一上升数，如选2754→2457，但不能选0，因为0不能在首位。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第26页 专属探索第3题`
+  },
+  {
+    id: `p26-digits-sum`,
+    category: `拓展变式`,
+    stage: `专属探索 · 第4题`,
+    accent: `red`,
+    title: `数字组三位数与各位数和（不含0 vs 含0）`,
+    prompt: `(1) 用 1, 2, 3, 4, 5, 6 这 6 个数字，能组成多少个各位数字互不相同的三位数？这些三位数的和是多少？\n(2) 用 0, 1, 3, 5, 7, 9 这 6 个数字，能组成多少个各位数字互不相同的三位数？这些三位数的和是多少？`,
+    specialNote: `含 0 组数核心（避坑第3条）：百位不能为 0，必须优先给百位选非 0 数字；算总和时注意 0 在百位出现 0 次，非 0 数字在百位出现 20 次、在十/个位出现 16 次。`,
+    formula: `(1) 120个，和 46620；(2) 100个，和 54400`,
+    steps: [
+      `(1) 不含0：三位数个数 A(6,3) = 6×5×4 = 120（个）。120 ÷ 6 = 20，每个数字在百、十、个位各出现 20 次。总和 = (1+2+3+4+5+6) × 20 × (100+10+1) = 21 × 20 × 111 = 46620。`,
+      `(2) 含0：百位不能为 0，先从 1,3,5,7,9 选 1 个放百位 C(5,1)=5，再从余下 5 个数选 2 个排十位和个位 A(5,2)=20，共 5 × 20 = 100（个）。`,
+      `含0总和：5个非0数字各在百位出现 100÷5 = 20 次；固定某个非0数字在十位（或个位），百位有4种非0选法、另一位有4种选法，共 4×4 = 16 次。数字和 0+1+3+5+7+9 = 25，故总和 = 25×20×100 + 25×16×10 + 25×16×1 = 50000 + 4000 + 400 = 54400。`
+    ],
+    quote: `“(1) A(6,3)=120（个）…21×20×111=46620；(2) C(5,1)×A(5,2)=100（个）…50000+4000+400=54400。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第26页 专属探索第4题`
+  },
+  {
+    id: `p27-class-check`,
+    category: `排列数A`,
+    stage: `课堂落实 · 第2、3、4题`,
+    accent: `blue`,
+    title: `课堂落实综合自测（照相 / 选糖 / 早午饭）`,
+    prompt: `第2题：甲、乙、丙、丁、戊五个人排队照相，每次 3 人站成一行，共可拍出多少张不同照片？\n第3题：乐乐从 9 颗不同口味的糖中选 4 颗，有多少种选法？\n第4题：从 10 种不同食物中，选择 2 种分别做早饭、午饭，一共有多少种不同选法？`,
+    specialNote: `课堂10分钟过关检测题（第2、3、4题；第1题为等差计算 116，来源未提及排列组合模型）。`,
+    formula: `第2题：60 张；第3题：126 种；第4题：90 种`,
+    steps: [
+      `第2题（排队照相）：① 5选3；② 站成一行与顺序有关 → A(5,3) = 5×4×3 = 60（张）。`,
+      `第3题（选糖）：① 9选4；② 只拿4颗与顺序无关 → C(9,4) = (9×8×7×6) ÷ (4×3×2×1) = 126（种）。`,
+      `第4题（早饭、午饭）：① 10选2；② 分配早饭和午饭有顺序区别 → A(10,2) = 10×9 = 90（种）。`
+    ],
+    quote: `“第2题 A(5,3)=60（张）；第3题 C(9,4)=126（种）；第4题 A(10,2)=90（种）。”`,
+    sourceRef: `《26秋-4C+-第02讲-运动会筹备-手写解析.pdf》第27–28页 课堂落实`
+  }
+];
+
+// ============================================================
+// Application State (persisted via window.notebookAppApi)
+// ============================================================
+let appState = {
+  activeTab: `perm_comb`,
+  simScenario: `signal`,
+  simSwapped: false,
+  category: `全部`,
+  searchQuery: ``,
+  statusFilter: `all`,
+  masteredIds: [],
+  expandedIds: []
+};
+
+async function persistState() {
+  try {
+    if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+      await window.notebookAppApi.setAppState({
+        activeTab: appState.activeTab,
+        simScenario: appState.simScenario,
+        category: appState.category,
+        statusFilter: appState.statusFilter,
+        masteredIds: appState.masteredIds,
+        expandedIds: appState.expandedIds
+      });
+    }
+  } catch (err) {
+    // Graceful degradation if host API throws
+  }
+}
+
+// Helper to render math text safely with stacked A/C tags
+function formatMathHTML(text) {
+  const escaped = text
+    .replace(/&/g, `&amp;`)
+    .replace(/</g, `&lt;`)
+    .replace(/>/g, `&gt;`)
+    .replace(/\n/g, `<br>`);
+  return escaped.replace(/\b([AC])\((\d+|n),(\s*[\w-]+)\)/g, function (_, letter, n, m) {
+    return `<span class="comb-sym">${letter}<span class="comb-indices"><span>${m.trim()}</span><span>${n}</span></span></span>`;
+  });
+}
+
+// ============================================================
+// Render: KPI Progress
+// ============================================================
+function renderProgressKPI() {
+  const total = PROBLEMS.length;
+  const done = appState.masteredIds.length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  const textEl = document.getElementById(`kpi-progress-text`);
+  const barEl = document.getElementById(`kpi-progress-bar`);
+  const pctEl = document.getElementById(`kpi-progress-pct`);
+
+  if (textEl) textEl.textContent = `${done} / ${total} 题`;
+  if (barEl) barEl.style.width = `${pct}%`;
+  if (pctEl) pctEl.textContent = `已掌握 ${pct}%`;
+}
+
+// ============================================================
+// Render: Comparison Tabs
+// ============================================================
+function renderComparePanel() {
+  const panel = document.getElementById(`compare-panel`);
+  if (!panel) return;
+
+  const tabData = COMPARE_TABS[appState.activeTab] || COMPARE_TABS.perm_comb;
+
+  const tabMap = {
+    perm_comb: `tab-perm-comb`,
+    group_name: `tab-group-name`,
+    direct_conv: `tab-direct-conv`
+  };
+
+  Object.keys(tabMap).forEach(function (key) {
+    const btn = document.getElementById(tabMap[key]);
+    if (btn) {
+      const active = key === appState.activeTab;
+      btn.classList.toggle(`is-active`, active);
+      btn.setAttribute(`aria-selected`, active ? `true` : `false`);
+    }
+  });
+
+  function buildCol(title, tag, rows, isAccent) {
+    const rowsHtml = rows.map(function (r) {
+      return `
+        <div class="compare-row">
+          <span class="compare-row-label">${r.label}</span>
+          <div class="compare-row-val">${formatMathHTML(r.val)}</div>
+        </div>
+      `;
+    }).join(``);
+
+    return `
+      <div class="compare-col ${isAccent ? `compare-col--accent` : ``}">
+        <div class="compare-col-head">
+          <h3 class="compare-col-title">${title}</h3>
+          <span class="tag ${isAccent ? `tag--yellow` : `tag--blue`}">${tag}</span>
+        </div>
+        ${rowsHtml}
+      </div>
+    `;
+  }
+
+  panel.innerHTML = `
+    <div class="compare-grid">
+      ${buildCol(tabData.leftTitle, tabData.leftTag, tabData.leftRows, tabData.leftAccent)}
+      ${buildCol(tabData.rightTitle, tabData.rightTag, tabData.rightRows, tabData.rightAccent)}
+    </div>
+  `;
+}
+
+function switchCompareTab(tabKey) {
+  if (!COMPARE_TABS[tabKey]) return;
+  appState.activeTab = tabKey;
+  renderComparePanel();
+  persistState();
+}
+
+// ============================================================
+// Render: Swap Test Simulator
+// ============================================================
+function renderSimulator() {
+  const scenario = SIM_SCENARIOS[appState.simScenario] || SIM_SCENARIOS.signal;
+  const stageEl = document.getElementById(`sim-stage`);
+  const btnEl = document.getElementById(`btn-sim-action`);
+  const verdictEl = document.getElementById(`sim-verdict`);
+  const selectEl = document.getElementById(`sim-scenario-select`);
+
+  if (selectEl) selectEl.value = appState.simScenario;
+
+  const slots = appState.simSwapped ? scenario.slotsAfter : scenario.slotsBefore;
+  const slotsHtml = slots.map(function (s) {
+    return `
+      <div class="sim-slot ${appState.simSwapped && s.changed ? `sim-slot--swapped` : ``}">
+        <span class="sim-slot-role">${s.role}</span>
+        <span>${s.val}</span>
+      </div>
+    `;
+  }).join(``);
+
+  if (stageEl) {
+    stageEl.innerHTML = `
+      <div>
+        <strong style="font-size:0.95rem;">${scenario.title}</strong>
+        <p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--on-surface-variant);">${scenario.desc}</p>
+      </div>
+      <div class="sim-slots">${slotsHtml}</div>
+    `;
+  }
+
+  if (btnEl) {
+    btnEl.textContent = appState.simSwapped ? scenario.resetText : scenario.actionText;
+  }
+
+  if (verdictEl) {
+    verdictEl.className = `sim-verdict ${scenario.isPerm ? `sim-verdict--perm` : `sim-verdict--comb`}`;
+    verdictEl.innerHTML = formatMathHTML(appState.simSwapped ? scenario.verdictAfter : scenario.verdictBefore);
+  }
+}
+
+function selectSimScenario(key) {
+  if (!SIM_SCENARIOS[key]) return;
+  appState.simScenario = key;
+  appState.simSwapped = false;
+  renderSimulator();
+  persistState();
+}
+
+function toggleSimAction() {
+  appState.simSwapped = !appState.simSwapped;
+  renderSimulator();
+}
+
+// ============================================================
+// Filtering & Rendering Problem Cards
+// ============================================================
+function getFilteredProblems() {
+  const q = appState.searchQuery.trim().toLowerCase();
+  return PROBLEMS.filter(function (p) {
+    if (appState.category !== `全部` && p.category !== appState.category) {
+      return false;
+    }
+    const isMastered = appState.masteredIds.indexOf(p.id) !== -1;
+    if (appState.statusFilter === `mastered` && !isMastered) return false;
+    if (appState.statusFilter === `unmastered` && isMastered) return false;
+
+    if (q) {
+      const haystack = `${p.title} ${p.stage} ${p.category} ${p.prompt} ${p.formula} ${p.specialNote} ${p.steps.join(` `)} ${p.sourceRef}`.toLowerCase();
+      if (haystack.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+}
+
+function renderFilterPills() {
+  const container = document.getElementById(`category-pills`);
+  if (!container) return;
+  const buttons = container.querySelectorAll(`.pill-btn`);
+  buttons.forEach(function (btn) {
+    const label = btn.textContent.replace(`全部模型`, `全部`).replace(`排列数 A`, `排列数A`).replace(`组合数 C`, `组合数C`);
+    btn.classList.toggle(`is-active`, label === appState.category);
+  });
+}
+
+function renderProblemCards() {
+  const grid = document.getElementById(`problem-cards-grid`);
+  const emptyEl = document.getElementById(`empty-state`);
+  const countEl = document.getElementById(`results-count`);
+  if (!grid) return;
+
+  const list = getFilteredProblems();
+  if (countEl) {
+    countEl.textContent = `正在显示 ${list.length} / ${PROBLEMS.length} 条讲义题目`;
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = ``;
+    if (emptyEl) emptyEl.classList.add(`is-visible`);
+    return;
+  }
+
+  if (emptyEl) emptyEl.classList.remove(`is-visible`);
+
+  grid.innerHTML = list.map(function (p) {
+    const isMastered = appState.masteredIds.indexOf(p.id) !== -1;
+    const isExpanded = appState.expandedIds.indexOf(p.id) !== -1;
+
+    const stepsHtml = p.steps.map(function (s) {
+      return `<div class="step-item">${formatMathHTML(s)}</div>`;
+    }).join(``);
+
+    return `
+      <article class="problem-card ${isMastered ? `is-mastered` : ``}" id="card-${p.id}">
+        <div>
+          <div class="card-accent-bar card-accent-bar--${p.accent}" aria-hidden="true"></div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <div class="tag-group">
+                <span class="tag tag--blue">${p.category}</span>
+                <span class="tag">${p.stage}</span>
+              </div>
+              <button type="button"
+                class="mastery-btn ${isMastered ? `is-done` : ``}"
+                aria-pressed="${isMastered ? `true` : `false`}"
+                onclick="toggleMastered('${p.id}')">
+                <span>${isMastered ? `✓ 已掌握` : `○ 待复习`}</span>
+              </button>
+            </div>
+
+            <h3 class="card-title">${p.title}</h3>
+            <p class="card-prompt">${formatMathHTML(p.prompt)}</p>
+
+            <div class="card-meta-line">
+              <span><strong>提示：</strong>${formatMathHTML(p.specialNote)}</span>
+            </div>
+
+            <div>
+              <button type="button"
+                class="accordion-trigger"
+                aria-expanded="${isExpanded ? `true` : `false`}"
+                onclick="toggleAccordion('${p.id}')">
+                <span>${isExpanded ? `收起分步解析与原文依据` : `展开分步解析与答案`}</span>
+                <span aria-hidden="true">${isExpanded ? `▲` : `▼`}</span>
+              </button>
+              <div class="accordion-panel ${isExpanded ? `is-open` : ``}">
+                <div>
+                  <span class="compare-row-label">核心算式与结论</span>
+                  <div style="margin-top:4px; font-weight:700;">${formatMathHTML(p.formula)}</div>
+                </div>
+                <div style="display:grid; gap:var(--space-xs);">
+                  <span class="compare-row-label">分步算理拆解</span>
+                  ${stepsHtml}
+                </div>
+                <div class="quote-box">
+                  <strong>讲义原文摘录：</strong>${formatMathHTML(p.quote)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer class="card-footer">
+          来源：${p.sourceRef}
+        </footer>
+      </article>
+    `;
+  }).join(``);
+}
+
+// ============================================================
+// Interactive Event Handlers (Hoisted function declarations)
+// ============================================================
+function setCategory(cat) {
+  appState.category = cat;
+  renderFilterPills();
+  renderProblemCards();
+  persistState();
+}
+
+function handleSearchInput(val) {
+  appState.searchQuery = val || ``;
+  renderProblemCards();
+}
+
+function handleStatusFilter(val) {
+  appState.statusFilter = val || `all`;
+  renderProblemCards();
+  persistState();
+}
+
+function clearAllFilters() {
+  appState.category = `全部`;
+  appState.searchQuery = ``;
+  appState.statusFilter = `all`;
+  const searchEl = document.getElementById(`search-input`);
+  const statusEl = document.getElementById(`status-filter`);
+  if (searchEl) searchEl.value = ``;
+  if (statusEl) statusEl.value = `all`;
+  renderFilterPills();
+  renderProblemCards();
+  persistState();
+}
+
+function toggleMastered(id) {
+  const idx = appState.masteredIds.indexOf(id);
+  if (idx === -1) {
+    appState.masteredIds.push(id);
+  } else {
+    appState.masteredIds.splice(idx, 1);
+  }
+  renderProgressKPI();
+  renderProblemCards();
+  persistState();
+}
+
+function toggleAccordion(id) {
+  const idx = appState.expandedIds.indexOf(id);
+  if (idx === -1) {
+    appState.expandedIds.push(id);
+  } else {
+    appState.expandedIds.splice(idx, 1);
+  }
+  renderProblemCards();
+  persistState();
+}
+
+function expandAllVisible(open) {
+  const visible = getFilteredProblems();
+  if (open) {
+    visible.forEach(function (p) {
+      if (appState.expandedIds.indexOf(p.id) === -1) {
+        appState.expandedIds.push(p.id);
+      }
+    });
+  } else {
+    const visibleIds = visible.map(function (p) { return p.id; });
+    appState.expandedIds = appState.expandedIds.filter(function (id) {
+      return visibleIds.indexOf(id) === -1;
+    });
+  }
+  renderProblemCards();
+  persistState();
+}
+
+function jumpToCategory(cat, query) {
+  appState.category = cat || `全部`;
+  appState.searchQuery = query || ``;
+  appState.statusFilter = `all`;
+  const searchEl = document.getElementById(`search-input`);
+  const statusEl = document.getElementById(`status-filter`);
+  if (searchEl) searchEl.value = appState.searchQuery;
+  if (statusEl) statusEl.value = `all`;
+  renderFilterPills();
+  renderProblemCards();
+  persistState();
+
+  const sec = document.getElementById(`sec-explorer-title`);
+  if (sec && typeof sec.scrollIntoView === `function`) {
+    sec.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+}
+
+function handleResetProgress(btn) {
+  if (!btn) return;
+  if (btn.dataset.armed !== `true`) {
+    btn.dataset.armed = `true`;
+    btn.textContent = `再点一次确认清空`;
+    return;
+  }
+  btn.dataset.armed = `false`;
+  btn.textContent = `重置进度`;
+  appState.masteredIds = [];
+  renderProgressKPI();
+  renderProblemCards();
+  persistState();
+}
+
+// ============================================================
+// Initialization
+// ============================================================
+async function initApp() {
+  try {
+    if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+      const saved = await window.notebookAppApi.getAppState();
+      if (saved && typeof saved === `object`) {
+        if (saved.activeTab && COMPARE_TABS[saved.activeTab]) appState.activeTab = saved.activeTab;
+        if (saved.simScenario && SIM_SCENARIOS[saved.simScenario]) appState.simScenario = saved.simScenario;
+        if (typeof saved.category === `string`) appState.category = saved.category;
+        if (typeof saved.statusFilter === `string`) appState.statusFilter = saved.statusFilter;
+        if (Array.isArray(saved.masteredIds)) appState.masteredIds = saved.masteredIds;
+        if (Array.isArray(saved.expandedIds)) appState.expandedIds = saved.expandedIds;
+      }
+    }
+  } catch (err) {
+    // Fallback to initial defaults
+  }
+
+  const statusEl = document.getElementById(`status-filter`);
+  if (statusEl) statusEl.value = appState.statusFilter;
+
+  renderProgressKPI();
+  renderComparePanel();
+  renderSimulator();
+  renderFilterPills();
+  renderProblemCards();
+
+  if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+    window.notebookAppApi.notifyAppReady();
+  }
+}
+
+initApp();
+</script>
+</body>
+</html>
