@@ -710,12 +710,11 @@ button, input, select, textarea {
   padding-top: var(--space-sm);
 }
 
-/* Problem Cards Grid */
+/* Problem Cards List (One problem per row) */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-lg);
-  align-items: start;
 }
 
 .problem-card {
@@ -744,9 +743,9 @@ button, input, select, textarea {
 .card-accent-bar--black { background: var(--primary); }
 
 .card-body {
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-lg);
   display: grid;
-  gap: var(--space-sm);
+  gap: var(--space-md);
 }
 
 .card-top-row {
@@ -837,8 +836,8 @@ button, input, select, textarea {
 .card-prompt {
   margin: 0;
   color: var(--on-surface);
-  font-size: 0.94rem;
-  line-height: 1.65;
+  font-size: 0.975rem;
+  line-height: 1.75;
   overflow-wrap: break-word;
 }
 
@@ -877,9 +876,9 @@ button, input, select, textarea {
 .accordion-panel {
   border: var(--border-medium);
   background: var(--background);
-  padding: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
   display: grid;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
 }
 
 .accordion-panel[hidden] {
