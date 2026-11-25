@@ -1484,11 +1484,11 @@ button, input, select, textarea {
         <div class="field-group">
           <label for="quiz-count" class="field-label">抽取题量（不超过筛选池上限）</label>
           <select id="quiz-count" class="select-control" onchange="onQuizConfigChange()">
-            <option value="3">3 题（5分钟小测）</option>
-            <option value="5" selected>5 题（标准训练）</option>
-            <option value="8">8 题（综合强化）</option>
-            <option value="12">12 题（冠军冲刺）</option>
-            <option value="99">当前条件全量题</option>
+            <option value="5" selected>5 道</option>
+            <option value="10">10 道</option>
+            <option value="15">15 道</option>
+            <option value="20">20 道</option>
+            <option value="all">全部题目</option>
           </select>
         </div>
 
@@ -3263,7 +3263,7 @@ button, input, select, textarea {
       const countEl = document.getElementById(`quiz-count`);
       if (stageEl) appState.quizConfig.stage = stageEl.value;
       if (diffEl) appState.quizConfig.difficulty = diffEl.value;
-      if (countEl) appState.quizConfig.count = Number(countEl.value) || 5;
+      if (countEl) appState.quizConfig.count = countEl.value === `all` ? `all` : (Number(countEl.value) || 5);
       generateQuiz();
     }
 
@@ -3280,7 +3280,7 @@ button, input, select, textarea {
 
     function generateQuiz() {
       const pool = getQuizPool();
-      const requested = appState.quizConfig.count;
+      const requested = appState.quizConfig.count === `all` ? pool.length : (Number(appState.quizConfig.count) || 5);
       const shuffled = shuffleArray(pool);
       const selected = shuffled.slice(0, Math.min(requested, shuffled.length));
       appState.quizQuestionIds = selected.map(function (q) { return q.id; });
@@ -3551,7 +3551,8 @@ button, input, select, textarea {
 
       if (appState.quizQuestionIds.length === 0) {
         const pool = getQuizPool();
-        appState.quizQuestionIds = shuffleArray(pool).slice(0, Math.min(appState.quizConfig.count, pool.length)).map(function (q) { return q.id; });
+        const req = appState.quizConfig.count === `all` ? pool.length : (Number(appState.quizConfig.count) || 5);
+        appState.quizQuestionIds = shuffleArray(pool).slice(0, Math.min(req, pool.length)).map(function (q) { return q.id; });
       }
 
       renderStagePills();

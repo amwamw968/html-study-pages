@@ -1094,6 +1094,82 @@ button, input, select, textarea {
   color: var(--on-primary);
 }
 
+/* Quiz Generator */
+.quiz-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+  align-items: end;
+}
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1.5px solid var(--outline-variant);
+}
+.inline-notice {
+  border: var(--border-medium);
+  border-left: 8px solid var(--tertiary);
+  background: var(--surface-white);
+  padding: var(--space-sm) var(--space-md);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.inline-notice.is-warn {
+  border-left-color: var(--secondary);
+  background: var(--warning-container);
+  color: var(--warning);
+}
+.quiz-paper-head {
+  border: var(--border-thick);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.quiz-sheet {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+.quiz-question {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+.quiz-q-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  border-bottom: var(--border-medium);
+  padding-bottom: var(--space-xs);
+}
+.quiz-scratch-line {
+  display: none;
+  border-bottom: 2px dashed var(--outline-variant);
+  height: 2.5rem;
+}
+.quiz-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
 /* Footer */
 .site-footer {
   border-top: var(--rule-heavy);
@@ -1115,6 +1191,7 @@ button, input, select, textarea {
   .mantra-banner { grid-template-columns: 1fr; }
   .pitfall-grid { grid-template-columns: 1fr; }
   .toolbar-inputs { grid-template-columns: 1fr; }
+  .quiz-fields { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
@@ -1127,6 +1204,16 @@ button, input, select, textarea {
   .compare-grid { grid-template-columns: 1fr; }
   .sop-grid { grid-template-columns: 1fr; }
   .card-grid { grid-template-columns: 1fr; }
+}
+
+@media print {
+  body { background: #ffffff; }
+  .no-print, .masthead, .kpi-grid, .site-footer, section:not(#sec-quiz) { display: none !important; }
+  .page-grid { max-width: 100%; padding: 0; gap: 1rem; }
+  .section-open { border-top: none; padding-top: 0; }
+  .quiz-question { box-shadow: none; break-inside: avoid; }
+  .quiz-scratch-line { display: block; }
+  .quiz-item-actions { display: none !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1517,6 +1604,76 @@ button, input, select, textarea {
         </tbody>
       </table>
     </div>
+  </section>
+
+  <!-- Section 6: Offline Auto-Quiz Generator -->
+  <section class="section-open section-open--black" id="sec-quiz" aria-labelledby="sec-quiz-title">
+    <div class="section-header no-print">
+      <div>
+        <span class="kicker-block">原题抽测与打印导出</span>
+        <h2 class="section-heading" id="sec-quiz-title">本地自动组卷生成器（排列组合全题库）</h2>
+        <p class="section-desc">完全在浏览器本地运行：按模型分类、学习阶段与期望题量（支持 5 / 10 / 15 / 20 道或全部题目）从本讲 16 组真实讲义例题与拓展题中随机组卷，展开可查看 KaTeX 公式、直观图解与分步解析，并支持 A4 打印与 TXT 导出。</p>
+      </div>
+    </div>
+
+    <div class="toolbar-panel no-print">
+      <div class="quiz-fields">
+        <div class="field-group">
+          <label class="field-label" for="quiz-category">模型分类筛选</label>
+          <select id="quiz-category" class="select-control" onchange="updateQuizConfig()">
+            <option value="全部">全部模型分类</option>
+            <option value="排列数A">排列数A</option>
+            <option value="组合数C">组合数C</option>
+            <option value="先选再排">先选再排</option>
+            <option value="分组消重问题">分组消重问题</option>
+            <option value="拓展变式">拓展变式</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="quiz-stage">学习阶段范围</label>
+          <select id="quiz-stage" class="select-control" onchange="updateQuizConfig()">
+            <option value="全部">全部阶段（讲练 + 拓展）</option>
+            <option value="课堂讲练">课堂讲练（活动一~三 / 课堂落实）</option>
+            <option value="巩固拓展">巩固与拓展（高能时刻 / 自我巩固 / 专属探索）</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="quiz-count">期望抽取题量</label>
+          <select id="quiz-count" class="select-control" onchange="updateQuizConfig()">
+            <option value="5" selected>5 道</option>
+            <option value="10">10 道</option>
+            <option value="15">15 道</option>
+            <option value="20">20 道</option>
+            <option value="all">全部题目</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
+          <button type="button" class="btn btn--primary" onclick="generateQuiz()">随机生成试卷</button>
+          <button type="button" class="btn btn--blue" id="btn-toggle-all-quiz" onclick="toggleAllQuizAnswers()">显示全部答案与解析</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
+          <button type="button" class="btn" onclick="printQuiz()">一键打印试卷</button>
+          <button type="button" class="btn" onclick="exportQuizTxt()">导出试卷 (.txt)</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="quiz-status-banner" class="inline-notice no-print" hidden></div>
+
+    <div class="quiz-paper-head">
+      <div>
+        <strong style="font-family:var(--font-headline); font-size:1.15rem;">《运动会筹划 · 排列组合》专项练习卷</strong>
+        <div id="quiz-paper-meta" style="font-size:0.84rem; margin-top:2px;">出题范围：全部模型 · 全部阶段 · 共 5 题</div>
+      </div>
+      <span class="tag tag--black" id="quiz-score-summary">自评完成：0 / 5 题</span>
+    </div>
+
+    <div id="quiz-output" class="quiz-sheet"></div>
   </section>
 
   <footer class="site-footer">
@@ -1978,10 +2135,25 @@ let appState = {
   searchQuery: ``,
   statusFilter: `all`,
   masteredIds: [],
-  expandedIds: []
+  expandedIds: [],
+  quizConfig: {
+    category: `全部`,
+    stage: `全部`,
+    count: 5
+  },
+  quizIds: [],
+  quizShowAllAnswers: false,
+  quizOpenAnswerIds: [],
+  quizStatusMsg: ``,
+  quizStatusWarn: false
 };
 
 async function persistState() {
+  try {
+    if (typeof localStorage !== `undefined`) {
+      localStorage.setItem(`sports_perm_comb_v2`, JSON.stringify(appState));
+    }
+  } catch (e) {}
   try {
     if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
       await window.notebookAppApi.setAppState({
@@ -1990,7 +2162,10 @@ async function persistState() {
         category: appState.category,
         statusFilter: appState.statusFilter,
         masteredIds: appState.masteredIds,
-        expandedIds: appState.expandedIds
+        expandedIds: appState.expandedIds,
+        quizConfig: appState.quizConfig,
+        quizIds: appState.quizIds,
+        quizShowAllAnswers: appState.quizShowAllAnswers
       });
     }
   } catch (err) {
@@ -2740,23 +2915,251 @@ function handleResetProgress(btn) {
 }
 
 // ============================================================
+// Offline Auto-Quiz Generator
+// ============================================================
+function updateQuizConfig() {
+  const catEl = document.getElementById(`quiz-category`);
+  const stgEl = document.getElementById(`quiz-stage`);
+  const cntEl = document.getElementById(`quiz-count`);
+  if (catEl) appState.quizConfig.category = catEl.value;
+  if (stgEl) appState.quizConfig.stage = stgEl.value;
+  if (cntEl) appState.quizConfig.count = cntEl.value === `all` ? `all` : (parseInt(cntEl.value, 10) || 5);
+  persistState();
+}
+
+function syncQuizControlsUI() {
+  const catEl = document.getElementById(`quiz-category`);
+  const stgEl = document.getElementById(`quiz-stage`);
+  const cntEl = document.getElementById(`quiz-count`);
+  if (catEl) catEl.value = appState.quizConfig.category || `全部`;
+  if (stgEl) stgEl.value = appState.quizConfig.stage || `全部`;
+  if (cntEl) cntEl.value = String(appState.quizConfig.count || 5);
+}
+
+function matchQuizStage(p, stageFilter) {
+  if (stageFilter === `全部`) return true;
+  const isAdvanced = /高能|自我巩固|专属探索|能力落地/.test(p.stage);
+  return stageFilter === `巩固拓展` ? isAdvanced : !isAdvanced;
+}
+
+function generateQuiz() {
+  updateQuizConfig();
+  const cfg = appState.quizConfig;
+  const pool = PROBLEMS.filter(function (p) {
+    if (cfg.category !== `全部` && p.category !== cfg.category) return false;
+    if (!matchQuizStage(p, cfg.stage)) return false;
+    return true;
+  });
+
+  if (pool.length === 0) {
+    appState.quizIds = [];
+    appState.quizStatusMsg = `当前筛选条件下暂无匹配原题，请放宽模型分类或阶段范围后重试。`;
+    appState.quizStatusWarn = true;
+    renderQuizOutput();
+    persistState();
+    return;
+  }
+
+  const shuffled = pool.slice();
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = shuffled[i];
+    shuffled[i] = shuffled[j];
+    shuffled[j] = tmp;
+  }
+
+  const isAll = cfg.count === `all`;
+  const reqCount = isAll ? shuffled.length : (parseInt(cfg.count, 10) || 5);
+  const selected = shuffled.slice(0, Math.min(reqCount, shuffled.length));
+  appState.quizIds = selected.map(function (p) { return p.id; });
+  appState.quizOpenAnswerIds = appState.quizShowAllAnswers ? appState.quizIds.slice() : [];
+
+  if (isAll) {
+    appState.quizStatusMsg = `已抽取当前筛选条件下的全部 ${selected.length} 道原题组成试卷。`;
+    appState.quizStatusWarn = false;
+  } else if (pool.length < reqCount) {
+    appState.quizStatusMsg = `当前符合条件的原题共 ${pool.length} 道（少于期望的 ${reqCount} 道），已为您抽取全部 ${selected.length} 道。`;
+    appState.quizStatusWarn = true;
+  } else {
+    appState.quizStatusMsg = `已从 ${pool.length} 道符合条件的原题中随机抽取 ${selected.length} 道组成试卷。`;
+    appState.quizStatusWarn = false;
+  }
+
+  renderQuizOutput();
+  persistState();
+}
+
+function toggleAllQuizAnswers() {
+  appState.quizShowAllAnswers = !appState.quizShowAllAnswers;
+  appState.quizOpenAnswerIds = appState.quizShowAllAnswers ? appState.quizIds.slice() : [];
+  renderQuizOutput();
+  persistState();
+}
+
+function toggleSingleQuizAnswer(id) {
+  const idx = appState.quizOpenAnswerIds.indexOf(id);
+  if (idx === -1) appState.quizOpenAnswerIds.push(id);
+  else appState.quizOpenAnswerIds.splice(idx, 1);
+  appState.quizShowAllAnswers = appState.quizIds.length > 0 &&
+    appState.quizIds.every(function (qid) { return appState.quizOpenAnswerIds.indexOf(qid) !== -1; });
+  renderQuizOutput();
+  persistState();
+}
+
+function renderQuizOutput() {
+  const banner = document.getElementById(`quiz-status-banner`);
+  const metaEl = document.getElementById(`quiz-paper-meta`);
+  const scoreEl = document.getElementById(`quiz-score-summary`);
+  const toggleBtn = document.getElementById(`btn-toggle-all-quiz`);
+  const out = document.getElementById(`quiz-output`);
+  if (!out) return;
+
+  if (banner) {
+    if (appState.quizStatusMsg) {
+      banner.hidden = false;
+      banner.textContent = appState.quizStatusMsg;
+      banner.className = appState.quizStatusWarn ? `inline-notice is-warn no-print` : `inline-notice no-print`;
+    } else {
+      banner.hidden = true;
+    }
+  }
+
+  const items = appState.quizIds
+    .map(function (id) { return PROBLEMS.find(function (p) { return p.id === id; }); })
+    .filter(Boolean);
+
+  const cfg = appState.quizConfig;
+  if (metaEl) metaEl.textContent = `出题范围：${cfg.category} · ${cfg.stage} · 共 ${items.length} 道`;
+  const doneCount = items.filter(function (p) { return appState.masteredIds.indexOf(p.id) !== -1; }).length;
+  if (scoreEl) scoreEl.textContent = `已掌握：${doneCount} / ${items.length} 题`;
+  if (toggleBtn) toggleBtn.textContent = appState.quizShowAllAnswers ? `隐藏全部答案与解析` : `显示全部答案与解析`;
+
+  if (items.length === 0) {
+    out.innerHTML = `<div class="empty-state is-visible"><strong>暂无组卷题目</strong><button type="button" class="btn btn--primary" onclick="appState.quizConfig={category:'全部',stage:'全部',count:5};syncQuizControlsUI();generateQuiz();">恢复默认条件并抽题</button></div>`;
+    return;
+  }
+
+  out.innerHTML = items.map(function (p, idx) {
+    const isOpen = appState.quizShowAllAnswers || appState.quizOpenAnswerIds.indexOf(p.id) !== -1;
+    const isMastered = appState.masteredIds.indexOf(p.id) !== -1;
+    const visualObj = buildProblemVisual(p.id);
+    const formulaTex = PROBLEM_FORMULAS[p.id] || ``;
+    const stepsHtml = p.steps.map(function (s) {
+      return `<div class="step-item">${formatMathHTML(s)}</div>`;
+    }).join(``);
+
+    return `
+      <article class="quiz-question">
+        <div class="quiz-q-head">
+          <div class="tag-group">
+            <span class="tag tag--black">第 ${idx + 1} 题</span>
+            <span class="tag tag--blue">${p.category}</span>
+            <span class="tag">${p.stage}</span>
+          </div>
+          <span style="font-size:0.78rem; color:var(--on-surface-variant);">${p.sourceRef}</span>
+        </div>
+        <h3 class="card-title">${p.title}</h3>
+        <p class="card-prompt">${formatMathHTML(p.prompt)}</p>
+        <div class="quiz-scratch-line" aria-hidden="true"></div>
+        <div class="quiz-item-actions no-print">
+          <button type="button" class="btn btn--small" onclick="toggleSingleQuizAnswer('${p.id}')">${isOpen ? `隐藏本题解析` : `查看本题答案与解析`}</button>
+          <button type="button" class="mastery-btn ${isMastered ? `is-done` : ``}" onclick="toggleMastered('${p.id}');renderQuizOutput();">${isMastered ? `✓ 已掌握` : `○ 标记已掌握`}</button>
+        </div>
+        <div class="accordion-panel" ${isOpen ? `` : `hidden`}>
+          ${formulaTex ? `<div class="formula-panel">${renderMath(formulaTex, true)}</div>` : ``}
+          ${visualObj ? `<div class="visual-box"><div class="visual-box-head"><span class="visual-box-title">${visualObj.title}</span><span class="tag tag--blue">${visualObj.tag}</span></div>${visualObj.html}</div>` : ``}
+          <div class="formula-banner">${formatMathHTML(p.formula)}</div>
+          <div class="step-list">${stepsHtml}</div>
+        </div>
+      </article>
+    `;
+  }).join(``);
+}
+
+function printQuiz() {
+  if (typeof window.print === `function`) window.print();
+}
+
+function exportQuizTxt() {
+  const items = appState.quizIds
+    .map(function (id) { return PROBLEMS.find(function (p) { return p.id === id; }); })
+    .filter(Boolean);
+  if (items.length === 0) return;
+
+  const lines = [
+    `《运动会筹划 · 排列组合》专项练习卷`,
+    `筛选条件：${appState.quizConfig.category} | ${appState.quizConfig.stage} | 共 ${items.length} 题`,
+    `============================================================`,
+    ``
+  ];
+  items.forEach(function (p, i) {
+    lines.push(`${i + 1}. 【${p.category} · ${p.stage}】${p.title}`);
+    lines.push(`   ${p.prompt.replace(/\n/g, `\n   `)}`);
+    lines.push(``);
+  });
+  lines.push(`============================================================`);
+  lines.push(`【参考答案与解析】`);
+  lines.push(``);
+  items.forEach(function (p, i) {
+    lines.push(`${i + 1}. ${p.formula}`);
+    p.steps.forEach(function (s) { lines.push(`   - ${s}`); });
+    lines.push(`   出处：${p.sourceRef}`);
+    lines.push(``);
+  });
+
+  const content = lines.join(`\n`);
+  try {
+    if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+      window.notebookAppApi.triggerFileDownload({ content: content, contentType: `text/plain`, encoding: `UTF-8`, filename: `运动会筹划-排列组合练习卷.txt` });
+      return;
+    }
+  } catch (e) {}
+  try {
+    const blob = new Blob([content], { type: `text/plain;charset=utf-8` });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement(`a`);
+    a.href = url;
+    a.download = `运动会筹划-排列组合练习卷.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {}
+}
+
+// ============================================================
 // Initialization
 // ============================================================
 async function initApp() {
+  let saved = null;
   try {
     if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
-      const saved = await window.notebookAppApi.getAppState();
-      if (saved && typeof saved === `object`) {
-        if (saved.activeTab && COMPARE_TABS[saved.activeTab]) appState.activeTab = saved.activeTab;
-        if (saved.simScenario && SIM_SCENARIOS[saved.simScenario]) appState.simScenario = saved.simScenario;
-        if (typeof saved.category === `string`) appState.category = saved.category;
-        if (typeof saved.statusFilter === `string`) appState.statusFilter = saved.statusFilter;
-        if (Array.isArray(saved.masteredIds)) appState.masteredIds = saved.masteredIds;
-        if (Array.isArray(saved.expandedIds)) appState.expandedIds = saved.expandedIds;
-      }
+      saved = await window.notebookAppApi.getAppState();
     }
-  } catch (err) {
-    // Fallback to initial defaults
+  } catch (err) {}
+  if (!saved) {
+    try {
+      const raw = localStorage.getItem(`sports_perm_comb_v2`);
+      if (raw) saved = JSON.parse(raw);
+    } catch (e) {}
+  }
+
+  if (saved && typeof saved === `object`) {
+    if (saved.activeTab && COMPARE_TABS[saved.activeTab]) appState.activeTab = saved.activeTab;
+    if (saved.simScenario && SIM_SCENARIOS[saved.simScenario]) appState.simScenario = saved.simScenario;
+    if (typeof saved.category === `string`) appState.category = saved.category;
+    if (typeof saved.statusFilter === `string`) appState.statusFilter = saved.statusFilter;
+    if (Array.isArray(saved.masteredIds)) appState.masteredIds = saved.masteredIds;
+    if (Array.isArray(saved.expandedIds)) appState.expandedIds = saved.expandedIds;
+    if (saved.quizConfig && typeof saved.quizConfig === `object`) {
+      appState.quizConfig = {
+        category: saved.quizConfig.category || `全部`,
+        stage: saved.quizConfig.stage || `全部`,
+        count: saved.quizConfig.count === `all` ? `all` : (parseInt(saved.quizConfig.count, 10) || 5)
+      };
+    }
+    if (Array.isArray(saved.quizIds)) appState.quizIds = saved.quizIds;
+    if (typeof saved.quizShowAllAnswers === `boolean`) appState.quizShowAllAnswers = saved.quizShowAllAnswers;
   }
 
   const statusEl = document.getElementById(`status-filter`);
@@ -2767,6 +3170,12 @@ async function initApp() {
   renderSimulator();
   renderFilterPills();
   renderProblemCards();
+  syncQuizControlsUI();
+  if (appState.quizIds.length === 0) {
+    generateQuiz();
+  } else {
+    renderQuizOutput();
+  }
 
   if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
     window.notebookAppApi.notifyAppReady();

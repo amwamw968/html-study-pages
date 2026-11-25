@@ -987,10 +987,11 @@ button, input, select, textarea { font-family: inherit; color: inherit; }
         <div class="field-group">
           <label class="field-label" for="quiz-count">抽题数量</label>
           <select id="quiz-count" class="select-control" onchange="updateQuizControl('count', this.value)">
-            <option value="3">3 题（随堂小测）</option>
-            <option value="5" selected>5 题（标准练习）</option>
-            <option value="8">8 题（专题巩固）</option>
-            <option value="12">12 题（模拟通关卷）</option>
+            <option value="5" selected>5 道</option>
+            <option value="10">10 道</option>
+            <option value="15">15 道</option>
+            <option value="20">20 道</option>
+            <option value="all">全部题目</option>
           </select>
         </div>
       </div>
@@ -2236,7 +2237,7 @@ function showChecklistToast(msg) {
 }
 
 function updateQuizControl(key, value) {
-  if (key === `count`) appState.quizConfig.count = parseInt(value, 10) || 5;
+  if (key === `count`) appState.quizConfig.count = value === `all` ? `all` : (parseInt(value, 10) || 5);
   else appState.quizConfig[key] = value;
   persistState();
 }
@@ -2287,13 +2288,17 @@ function generateQuiz() {
     shuffled[j] = tmp;
   }
 
-  const targetCount = Math.min(cfg.count, shuffled.length);
+  const isAll = cfg.count === `all`;
+  const reqCount = isAll ? shuffled.length : (parseInt(cfg.count, 10) || 5);
+  const targetCount = Math.min(reqCount, shuffled.length);
   appState.quizQuestionIds = shuffled.slice(0, targetCount).map(function(q) { return q.id; });
   appState.quizOpenAnswerIds = [];
   appState.quizMasteredIds = [];
 
-  if (shuffled.length < cfg.count) {
-    setQuizStatus(`该筛选条件下共有 ${shuffled.length} 道原题（少于请求的 ${cfg.count} 题），已为您抽取全部 ${targetCount} 题。`);
+  if (isAll) {
+    setQuizStatus(`已抽取当前筛选条件下的全部 ${targetCount} 道原题组成试卷。`);
+  } else if (shuffled.length < reqCount) {
+    setQuizStatus(`该筛选条件下共有 ${shuffled.length} 道原题（少于请求的 ${reqCount} 道），已为您抽取全部 ${targetCount} 道。`);
   } else {
     setQuizStatus(`已从 31 题源题库随机抽取 ${targetCount} 道原题生成新试卷。`);
   }
@@ -2490,7 +2495,7 @@ async function initApp() {
         topic: saved.quizConfig.topic || `all`,
         difficulty: saved.quizConfig.difficulty || `all`,
         qtype: saved.quizConfig.qtype || `all`,
-        count: parseInt(saved.quizConfig.count, 10) || 5
+        count: saved.quizConfig.count === `all` ? `all` : (parseInt(saved.quizConfig.count, 10) || 5)
       };
     }
     if (Array.isArray(saved.quizQuestionIds)) appState.quizQuestionIds = saved.quizQuestionIds;

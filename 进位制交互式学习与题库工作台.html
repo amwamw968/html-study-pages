@@ -1549,11 +1549,11 @@ button, input, select, textarea {
         <div class="field-group">
           <label class="field-label" for="quiz-count">期望抽取题量</label>
           <select id="quiz-count" class="select-control" onchange="updateQuizConfig()">
-            <option value="3">3 题</option>
-            <option value="5" selected>5 题</option>
-            <option value="8">8 题</option>
-            <option value="10">10 题</option>
-            <option value="15">15 题</option>
+            <option value="5" selected>5 道</option>
+            <option value="10">10 道</option>
+            <option value="15">15 道</option>
+            <option value="20">20 道</option>
+            <option value="all">全部题目</option>
           </select>
         </div>
       </div>
@@ -3240,7 +3240,7 @@ button, input, select, textarea {
       if (secEl) appState.quizConfig.section = secEl.value;
       if (difEl) appState.quizConfig.difficulty = difEl.value;
       if (qtypeEl) appState.quizConfig.qtype = qtypeEl.value;
-      if (cntEl) appState.quizConfig.count = parseInt(cntEl.value, 10) || 5;
+      if (cntEl) appState.quizConfig.count = cntEl.value === `all` ? `all` : (parseInt(cntEl.value, 10) || 5);
       persistState();
     }
 
@@ -3282,11 +3282,16 @@ button, input, select, textarea {
         shuffled[j] = tmp;
       }
 
-      const selected = shuffled.slice(0, cfg.count);
+      const isAll = cfg.count === `all`;
+      const reqCount = isAll ? shuffled.length : (parseInt(cfg.count, 10) || 5);
+      const selected = shuffled.slice(0, Math.min(reqCount, shuffled.length));
       appState.quizIds = selected.map(function(item) { return item.id; });
 
-      if (pool.length < cfg.count) {
-        appState.quizStatusMsg = `当前符合条件的来源原题共 ` + pool.length + ` 道（少于期望的 ` + cfg.count + ` 题），已全部抽取，绝不编造补充题目。`;
+      if (isAll) {
+        appState.quizStatusMsg = `已抽取当前筛选条件下的全部 ` + selected.length + ` 道来源原题组成试卷。`;
+        appState.quizStatusWarn = false;
+      } else if (pool.length < reqCount) {
+        appState.quizStatusMsg = `当前符合条件的来源原题共 ` + pool.length + ` 道（少于期望的 ` + reqCount + ` 道），已全部抽取，绝不编造补充题目。`;
         appState.quizStatusWarn = true;
       } else {
         appState.quizStatusMsg = `已从 ` + pool.length + ` 道符合条件的来源原题中随机抽取 ` + selected.length + ` 道组成试卷。`;
