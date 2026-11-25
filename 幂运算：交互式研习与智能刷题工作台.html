@@ -1,0 +1,2526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="artifact-type" content="dashboard">
+<meta name="design-style" content="bauhaus">
+<title>Lesson 1 幂运算 · 交互式研习与智能刷题工作台</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+:root {
+  color-scheme: light;
+
+  /* 1. Bauhaus surfaces & ink */
+  --background: #f5f0e8;
+  --surface-container-low: #f2ede5;
+  --surface-container: #eee9e0;
+  --surface-container-high: #e8e3da;
+  --surface-white: #ffffff;
+
+  --on-surface: #1a1a1a;
+  --on-surface-variant: #4a4a4a;
+
+  --outline: #1a1a1a;
+  --outline-variant: #d0cbc3;
+
+  --primary: #1a1a1a;
+  --on-primary: #ffffff;
+  --primary-container: #ffcc00;
+  --on-primary-container: #1a1a1a;
+  --secondary: #e63b2e;
+  --on-secondary: #ffffff;
+  --tertiary: #0055ff;
+  --on-tertiary: #ffffff;
+  --error: #cc0000;
+  --on-error: #ffffff;
+
+  /* Fonts */
+  --font-headline: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+  --font-body: 'Noto Sans SC', 'Inter', sans-serif;
+  --font-label: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+
+  /* Shape & Bauhaus borders/shadows */
+  --rounded: 0.125rem;
+  --rounded-lg: 0.25rem;
+  --rounded-full: 0.75rem;
+  --border-thick: 3px solid var(--outline);
+  --border-medium: 2px solid var(--outline);
+  --offset-shadow: 5px 5px 0 var(--outline);
+  --offset-shadow-sm: 3px 3px 0 var(--outline);
+  --rule-heavy: 6px solid var(--outline);
+
+  /* Semantic tokens */
+  --positive: #156d3f;
+  --on-positive: #ffffff;
+  --positive-container: #d8efe0;
+  --on-positive-container: #114b2c;
+  --warning: #8f5800;
+  --warning-container: #fff3c4;
+  --focus: #0055ff;
+
+  /* Type scale */
+  --display-size: clamp(1.85rem, 1.4rem + 1.8vw, 2.75rem);
+  --headline-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.2rem);
+  --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+  --label-size: 0.75rem;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; margin: 0; padding: 0; }
+header { position: static !important; }
+
+body {
+  background-color: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea { font-family: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.page-grid {
+  display: grid;
+  gap: var(--space-xl);
+  padding: var(--space-lg);
+  max-width: 1240px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.page-grid * { min-width: 0; }
+
+/* Masthead */
+.masthead {
+  border-top: var(--rule-heavy);
+  border-bottom: var(--border-thick);
+  padding: var(--space-lg) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: end;
+}
+
+.kicker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.kicker-block {
+  display: inline-block;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  background: var(--primary);
+  color: var(--on-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-medium);
+}
+.kicker-block--blue { background: var(--tertiary); color: var(--on-tertiary); }
+.kicker-block--yellow { background: var(--primary-container); color: var(--on-primary-container); }
+.kicker-block--red { background: var(--secondary); color: var(--on-secondary); }
+
+.flag-trio { display: inline-flex; gap: var(--space-xs); align-items: center; }
+.flag-swatch { width: 14px; height: 18px; border: var(--border-medium); display: inline-block; }
+.flag-swatch--red { background: var(--secondary); }
+.flag-swatch--yellow { background: var(--primary-container); }
+.flag-swatch--blue { background: var(--tertiary); }
+
+.title {
+  font-family: var(--font-headline);
+  font-weight: 900;
+  font-size: var(--display-size);
+  line-height: 1.12;
+  margin: 0 0 var(--space-sm) 0;
+}
+.title mark {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: 0 var(--space-xs);
+  box-decoration-break: clone;
+}
+
+.lede { margin: 0; color: var(--on-surface-variant); max-width: 68ch; }
+
+.quick-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.quick-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--space-sm);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  color: var(--on-surface);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+.quick-nav-link:hover { background: var(--primary-container); color: var(--on-primary-container); }
+.quick-nav-link:active { transform: translate(2px, 2px); box-shadow: none; }
+.quick-nav-link--home { background: var(--primary); color: var(--on-primary); }
+.quick-nav-link--home:hover { background: var(--tertiary); color: var(--on-tertiary); }
+
+.source-pill-box {
+  background: var(--surface-container-low);
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  padding: var(--space-md);
+}
+.source-pill-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+.source-pill-title { font-family: var(--font-label); font-weight: 700; font-size: var(--label-size); margin: 0; }
+.sync-badge {
+  font-family: var(--font-label);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border: 1.5px solid var(--outline);
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+}
+.source-list { margin: 0; padding-left: 1.1rem; font-size: 0.86rem; color: var(--on-surface-variant); }
+
+/* KPI Row */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+.kpi-block {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-container-low);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+.kpi-block--highlight { background: var(--primary-container); color: var(--on-primary-container); }
+.kpi-label { font-family: var(--font-label); font-weight: 700; font-size: var(--label-size); color: var(--on-surface-variant); }
+.kpi-block--highlight .kpi-label, .kpi-block--highlight .kpi-sub { color: var(--on-primary-container); }
+.kpi-value { font-family: var(--font-label); font-weight: 700; font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kpi-sub { font-size: 0.84rem; color: var(--on-surface-variant); }
+.kpi-footer-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-xs); }
+.progress-track { width: 100%; height: 12px; border: var(--border-medium); background: var(--surface-white); overflow: hidden; }
+.progress-fill { height: 100%; width: 0%; background: var(--tertiary); transition: width var(--dur-short) var(--ease-out); }
+
+/* Sections */
+.section-open {
+  border-top: var(--space-sm) solid var(--section-accent, var(--tertiary));
+  padding-top: var(--space-lg);
+  display: grid;
+  gap: var(--space-lg);
+}
+.section-open--blue { --section-accent: var(--tertiary); }
+.section-open--red { --section-accent: var(--secondary); }
+.section-open--yellow { --section-accent: var(--primary-container); }
+.section-open--black { --section-accent: var(--primary); }
+
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-md);
+}
+.section-heading { font-family: var(--font-headline); font-weight: 900; font-size: var(--headline-size); line-height: 1.2; margin: var(--space-xs) 0 0 0; }
+.section-desc { margin: var(--space-xs) 0 0 0; color: var(--on-surface-variant); max-width: 72ch; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  color: var(--on-surface);
+  cursor: pointer;
+  transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.btn:hover { background: var(--primary); color: var(--on-primary); }
+.btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.btn--primary { background: var(--primary-container); color: var(--on-primary-container); }
+.btn--primary:hover { background: var(--primary); color: var(--on-primary); }
+.btn--blue { background: var(--tertiary); color: var(--on-tertiary); }
+.btn--blue:hover { background: var(--primary); color: var(--on-primary); }
+.btn--small { min-height: 36px; padding: 0 var(--space-sm); font-size: 0.8rem; border-width: 2px; box-shadow: 2px 2px 0 var(--outline); }
+
+/* Tabs & Comparison Workbench */
+.tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.tab-group { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+.tab-btn {
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-white);
+  color: var(--on-surface);
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.tab-btn:hover { background: var(--surface-container-high); }
+.tab-btn.is-active { background: var(--primary); color: var(--on-primary); }
+
+.comparison-shell {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.law-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.law-hero {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  border-bottom: var(--border-thick);
+  padding-bottom: var(--space-md);
+}
+.law-name { margin: 0; font-family: var(--font-headline); font-weight: 900; font-size: 1.4rem; }
+.law-mnemonic { font-weight: 700; color: var(--tertiary); font-size: 0.95rem; margin-top: 2px; }
+.law-formula-box {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: var(--space-xs) var(--space-lg);
+  overflow-x: auto;
+}
+
+.dim-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+.dim-card {
+  border: var(--border-medium);
+  background: var(--background);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-xs);
+  align-content: start;
+}
+.dim-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  color: var(--tertiary);
+  border-bottom: 1.5px solid var(--outline-variant);
+  padding-bottom: 4px;
+}
+.dim-content { font-size: 0.92rem; line-height: 1.65; }
+.example-list { margin: 0; padding-left: 1.15rem; display: grid; gap: 6px; }
+
+/* Interactive Step Box */
+.sim-box {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow-sm);
+  background: var(--surface-container-low);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-md);
+}
+.sim-stage { display: grid; gap: var(--space-sm); }
+.demo-steps { display: grid; gap: var(--space-xs); }
+.demo-step-row {
+  border: var(--border-medium);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface-white);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.demo-step-row.is-current { border-left: 8px solid var(--tertiary); background: var(--warning-container); font-weight: 700; }
+.demo-step-row.is-done { border-left: 8px solid var(--positive); background: var(--positive-container); color: var(--on-positive-container); }
+.demo-step-row.is-locked { opacity: 0.45; border-style: dashed; }
+.demo-controls { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+
+/* Tables */
+.table-wrap { border: var(--border-thick); box-shadow: var(--offset-shadow-sm); background: var(--surface-white); overflow-x: auto; }
+.variant-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
+.variant-table thead th {
+  background: var(--surface-container-high);
+  border-bottom: var(--border-thick);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  white-space: nowrap;
+}
+.variant-table tbody td { border-bottom: 1px solid var(--outline-variant); padding: var(--space-sm) var(--space-md); vertical-align: top; line-height: 1.65; }
+.variant-table tbody tr:hover { background: var(--surface-container-low); }
+
+.mini-power-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-sm) 0;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  border: var(--border-medium);
+}
+.mini-power-table th, .mini-power-table td { border: 1.5px solid var(--outline); padding: 6px 8px; text-align: center; }
+.mini-power-table th { background: var(--primary-container); font-weight: 700; }
+
+/* Toolbar & Pills */
+.toolbar-panel {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+.toolbar-inputs { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-md); align-items: end; }
+.field-group { display: grid; gap: var(--space-xs); }
+.field-label { font-family: var(--font-label); font-weight: 700; font-size: var(--label-size); }
+.input-control, .select-control {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  background: var(--background);
+  font-size: 0.94rem;
+  font-weight: 500;
+}
+.input-control:focus, .select-control:focus { background: var(--surface-white); }
+
+.filter-pills { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.pill {
+  min-height: 38px;
+  padding: 0 var(--space-sm);
+  border: var(--border-medium);
+  border-radius: var(--rounded);
+  background: var(--surface-container-low);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.pill:hover { background: var(--primary-container); }
+.pill.is-active { background: var(--tertiary); color: var(--on-tertiary); box-shadow: 2px 2px 0 var(--outline); }
+
+.results-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1.5px solid var(--outline-variant);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.84rem;
+}
+
+/* Single-Column Evidence Card Grid (1 problem per row) */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+.entry-card {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.card-accent-bar { height: 10px; border-bottom: var(--border-medium); }
+.card-accent-bar--blue { background: var(--tertiary); }
+.card-accent-bar--red { background: var(--secondary); }
+.card-accent-bar--yellow { background: var(--primary-container); }
+.card-accent-bar--black { background: var(--primary); }
+
+.card-body { padding: var(--space-lg); display: grid; gap: var(--space-md); }
+.card-top-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-sm); }
+.tag-group { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.tag {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--label-size);
+  border: var(--border-medium);
+  padding: 2px 8px;
+  border-radius: var(--rounded);
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+.tag--blue { background: var(--tertiary); color: var(--on-tertiary); }
+.tag--red { background: var(--secondary); color: var(--on-secondary); }
+.tag--yellow { background: var(--primary-container); color: var(--on-primary-container); }
+.tag--black { background: var(--primary); color: var(--on-primary); }
+.tag--green { background: var(--positive-container); color: var(--on-positive-container); border-color: var(--positive); }
+
+.card-title { margin: 0; font-family: var(--font-headline); font-weight: 900; font-size: 1.2rem; line-height: 1.3; }
+.card-prompt { margin: 0; font-size: 0.98rem; line-height: 1.75; }
+.card-prompt p { margin: 0 0 0.5rem 0; }
+.card-prompt p:last-child { margin-bottom: 0; }
+
+/* Accordion */
+.accordion-trigger {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
+  border: var(--border-medium);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  text-align: left;
+}
+.accordion-trigger:hover, .accordion-trigger[aria-expanded="true"] {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+.accordion-panel {
+  border: var(--border-medium);
+  border-top: none;
+  background: var(--background);
+  padding: var(--space-md) var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+.accordion-panel[hidden] { display: none; }
+
+.answer-callout {
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+  border: 2px solid var(--positive);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+
+.quote-box {
+  background: var(--surface-container);
+  border-left: 5px solid var(--primary);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+.card-footer {
+  border-top: var(--border-medium);
+  background: var(--surface-container);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  font-weight: 600;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+/* Visual Diagrams & Formula Panels */
+.visual-box {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  box-shadow: var(--offset-shadow-sm);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+.visual-box-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xs);
+  border-bottom: 1.5px solid var(--outline-variant);
+  padding-bottom: var(--space-xs);
+}
+.visual-box-title { font-family: var(--font-label); font-weight: 700; font-size: 0.85rem; }
+.visual-caption { font-size: 0.82rem; color: var(--on-surface-variant); margin: 0; }
+.formula-panel {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  border-left: 6px solid var(--tertiary);
+  padding: var(--space-sm) var(--space-md);
+  overflow-x: auto;
+}
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.15rem 0; margin: 0.2rem 0; }
+.math-fallback { font-family: var(--font-label); font-weight: 700; font-size: 0.96rem; line-height: 1.7; }
+.math-frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 0.18em; font-size: 0.86em; line-height: 1.1; }
+.math-frac-num { border-bottom: 1.5px solid currentColor; padding: 0 0.25em 1px; }
+.math-frac-den { padding: 1px 0.25em 0; }
+.math-overline { text-decoration: overline; }
+.math-boxed { border: 2px solid var(--outline); background: var(--primary-container); padding: 0 4px; }
+
+.power-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-family: var(--font-label); font-weight: 700; }
+.power-cell { border: var(--border-medium); background: var(--background); padding: 5px 10px; text-align: center; display: inline-grid; gap: 2px; min-width: 62px; }
+.power-cell small { font-size: 0.72rem; font-weight: 600; color: var(--on-surface-variant); }
+.power-cell--yellow { background: var(--primary-container); color: var(--on-primary-container); }
+.power-cell--blue { background: var(--tertiary); color: var(--on-tertiary); }
+.power-cell--blue small { color: rgba(255,255,255,0.88); }
+.power-cell--red { background: var(--secondary); color: #ffffff; }
+.power-cell--red small { color: rgba(255,255,255,0.88); }
+.power-cell--green { background: var(--positive-container); border-color: var(--positive); color: var(--on-positive-container); }
+
+.ladder-list { display: grid; gap: 5px; font-family: var(--font-label); font-size: 0.86rem; }
+.ladder-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 10px; background: var(--background); border: 1.5px solid var(--outline-variant); }
+.ladder-badge { background: var(--primary-container); border: 1.5px solid var(--outline); padding: 1px 8px; font-weight: 900; }
+
+.funnel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: var(--space-sm); }
+.funnel-step { border: var(--border-medium); border-left: 6px solid var(--tertiary); background: var(--background); padding: var(--space-sm); font-size: 0.86rem; display: grid; gap: 3px; }
+.funnel-step--yellow { border-left-color: var(--warning); background: var(--warning-container); }
+.funnel-step--ok { border-left-color: var(--positive); background: var(--positive-container); color: var(--on-positive-container); }
+
+/* Mastery Checklist Section */
+.checklist-panel {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+.checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+.check-item {
+  border: var(--border-medium);
+  background: var(--background);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out);
+}
+.check-item:hover { background: var(--surface-container-high); }
+.check-item.is-checked { background: var(--positive-container); border-color: var(--positive); }
+.check-item input[type="checkbox"] { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--positive); cursor: pointer; flex-shrink: 0; }
+.check-item-body { display: grid; gap: 2px; }
+.check-item-title { font-weight: 700; font-size: 0.9rem; }
+.check-item.is-checked .check-item-title { text-decoration: line-through; color: var(--on-positive-container); }
+.check-item-src { font-family: var(--font-label); font-size: 0.75rem; color: var(--on-surface-variant); }
+
+/* Quiz Generator */
+.quiz-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-md);
+  align-items: end;
+}
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1.5px solid var(--outline-variant);
+}
+.inline-notice {
+  border: var(--border-medium);
+  border-left: 8px solid var(--tertiary);
+  background: var(--surface-white);
+  padding: var(--space-sm) var(--space-md);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+.quiz-paper-head {
+  border: var(--border-thick);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.quiz-sheet { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); }
+.quiz-question {
+  border: var(--border-thick);
+  border-radius: var(--rounded);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+.quiz-q-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  border-bottom: var(--border-medium);
+  padding-bottom: var(--space-xs);
+}
+.quiz-scratch-line { display: none; border-bottom: 2px dashed var(--outline-variant); height: 2.5rem; }
+.quiz-item-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-sm); }
+
+.empty-state {
+  border: var(--border-thick);
+  box-shadow: var(--offset-shadow);
+  background: var(--surface-white);
+  padding: var(--space-xl);
+  display: grid;
+  gap: var(--space-sm);
+  justify-items: start;
+}
+
+.site-footer {
+  border-top: var(--rule-heavy);
+  padding: var(--space-lg) 0 var(--space-xl) 0;
+  display: grid;
+  gap: var(--space-xs);
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+}
+
+@media (max-width: 960px) {
+  .masthead { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .law-layout { grid-template-columns: 1fr; }
+  .dim-grid { grid-template-columns: 1fr; }
+  .checklist-grid { grid-template-columns: 1fr; }
+  .quiz-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .page-grid { padding: var(--space-md); gap: var(--space-lg); }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .toolbar-inputs { grid-template-columns: 1fr; }
+  .quiz-fields { grid-template-columns: 1fr; }
+}
+@media print {
+  body { background: #ffffff; }
+  .no-print, .masthead, .kpi-grid, #sec-compare, #sec-evidence, #sec-checklist, .toolbar-panel, .site-footer { display: none !important; }
+  .page-grid { max-width: 100%; padding: 0; gap: 1rem; }
+  .section-open { border-top: none; padding-top: 0; }
+  .quiz-question { box-shadow: none; break-inside: avoid; }
+  .quiz-scratch-line { display: block; }
+  .quiz-item-actions { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="page-grid">
+
+  <!-- Masthead -->
+  <header class="masthead">
+    <div>
+      <div class="kicker-row">
+        <span class="kicker-block">Lesson 1 · 幂运算</span>
+        <span class="kicker-block kicker-block--blue">初中数学专题</span>
+        <span class="flag-trio" aria-hidden="true">
+          <span class="flag-swatch flag-swatch--red"></span>
+          <span class="flag-swatch flag-swatch--yellow"></span>
+          <span class="flag-swatch flag-swatch--blue"></span>
+        </span>
+      </div>
+      <h1 class="title">幂运算：<mark>交互式研习与智能刷题</mark>工作台</h1>
+      <p class="lede">严格依据讲义《Lesson 1-幂运算.pdf》与配套《Lesson 1-幂运算-练习册.pdf》构建：覆盖四大幂运算法则横向对比、分步演示、16 组单列精讲证据卡片（配核心公式链与直观图示）、10 项掌握度打卡及 31 题纯前端离线自动组卷。</p>
+      <nav class="quick-nav no-print" aria-label="工作台快速跳转">
+        <a class="quick-nav-link quick-nav-link--home" href="./index.html">← 返回专题目录</a>
+        <a class="quick-nav-link" href="#sec-compare">01 四则法则对比</a>
+        <a class="quick-nav-link" href="#sec-evidence">02 证据溯源精讲</a>
+        <a class="quick-nav-link" href="#sec-checklist">03 学习进度打卡</a>
+        <a class="quick-nav-link" href="#sec-quiz">04 离线自动组卷</a>
+      </nav>
+    </div>
+
+    <div class="source-pill-box">
+      <div class="source-pill-head">
+        <p class="source-pill-title">本工作台唯一内容来源</p>
+        <span class="sync-badge">进度本地自动保存</span>
+      </div>
+      <ul class="source-list">
+        <li>《Lesson 1-幂运算.pdf》（Warm Up / Exploration 1–8 &amp; Extension）</li>
+        <li>《Lesson 1-幂运算-练习册.pdf》（第 1–12 题原题与解析）</li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- KPI Summary Row -->
+  <section class="kpi-grid no-print" aria-label="学习档案概览指标">
+    <div class="kpi-block kpi-block--highlight">
+      <span class="kpi-label">我的学习打卡进度</span>
+      <div class="kpi-value" id="kpi-progress-val">0 / 10</div>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="kpi-progress-bar"></div>
+      </div>
+      <div class="kpi-footer-row">
+        <span class="kpi-sub" id="kpi-progress-pct">当前掌握率 0%</span>
+        <button type="button" class="btn btn--small" id="btn-reset-kpi" onclick="resetChecklist(this)">重置打卡</button>
+      </div>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">核心知识板块</span>
+      <div class="kpi-value">6 大维度</div>
+      <span class="kpi-sub">四则幂法则 · 大小比较 · 级数求和拓展</span>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">溯源原题库总量</span>
+      <div class="kpi-value" id="kpi-bank-count">31 题</div>
+      <span class="kpi-sub">100% 标注讲义与练习册原始出处</span>
+    </div>
+
+    <div class="kpi-block">
+      <span class="kpi-label">当前智能组卷状态</span>
+      <div class="kpi-value" id="kpi-quiz-count">5 题</div>
+      <span class="kpi-sub" id="kpi-quiz-meta">支持展开解析、公式图示与打印导出</span>
+    </div>
+  </section>
+
+  <!-- Section 1: Four-Law Comparison & Interactive Step Walkthrough -->
+  <section id="sec-compare" class="section-open section-open--blue no-print" aria-labelledby="heading-compare">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--blue">01 · 核心法则对比台</span>
+        <h2 class="section-heading" id="heading-compare">四大幂运算法则横向对比（单项深剖 + 逐步拆解演示）</h2>
+        <p class="section-desc">切换下方四大幂运算法则对比公式、口诀、运算条件、逆向技巧与高频易错点；右侧支持逐步点击演练典型例题拆解过程；资料未覆盖的边界均标明「来源未提及」。</p>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-group" role="tablist" aria-label="幂运算法则选项卡">
+        <button type="button" class="tab-btn is-active" role="tab" aria-selected="true" id="tab-mul" onclick="switchLawTab('mul')">1. 同底数幂乘法</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tab-div" onclick="switchLawTab('div')">2. 同底数幂除法</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tab-pow" onclick="switchLawTab('pow')">3. 幂的乘方</button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" id="tab-prod" onclick="switchLawTab('prod')">4. 积的乘方</button>
+      </div>
+      <button type="button" class="btn btn--primary btn--small" id="btn-toggle-matrix" onclick="toggleMatrixView()">查看四法则横向总览表</button>
+    </div>
+
+    <div id="comparison-panel" class="comparison-shell" role="tabpanel" aria-live="polite">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- Section 2: Search, Filter & Single-Column Evidence Cards -->
+  <section id="sec-evidence" class="section-open section-open--red no-print" aria-labelledby="heading-evidence">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--red">02 · 证据溯源精讲库</span>
+        <h2 class="section-heading" id="heading-evidence">核心知识点与原题精讲（16 组单列卡片 · 含公式与直观图解）</h2>
+        <p class="section-desc">每组卡片独立成行，便于专注研读；支持关键字实时检索与 6 大维度标签过滤，展开即可查看核心公式链、可视化结构图、完整推导过程与讲义原文摘引。</p>
+      </div>
+    </div>
+
+    <div class="toolbar-panel">
+      <div class="toolbar-inputs">
+        <div class="field-group">
+          <label class="field-label" for="keyword-search">实时关键字检索（支持公式数值、题号、核心词，如：1024、21、零次方、斐波那契、立方和、凑整）</label>
+          <input type="search" id="keyword-search" class="input-control" placeholder="输入关键字实时筛选下方知识卡片与来源原题…" oninput="handleSearchInput(this.value)">
+        </div>
+        <button type="button" class="btn" onclick="resetAllFilters()">清空筛选</button>
+      </div>
+
+      <div class="field-group">
+        <span class="field-label">按核心知识点 / 章节维度筛选</span>
+        <div class="filter-pills" id="filter-pills-container" role="group" aria-label="知识点筛选标签"></div>
+      </div>
+
+      <div class="results-meta">
+        <span id="filter-match-status">当前匹配 16 / 16 组溯源卡片</span>
+        <div style="display:flex; gap:var(--space-xs); flex-wrap:wrap;">
+          <button type="button" class="btn btn--small" onclick="expandAllVisibleCards()">展开当前全部解析</button>
+          <button type="button" class="btn btn--small" onclick="collapseAllCards()">收起全部解析</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-grid" id="evidence-cards-container">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- Section 3: Mastery Checklist -->
+  <section id="sec-checklist" class="section-open section-open--yellow no-print" aria-labelledby="heading-checklist">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--yellow">03 · 掌握度追踪</span>
+        <h2 class="section-heading" id="heading-checklist">核心考点学习进度打卡清单（10 项通关）</h2>
+        <p class="section-desc">勾选已熟练掌握的模块，进度将自动保存在浏览器本地存储中。</p>
+      </div>
+      <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+        <button type="button" class="btn btn--primary btn--small" onclick="checkAllItems()">全部打卡</button>
+        <button type="button" class="btn btn--small" id="btn-reset-checklist" onclick="resetChecklist(this)">重置打卡进度</button>
+      </div>
+    </div>
+
+    <div class="checklist-panel">
+      <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:var(--space-sm);">
+        <strong id="checklist-summary-label">已掌握 0 / 10 项（0%，自动同步状态）</strong>
+        <span id="checklist-toast" style="font-family:var(--font-label); font-size:0.82rem; font-weight:700; color:var(--positive);"></span>
+      </div>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="checklist-progress-bar"></div>
+      </div>
+      <div class="checklist-grid" id="checklist-items-container"></div>
+    </div>
+  </section>
+
+  <!-- Section 4: Offline Auto-Quiz Generator -->
+  <section id="sec-quiz" class="section-open section-open--black" aria-labelledby="heading-quiz">
+    <div class="section-header no-print">
+      <div>
+        <span class="kicker-block">04 · 原题抽测与导出</span>
+        <h2 class="section-heading" id="heading-quiz">纯前端离线自动组卷 / 智能刷题生成器（31 题真题库）</h2>
+        <p class="section-desc">100% 抽取自两份源文档原题，单题独立成行排布；支持自由设定范围/难度/题型、查看带公式与图示的详细解析、自评掌握，以及 A4 试卷打印与 TXT 导出。</p>
+      </div>
+    </div>
+
+    <div class="toolbar-panel no-print">
+      <div class="quiz-fields">
+        <div class="field-group">
+          <label class="field-label" for="quiz-topic">知识点范围</label>
+          <select id="quiz-topic" class="select-control" onchange="updateQuizControl('topic', this.value)">
+            <option value="all">全部知识点（综合组卷）</option>
+            <option value="laws">四则幂法则（乘除、乘方、积的乘方）</option>
+            <option value="compare">幂的大小比较</option>
+            <option value="mixed">高次混合与逆向求值</option>
+            <option value="series">级数求和拓展（平方和、立方和、连乘）</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="quiz-difficulty">题目难度</label>
+          <select id="quiz-difficulty" class="select-control" onchange="updateQuizControl('difficulty', this.value)">
+            <option value="all">全难度混合</option>
+            <option value="basic">基础温故</option>
+            <option value="medium">能力提升</option>
+            <option value="hard">拓展突破</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="quiz-type">题型偏好</label>
+          <select id="quiz-type" class="select-control" onchange="updateQuizControl('qtype', this.value)">
+            <option value="all">全部题型</option>
+            <option value="calc">计算与填空题</option>
+            <option value="eval">化简与求值题</option>
+            <option value="compare">大小比较与判断题</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="quiz-count">抽题数量</label>
+          <select id="quiz-count" class="select-control" onchange="updateQuizControl('count', this.value)">
+            <option value="3">3 题（随堂小测）</option>
+            <option value="5" selected>5 题（标准练习）</option>
+            <option value="8">8 题（专题巩固）</option>
+            <option value="12">12 题（模拟通关卷）</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
+          <button type="button" class="btn btn--primary" onclick="generateQuiz()">随机生成试卷</button>
+          <button type="button" class="btn btn--blue" id="btn-toggle-all-answers" onclick="toggleAllQuizAnswers()">显示全部答案与解析</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
+          <button type="button" class="btn" onclick="printQuiz()">一键打印试卷</button>
+          <button type="button" class="btn" onclick="exportQuizText()">导出纯文本试卷 (.txt)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="inline-notice no-print" id="quiz-status-msg" hidden></div>
+
+    <div class="quiz-paper-head">
+      <div>
+        <strong style="font-family:var(--font-headline); font-size:1.15rem;">《Lesson 1 幂运算》专项练习卷</strong>
+        <div id="quiz-paper-meta" style="font-size:0.84rem; margin-top:2px;">出题范围：全部知识点 · 全难度 · 共 5 题</div>
+      </div>
+      <span class="tag tag--black" id="quiz-score-summary">自评完成：0 / 5 题</span>
+    </div>
+
+    <div class="quiz-sheet" id="quiz-questions-container"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer no-print">
+    <div><strong>来源边界声明：</strong>本工作台全部定理、例题、答案与解析均严格取材自《Lesson 1-幂运算.pdf》与《Lesson 1-幂运算-练习册.pdf》；未在资料中出现的概念（如四大法则几何本质、负整数指数与分数指数拓展）均已明确标明「来源未提及」。</div>
+    <div>包豪斯（Bauhaus）几何工作台风格 · KaTeX 数学渲染（离线自动无损降级） · 支持本地进度持久化与 A4 打印导出</div>
+  </footer>
+
+</div>
+
+<api-shim></api-shim>
+<script>
+const STORAGE_KEY = `lesson1_exponents_bauhaus_v1`;
+
+const FILTER_CATEGORIES = [
+  { id: `all`, label: `全部内容` },
+  { id: `mul`, label: `同底数幂乘法` },
+  { id: `div`, label: `同底数幂除法` },
+  { id: `pow`, label: `幂的乘方` },
+  { id: `prod`, label: `积的乘方` },
+  { id: `compare`, label: `幂的大小比较` },
+  { id: `series`, label: `高阶综合与求和拓展` }
+];
+
+const CATEGORY_ACCENT = {
+  mul: { bar: `blue`, tag: `tag--blue` },
+  div: { bar: `red`, tag: `tag--red` },
+  pow: { bar: `yellow`, tag: `tag--yellow` },
+  prod: { bar: `black`, tag: `tag--black` },
+  compare: { bar: `blue`, tag: `tag--blue` },
+  series: { bar: `red`, tag: `tag--red` }
+};
+
+const LAWS_DATA = {
+  mul: {
+    id: `mul`,
+    name: `同底数幂乘法`,
+    formulaTex: `a^m \\times a^n = a^{m+n}`,
+    mnemonic: `底数不变，指数相加`,
+    conditions: `底数 $a$ 必须相同；资料中主要讨论正整数指数的连乘运算（可推广至多个同底数幂相乘，如 $a^m \\times a^n \\times a^p = a^{m+n+p}$）。负整数指数与分数指数「来源未提及」。`,
+    essence: `<strong>代数本质（连乘展开）：</strong>$5^2 \\times 5^3 = (5\\times 5)\\times(5\\times 5\\times 5) = 5^{2+3} = 5^5$，本质是相同因数个数的累加。<br><strong>几何本质：</strong>「来源未提及」（两份资料均以代数连乘展开推导，未给出几何面积或体积图解）。`,
+    reverse: `<strong>逆用公式：$a^{m+n} = a^m \\cdot a^n$</strong><br>将和形式指数拆成同底数幂相乘，用于整体代入求值。例如已知 $3^a=5,\\; 9^b=10$，将 $3^{a+2b}$ 拆为 $3^a \\cdot 3^{2b} = 3^a \\cdot 9^b = 5\\times 10 = 50$。`,
+    pitfalls: `① 误把指数相乘或将底数相加（如 $5^2\\times 5^3$ 误选 $5^6$、$5^2+5^3$ 或 $2\\times 5^5$）；<br>② 忽略隐含指数 $1$（如 $2^8\\times 2^4\\times 2^2\\times 2$ 最后一项是 $2^1$）；<br>③ 混淆底数与指数意义（如 $7^8$ 表示 $8$ 个 $7$ 相乘，非 $7$ 个 $8$ 相乘）。`,
+    examples: [
+      `<strong>基础选择：</strong>$5^2 \\times 5^3 = 5^5$（《Lesson 1-幂运算.pdf》Warm Up）`,
+      `<strong>多底分组：</strong>$3^2\\times 5\\times 5^5\\times 3^6\\times 5^{12} = 3^8\\times 5^{18}$（《Lesson 1-幂运算.pdf》Exploration 1）`,
+      `<strong>基础计算：</strong>$2^8\\times 2^4\\times 2^2\\times 2 = 2^{8+4+2+1} = 2^{15}$（《Lesson 1-幂运算-练习册.pdf》第1(1)题）`,
+      `<strong>指数求和：</strong>$20\\times 20^2\\times 20^3\\times\\dots\\times 20^{50} = 20^{(1+50)\\times 50\\div 2} = 20^{1275}$（《Lesson 1-幂运算-练习册.pdf》第10题）`
+    ],
+    demoTitle: `原题拆解：已知 $3^a = 5,\\; 9^b = 10$，求 $3^{a+2b}$`,
+    demoSteps: [
+      `第 1 步（逆用乘法法则拆指数）：$3^{a+2b} = 3^a \\cdot 3^{2b}$`,
+      `第 2 步（幂的乘方换底对齐）：$3^{2b} = (3^2)^b = 9^b$`,
+      `第 3 步（整体代入求值）：$3^a \\cdot 9^b = 5 \\times 10 = 50$`
+    ],
+    source: `来源：《Lesson 1-幂运算.pdf》Warm Up、Exploration 1；《Lesson 1-幂运算-练习册.pdf》第1、8、10、11题`
+  },
+  div: {
+    id: `div`,
+    name: `同底数幂除法`,
+    formulaTex: `a^m \\div a^n = a^{m-n},\\qquad a^0 = 1\\;(a\\ne 0)`,
+    mnemonic: `底数不变，指数相减；非零数零次幂 $a^0 = 1\\,(a \\ne 0)$`,
+    conditions: `底数 $a$ 必须相同；对于零次方，资料明确给出 $a^0 = 1\\,(a \\ne 0)$。一般除法中对底数 $a\\ne 0$ 及 $m,n$ 大小关系的负指数拓展「来源未提及」。`,
+    essence: `<strong>代数本质（连乘约分）：</strong>$5^6 \\div 5^2 = (5\\times 5\\times 5\\times 5\\times 5\\times 5)\\div(5\\times 5) = 5^{6-2} = 5^4$。<br><strong>几何本质：</strong>「来源未提及」。`,
+    reverse: `<strong>逆用公式：$a^{m-n} = a^m \\div a^n$</strong><br>将差形式指数化为同底数幂相除。例如已知 $3^m=6,\\; 3^n=4$，求 $3^{2m-n} = 3^{2m}\\div 3^n = (3^m)^2\\div 3^n = 6^2\\div 4 = 9$。`,
+    pitfalls: `① 误认为“任何数的零次方都等于 $0$”（《Lesson 1-幂运算.pdf》Warm Up 明确判错，应为 $a^0=1\\,(a\\ne 0)$）；<br>② 混合连除时漏减隐含指数 $1$（如 $3^{12}\\div 3^5\\times 3^{19}\\div 3\\div 3^3 = 3^{12-5+19-1-3} = 3^{22}$）；<br>③ 误将指数直接相除（如 $5^6\\div 5^2$ 误选 $5^3$）。`,
+    examples: [
+      `<strong>连除基础：</strong>$11^{20}\\div 11^{11}\\div 11^3 = 11^{20-11-3} = 11^6$（《Lesson 1-幂运算.pdf》Exploration 1）`,
+      `<strong>配对消项：</strong>$2^2\\div 2^3\\times 2^4\\div 2^5\\times\\dots\\div 2^{99}\\times 2^{100} = 2^{2+49} = 2^{51}$（《Lesson 1-幂运算.pdf》Exploration 1 Extension）`,
+      `<strong>零次幂：</strong>$(19^{21}\\times 19^5\\div 19^{12}\\times 19^2)^0 = 1$（《Lesson 1-幂运算-练习册.pdf》第2(3)题）`,
+      `<strong>分组运算：</strong>$11^{12}\\times 7^{27}\\times 9^{15}\\div 7^{18}\\div 11^7\\div 9^{13} = 11^5\\times 7^9\\times 9^2$（《Lesson 1-幂运算-练习册.pdf》第3题）`
+    ],
+    demoTitle: `原题拆解：已知 $3^m = 6,\\; 3^n = 4$，求 $3^{2m-n}$`,
+    demoSteps: [
+      `第 1 步（逆用除法法则）：$3^{2m-n} = 3^{2m} \\div 3^n$`,
+      `第 2 步（逆用幂的乘方）：$3^{2m} = (3^m)^2 = 6^2 = 36$`,
+      `第 3 步（代入相除得解）：$36 \\div 4 = 9$`
+    ],
+    source: `来源：《Lesson 1-幂运算.pdf》Warm Up、Exploration 1、Exploration 3；《Lesson 1-幂运算-练习册.pdf》第1、2、3、6题`
+  },
+  pow: {
+    id: `pow`,
+    name: `幂的乘方`,
+    formulaTex: `(a^m)^n = a^{m \\cdot n}`,
+    mnemonic: `底数不变，指数相乘`,
+    conditions: `适用于幂的多次乘方；当底数不同但存在倍数幂次关系（如 $4=2^2,\\; 8=2^3,\\; 9=3^2,\\; 16=2^4,\\; 27=3^3,\\; 64=2^6,\\; 256=2^8,\\; 1024=2^{10}$）时，可先化为同底数后再运算。`,
+    essence: `<strong>代数本质（相同幂连乘）：</strong>$(a^m)^n$ 表示 $n$ 个 $a^m$ 相乘；如 $9\\times 9\\times 9\\times 9 = 9^4 = (9^2)^2 = 81^2$，$5^6 = (5^2)^3 = (5^3)^2$。<br><strong>几何本质：</strong>「来源未提及」。`,
+    reverse: `<strong>逆用公式：$a^{mn} = (a^m)^n = (a^n)^m$</strong><br>① <strong>凑同指数比大小：</strong>如 $3^{50}=(3^5)^{10}=243^{10}$，$4^{40}=(4^4)^{10}=256^{10}$，$5^{30}=(5^3)^{10}=125^{10}$；<br>② <strong>整体换元：</strong>如 $x^{20}y^{15}z^5=(x^4y^3z)^5=3^5$，进而求 $x^8y^6z^2=(x^4y^3z)^2=9$。`,
+    pitfalls: `① 与同底数幂乘法混淆，误把指数相加（如将 $(a^{100})^2$ 误算成 $a^{102}$，实际应为 $a^{200}$）；<br>② 含高次合数底数时忘记先化同底（如 $9^4\\times 3^3 = (3^2)^4\\times 3^3 = 3^{11}$）；<br>③ 指数方程漏算外层指数乘法（如 $81^m = (3^4)^m = 3^{4m}$）。`,
+    examples: [
+      `<strong>化同底连乘：</strong>$2^6\\times 4^2\\times 8^2 = 2^6\\cdot (2^2)^2\\cdot (2^3)^2 = 2^{16}$（《Lesson 1-幂运算.pdf》Exploration 1）`,
+      `<strong>线性条件求值：</strong>若 $2x+5y-3=0$，则 $4^x\\cdot 32^y = 2^{2x+5y} = 2^3 = 8$（《Lesson 1-幂运算.pdf》Exploration 3）`,
+      `<strong>指数换算：</strong>已知 $8^{16}=16^b$，得 $2^{48}=(2^4)^{12}$，故 $b=12$（《Lesson 1-幂运算.pdf》Exploration 4 Extension）`,
+      `<strong>方程求参：</strong>$3^m\\cdot 9^3\\cdot 27^3\\cdot 81^m = 3^{30}$，得 $m+6+9+4m=30 \\Rightarrow m=3$（《Lesson 1-幂运算-练习册.pdf》第9题）`
+    ],
+    demoTitle: `原题拆解：若 $2x + 5y - 3 = 0$，求 $4^x \\cdot 32^y$`,
+    demoSteps: [
+      `第 1 步（统一底数为 $2$）：$4^x = (2^2)^x = 2^{2x}$，$32^y = (2^5)^y = 2^{5y}$`,
+      `第 2 步（合并同底数幂）：$4^x \\cdot 32^y = 2^{2x} \\cdot 2^{5y} = 2^{2x+5y}$`,
+      `第 3 步（整体代入线性条件）：由 $2x+5y=3$ 得 $2^3 = 8$`
+    ],
+    source: `来源：《Lesson 1-幂运算.pdf》Warm Up、Exploration 1、3、4；《Lesson 1-幂运算-练习册.pdf》第2、6、9题`
+  },
+  prod: {
+    id: `prod`,
+    name: `积的乘方`,
+    formulaTex: `(ab)^n = a^n b^n`,
+    mnemonic: `积的每一个因式分别乘方，再把所得的幂相乘`,
+    conditions: `括号内必须是乘积形式，可推广至三项及以上乘积（如 $(3^5\\times 5^2\\times 11)^3$）。对于加减和差 $(a+b)^n$ 不可拆成 $a^n+b^n$，$(a+b)$ 只能作为整体底数。`,
+    essence: `<strong>代数本质（乘法交换律与结合律）：</strong>$(2\\times 7^3)^5$ 为 $5$ 组 $(2\\times 7^3)$ 连乘，重排即得 $2^5\\times (7^3)^5 = 2^5\\times 7^{15}$。<br><strong>几何本质：</strong>「来源未提及」。`,
+    reverse: `<strong>逆用公式：$a^n b^n = (ab)^n$</strong><br>① <strong>凑整十巧算：</strong>如 $2^{12}\\times 5^{12} = (2\\times 5)^{12} = 10^{12}$；<br>② <strong>同指数合并底数：</strong>如 $3^8\\times 7^8 = 21^8$；$3^{10}\\times 4^{15}\\times 5^{10} = 3^{10}\\times 8^{10}\\times 5^{10} = 120^{10}$。`,
+    pitfalls: `① 漏掉括号内系数或 $1$ 次字母因式的乘方（如 $(a^2 b)^6 = a^{12}b^6$，不可漏写 $b^6$）；<br>② 拆分合数底数时漏项（如 $30^{50} = (2\\times 3\\times 5)^{50} = 2^{50}\\times 3^{50}\\times 5^{50}$）。`,
+    examples: [
+      `<strong>多项积乘方：</strong>$(3^5\\times 5^2\\times 11)^3 = 3^{15}\\times 5^6\\times 11^3$（《Lesson 1-幂运算.pdf》Exploration 1）`,
+      `<strong>拆底凑整：</strong>$(6^4)^5\\times 15^{12}\\div 2^8\\div 9^{16} = 2^{12}\\times 5^{12} = 10^{12}$（《Lesson 1-幂运算.pdf》Exploration 2）`,
+      `<strong>逆用合并：</strong>$(3^2\\times 7^2)^{11}\\div 7^{14}\\times 9^3\\div (3^4)^5 = 3^8\\times 7^8 = 21^8$（《Lesson 1-幂运算-练习册.pdf》第4题）`,
+      `<strong>代数式除法：</strong>$(a^2b)^6\\div (ab)^5 = a^{12}b^6\\div (a^5b^5) = a^7b$（《Lesson 1-幂运算-练习册.pdf》第7题）`
+    ],
+    demoTitle: `原题拆解：$(6^4)^5 \\times 15^{12} \\div 2^8 \\div 9^{16}$`,
+    demoSteps: [
+      `第 1 步（合数分解质因数）：$6^{20}=(2\\times 3)^{20}$，$15^{12}=(3\\times 5)^{12}$，$9^{16}=3^{32}$`,
+      `第 2 步（按质底数 $2, 3, 5$ 合并指数）：$2^{20-8} \\times 3^{20+12-32} \\times 5^{12} = 2^{12} \\times 3^0 \\times 5^{12}$`,
+      `第 3 步（逆用积的乘方凑整十）：$2^{12} \\times 5^{12} = (2\\times 5)^{12} = 10^{12}$`
+    ],
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 1、2；《Lesson 1-幂运算-练习册.pdf》第2、4、5、7题`
+  }
+};
+
+const EVIDENCE_CARDS = [
+  {
+    id: `ev-warmup-1`,
+    category: `mul`,
+    categoryLabel: `基础概念 · 同底数幂乘法`,
+    difficulty: `基础温故`,
+    title: `乘方定义、常用幂值表与四项正误辨析`,
+    formulaTex: `a^n = \\underbrace{a\\times a\\times\\dots\\times a}_{n\\text{ 个 }a},\\qquad a^0 = 1\\;(a\\ne 0),\\qquad 2^{10}=\\boxed{1024}`,
+    summary: `<p>$6\\times 6\\times\\dots\\times 6$（$8$ 个 $6$）记作 $6^8$，读作 $6$ 的 $8$ 次方。在 $13^{57}$ 中，$13$ 叫做<strong>底数</strong>，$57$ 叫做<strong>指数</strong>，运算结果叫做<strong>幂</strong>。</p>
+    <table class="mini-power-table" aria-label="常用幂值表">
+      <thead><tr><th>乘方</th><th>$2^0$</th><th>$2^1$</th><th>$2^2$</th><th>$2^3$</th><th>$2^4$</th><th>$2^5$</th><th>$2^{10}$</th></tr></thead>
+      <tbody><tr><td>幂</td><td>1</td><td>2</td><td>4</td><td>8</td><td>16</td><td>32</td><td>1024</td></tr></tbody>
+      <thead><tr><th>乘方</th><th>$3^2$</th><th>$3^3$</th><th>$3^4$</th><th>$3^5$</th><th>$5^2$</th><th>$5^3$</th><th>$5^4$</th></tr></thead>
+      <tbody><tr><td>幂</td><td>9</td><td>27</td><td>81</td><td>243</td><td>25</td><td>125</td><td>625</td></tr></tbody>
+    </table>`,
+    detail: `<strong>判断正误解析：</strong><br>
+    1. $10^n$ 表示 $n$ 个 $10$ 相乘所得的积（$\\checkmark$）。<br>
+    2. $7^8$ 表示 $7$ 个 $8$ 相乘（$\\times$，应为 $8$ 个 $7$ 相乘）。<br>
+    3. $18$ 个 $(a+b)$ 相乘写成乘方形式是 $(a+b)^{18}$（$\\checkmark$）。<br>
+    4. 任何数的零次方都等于 $0$（$\\times$，$a^0 = 1\\,(a \\ne 0)$）。<br>
+    <strong>填空变形：</strong>$9^4 = (9^2)^2 = 81^2$；$5^6 = (5^2)^3 = (5^3)^2$；$16=2^4$，$27=3^3$，$81=3^4=9^2$。`,
+    quote: `原文摘引：“$13^{57}$ 中，$13$ 叫做底数，$57$ 叫做指数，$13^{57}$ 的运算结果叫做幂。” / “$a^0 = 1\\,(a \\ne 0)$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Warm Up`
+  },
+  {
+    id: `ev-mul-2`,
+    category: `mul`,
+    categoryLabel: `同底数幂乘法`,
+    difficulty: `基础温故`,
+    title: `多底数分组连乘与等差数列指数求和`,
+    formulaTex: `3^2\\times 5\\times 5^5\\times 3^6\\times 5^{12} = \\boxed{3^8\\times 5^{18}},\\qquad 20^{1+2+\\dots+50} = \\boxed{20^{1275}}`,
+    summary: `<p>1. 多底数连乘按底数分类相加：$3^2\\times 5\\times 5^5\\times 3^6\\times 5^{12} = 3^{2+6}\\times 5^{1+5+12} = 3^8\\times 5^{18}$。</p>
+    <p>2. 练习册第10题：$20\\times 20^2\\times 20^3\\times\\dots\\times 20^{50} = 20^{1275}$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    • $2^8\\times 2^4\\times 2^2\\times 2 = 2^{8+4+2+1} = 2^{15}$（注意末项 $2 = 2^1$）。<br>
+    • $29^7\\times 29^{13}\\times 29^{19}\\times 29^{25}\\times 29^{31} = 29^{7+13+19+25+31} = 29^{95}$。<br>
+    • $20\\times 20^2\\times\\dots\\times 20^{50} = 20^{1+2+3+\\dots+50} = 20^{(1+50)\\times 50\\div 2} = 20^{1275}$。`,
+    quote: `原文摘引：“原式 $= 20^{1+2+3+\\dots+50} = 20^{(1+50)\\times 50\\div 2} = 20^{1275}$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 1；《Lesson 1-幂运算-练习册.pdf》第1、10题`
+  },
+  {
+    id: `ev-mul-3`,
+    category: `mul`,
+    categoryLabel: `同底数幂乘法 · 逆用与待定系数`,
+    difficulty: `能力提升`,
+    title: `乘法逆向拆分求值与双字母指数方程`,
+    formulaTex: `3^{a+2b} = 3^a\\cdot (3^2)^b = 3^a\\cdot 9^b = 5\\times 10 = \\boxed{50},\\qquad 4m+n=17,\\;m-3=1 \\Rightarrow \\boxed{m=4,\\,n=1}`,
+    summary: `<p><strong>练习册第8题：</strong>已知 $3^a = 5$，$9^b = 10$，则 $3^{a+2b} = 50$。</p>
+    <p><strong>练习册第11题：</strong>已知 $a, b$ 不为 $0$ 或 $1$，$a^{m+n}\\times b^{m-3}\\times a^{3m} = a^{17}b$，则 $m=4,\\,n=1$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    • 第8题：$3^{a+2b} = 3^a \\cdot 3^{2b} = 3^a \\cdot (3^2)^b = 3^a \\cdot 9^b = 5\\times 10 = 50$。<br>
+    • 第11题：合并同底数幂得 $a^{m+n+3m}\\times b^{m-3} = a^{4m+n}\\times b^{m-3} = a^{17}b$。由底数不为 $0$ 或 $1$，对应指数相等：$m-3=1 \\Rightarrow m=4$，$4m+n=17 \\Rightarrow 16+n=17 \\Rightarrow n=1$。`,
+    quote: `原文摘引：“$a^{m+n}\\times b^{m-3}\\times a^{3m} = a^{m+n+3m}\\times b^{m-3} = a^{17}b$，所以 $4m+n=17$，$m-3=1$。”`,
+    source: `来源：《Lesson 1-幂运算-练习册.pdf》第8、11题`
+  },
+  {
+    id: `ev-div-1`,
+    category: `div`,
+    categoryLabel: `同底数幂除法`,
+    difficulty: `基础温故`,
+    title: `同底数幂连除、乘除混合与零次方法则`,
+    formulaTex: `11^{20}\\div 11^{11}\\div 11^3 = \\boxed{11^6},\\qquad 3^{12-5+19-1-3}=\\boxed{3^{22}},\\qquad (\\text{非零数})^0=\\boxed{1}`,
+    summary: `<p>1. $11^{20}\\div 11^{11}\\div 11^3 = 11^{20-11-3} = 11^6$；$79^{50}\\div 79^8\\div 79^{14}\\div 79^{27} = 79^1 = 79$。</p>
+    <p>2. $(19^{21}\\times 19^5\\div 19^{12}\\times 19^2)^0 = 1$；$3^{12}\\div 3^5\\times 3^{19}\\div 3\\div 3^3 = 3^{22}$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    • $5^6\\div 5^2 = (5\\times 5\\times 5\\times 5\\times 5\\times 5)\\div(5\\times 5) = 5^{6-2} = 5^4$。<br>
+    • $3^{12}\\div 3^5\\times 3^{19}\\div 3\\div 3^3 = 3^{12-5+19-1-3} = 3^{22}$。<br>
+    • $11^{12}\\times 7^{27}\\times 9^{15}\\div 7^{18}\\div 11^7\\div 9^{13} = 11^{12-7}\\times 7^{27-18}\\times 9^{15-13} = 11^5\\times 7^9\\times 9^2$。<br>
+    • 因为括号内为非零数，所以零次方直接等于 $1$。`,
+    quote: `原文摘引：“同底数幂乘法，底数不变，指数相加；同底数幂除法，底数不变，指数相减。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Warm Up、Exploration 1；《Lesson 1-幂运算-练习册.pdf》第1、2、3题`
+  },
+  {
+    id: `ev-div-2`,
+    category: `div`,
+    categoryLabel: `同底数幂除法 · 配对与逆用`,
+    difficulty: `拓展突破`,
+    title: `乘除交替长串配对与差指数逆向代入`,
+    formulaTex: `2^{2+(4-3)+(6-5)+\\dots+(100-99)} = 2^{2+49} = \\boxed{2^{51}},\\qquad 3^{2m-n} = \\frac{(3^m)^2}{3^n} = \\frac{36}{4} = \\boxed{9}`,
+    summary: `<p><strong>长串配对：</strong>$2^2\\div 2^3\\times 2^4\\div 2^5\\times 2^6\\div\\dots\\div 2^{99}\\times 2^{100} = 2^{51}$。</p>
+    <p><strong>差指数逆用：</strong>已知 $3^m=6,\\; 3^n=4$，求 $3^{2m-n} = 9$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    • 乘除交替：原式 $= 2^{2-3+4-5+6-\\dots-99+100} = 2^{2+(4-3)+(6-5)+\\dots+(100-99)}$。括号共有 $(100-2)\\div 2 = 49$ 组，每组差为 $1$，故指数为 $2+49=51$，结果为 $2^{51}$。<br>
+    • 逆向代入：$3^{2m-n} = 3^{2m}\\div 3^n = (3^m)^2\\div 3^n = 6^2\\div 4 = 36\\div 4 = 9$。`,
+    quote: `原文摘引：“$2^{2+(4-3)+(6-5)+\\dots+(100-99)} = 2^{2+49} = 2^{51}$。”（共 $(100-2)\\div 2$ 个 $1$）`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 1 Extension、Exploration 3`
+  },
+  {
+    id: `ev-pow-1`,
+    category: `pow`,
+    categoryLabel: `幂的乘方`,
+    difficulty: `能力提升`,
+    title: `化异底为同底运算与指数方程求解`,
+    formulaTex: `2^6\\cdot (2^2)^2\\cdot (2^3)^2 = \\boxed{2^{16}},\\qquad 3^{m+6+9+4m} = 3^{30} \\Rightarrow \\boxed{m=3}`,
+    summary: `<p>遇到 $4, 8, 9, 16, 27, 81$ 等底数时，先转化为 $2$ 或 $3$ 的幂再结合律求解。例如 $2^6\\times 4^2\\times 8^2 = 2^{16}$；$3^m\\cdot 9^3\\cdot 27^3\\cdot 81^m = 3^{30}$ 得 $m=3$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    • $9^4\\times 3^3 = (3^2)^4\\times 3^3 = 3^8\\times 3^3 = 3^{11}$。<br>
+    • $2^6\\times 4^2\\times 8^2 = 2^6\\cdot (2^2)^2\\cdot (2^3)^2 = 2^6\\times 2^4\\times 2^6 = 2^{16}$。<br>
+    • $4^8\\times 8^8\\times 2^4\\times 2^2\\div 16 = (2^2)^8\\times (2^3)^8\\times 2^4\\times 2^2\\div 2^4 = 2^{16+24+4+2-4} = 2^{42}$。<br>
+    • 已知 $(8^7)^6 = 2^a \\Rightarrow 8^{42} = (2^3)^{42} = 2^{126} \\Rightarrow a = 126$；已知 $8^{16}=16^b \\Rightarrow 2^{48} = (2^4)^{12} \\Rightarrow b=12$。`,
+    quote: `原文摘引：“$8^{16} = (2^3)^{16} = 2^{48} = 2^{4\\cdot 12} = (2^4)^{12} = 16^{12} = 16^b$，$b=12$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 1、Exploration 4 Extension；《Lesson 1-幂运算-练习册.pdf》第9题`
+  },
+  {
+    id: `ev-pow-2`,
+    category: `pow`,
+    categoryLabel: `幂的乘方 · 整体换元`,
+    difficulty: `拓展突破`,
+    title: `线性方程整体代入与高次多元整体降幂`,
+    formulaTex: `4^x\\cdot 32^y = 2^{2x+5y} = 2^3 = \\boxed{8},\\qquad (x^4y^3z)^5 = 3^5 \\Rightarrow (x^4y^3z)^2 = \\boxed{9}`,
+    summary: `<p>1. 若 $2x + 5y - 3 = 0$，则 $4^x\\cdot 32^y = 8$。</p>
+    <p>2. 已知 $x^{20}y^{15}z^5 = 243$，求 $x^8y^6z^2 = 9$；已知 $a^n=5,\\; b^n=3$，求 $(ab^2)^{2n} = 2025$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    • 由 $2x+5y-3=0$ 得 $2x+5y=3$。原式 $= (2^2)^x\\cdot (2^5)^y = 2^{2x}\\cdot 2^{5y} = 2^{2x+5y} = 2^3 = 8$。<br>
+    • $x^{20}y^{15}z^5 = (x^4y^3z)^5 = 243 = 3^5$，则 $x^4y^3z = 3$，所以 $x^8y^6z^2 = (x^4y^3z)^2 = 3^2 = 9$。<br>
+    • $(ab^2)^{2n} = a^{2n}\\cdot b^{4n} = (a^n)^2\\cdot (b^n)^4 = 5^2\\times 3^4 = 25\\times 81 = 2025$。`,
+    quote: `原文摘引：“$x^{20}y^{15}z^5 = (x^4y^3z)^5 = 243 = 3^5$，$x^8y^6z^2 = (x^4y^3z)^2 = 3^2 = 9$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 3、Exploration 4 Extension`
+  },
+  {
+    id: `ev-prod-1`,
+    category: `prod`,
+    categoryLabel: `积的乘方`,
+    difficulty: `基础温故`,
+    title: `积的乘方逐项展开与单项式幂除法`,
+    formulaTex: `(3^5\\times 5^2\\times 11)^3 = \\boxed{3^{15}\\times 5^6\\times 11^3},\\qquad (a^2b)^6\\div(ab)^5 = \\frac{a^{12}b^6}{a^5b^5} = \\boxed{a^7b}`,
+    summary: `<p>括号内每个因式都要乘方：$(2\\times 7^3)^5 = 2^5\\times 7^{15}$；$(3^5\\times 5^2\\times 11)^3 = 3^{15}\\times 5^6\\times 11^3$；$(a^2b)^6\\div(ab)^5 = a^7b$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    • $(5^3\\times 12^6)^7 = 5^{21}\\times 12^{42}$（练习册第2(2)题）。<br>
+    • $(a^2b)^6\\div(ab)^5 = a^{12}b^6\\div (a^5b^5) = a^{12-5}b^{6-5} = a^7b$（练习册第7题）。<br>
+    • 拓展代数式：$a^{m+n}\\times (3a^mb^{n+1}) = 3a^{2m+n}b^{n+1} = 3a^8b^3 \\Rightarrow n+1=3\\,(n=2)$，$2m+n=8\\,(m=3)$。`,
+    quote: `原文摘引：“$(3^5)^3\\times (5^2)^3\\times (11)^3 = 3^{15}\\times 5^6\\times 11^3$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 1、4 Extension；《Lesson 1-幂运算-练习册.pdf》第2、7题`
+  },
+  {
+    id: `ev-prod-2`,
+    category: `prod`,
+    categoryLabel: `积的乘方 · 逆用凑整`,
+    difficulty: `能力提升`,
+    title: `分解合数底数与逆用积的乘方凑整巧算`,
+    formulaTex: `(6^4)^5\\times 15^{12}\\div 2^8\\div 9^{16} = 2^{12}\\times 5^{12} = \\boxed{10^{12}},\\qquad 3^{10}\\times 4^{15}\\times 5^{10} = \\boxed{120^{10}}`,
+    summary: `<p><strong>Exploration 2：</strong>$(6^4)^5\\times 15^{12}\\div 2^8\\div 9^{16} = 10^{12}$；$2^{50}\\times 3^{51}\\times 5^{52}\\div 30^{50} = 75$。</p>
+    <p><strong>练习册第4、5题：</strong>$(3^2\\times 7^2)^{11}\\div 7^{14}\\times 9^3\\div (3^4)^5 = 21^8$；$3^{10}\\times 4^{15}\\times 5^{10} = 120^{10}$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    • $(6^4)^5\\times 15^{12}\\div 2^8\\div 9^{16} = (2\\times 3)^{20}\\times (3\\times 5)^{12}\\div 2^8\\div (3^2)^{16} = 2^{20-8}\\times 3^{20+12-32}\\times 5^{12} = 2^{12}\\times 5^{12} = (2\\times 5)^{12} = 10^{12}$。<br>
+    • $2^{50}\\times 3^{51}\\times 5^{52}\\div (5\\times 2\\times 3)^{50} = 2^0\\times 3^1\\times 5^2 = 3\\times 25 = 75$。<br>
+    • 练习册第4题：$3^{22}\\times 7^{22}\\div 7^{14}\\times 3^6\\div 3^{20} = 3^8\\times 7^8 = 21^8$。<br>
+    • 练习册第5题：$3^{10}\\times 2^{30}\\times 5^{10} = 3^{10}\\times 8^{10}\\times 5^{10} = 120^{10}$。`,
+    quote: `原文摘引：“$= 2^{12}\\times 5^{12} = (2\\times 5)^{12} = 10^{12}$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 2 & Extension；《Lesson 1-幂运算-练习册.pdf》第4、5题`
+  },
+  {
+    id: `ev-comp-1`,
+    category: `compare`,
+    categoryLabel: `幂的大小比较 · 判别法则`,
+    difficulty: `基础温故`,
+    title: `同底数比较与同指数比较基本准则`,
+    formulaTex: `A>1:\\; A^m > A^n \\iff m > n,\\qquad 0<A<1:\\; A^m > A^n \\iff m < n,\\qquad n>0:\\; A^n > B^n \\iff A > B`,
+    summary: `<p>① <strong>底数相同：</strong>当 $A > 1$ 时，$A^m > A^n \\iff m > n$；当 $0 < A < 1$ 时，$A^m > A^n \\iff m < n$。</p>
+    <p>② <strong>指数相同（$n > 0$）：</strong>$A^n > B^n \\iff A > B$（底数均正时成立，负数偶奇次幂讨论「来源未提及」）。</p>`,
+    detail: `<strong>核心策略：</strong>当两个幂的底数和指数都不同时，若指数有最大公约数，优先“化为同指数比较底数”；若底数是同一正整数的不同次幂，优先“化为同底数比较指数”。`,
+    quote: `原文摘引：“① 底数相同：$A>1$，$A^m > A^n \\iff m > n$；$0<A<1$，$A^m > A^n \\iff m < n$。② 指数相同($n>0$)：$A^n > B^n \\iff A > B$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 4`
+  },
+  {
+    id: `ev-comp-2`,
+    category: `compare`,
+    categoryLabel: `幂的大小比较 · 同指数法`,
+    difficulty: `能力提升`,
+    title: `提取指数公因数化为同指数比较`,
+    formulaTex: `5^{30}=125^{10} < 3^{50}=243^{10} < 4^{40}=256^{10} \\quad\\Rightarrow\\quad \\boxed{5^{30} < 3^{50} < 4^{40}}`,
+    summary: `<p>1. 比较 $3^{50}$、$4^{40}$、$5^{30}$ 的大小：结论 $5^{30} < 3^{50} < 4^{40}$。</p>
+    <p>2. 比较 $2^{55}$、$3^{44}$、$5^{33}$、$6^{22}$ 的大小：结论 $2^{55} < 6^{22} < 3^{44} < 5^{33}$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    • $50, 40, 30$ 都是 $10$ 的倍数：$3^{50}=(3^5)^{10}=243^{10}$，$4^{40}=(4^4)^{10}=256^{10}$，$5^{30}=(5^3)^{10}=125^{10}$。因为 $125^{10} < 243^{10} < 256^{10}$，所以 $5^{30} < 3^{50} < 4^{40}$。<br>
+    • $55, 44, 33, 22$ 都是 $11$ 的倍数：$2^{55}=(2^5)^{11}=32^{11}$，$3^{44}=(3^4)^{11}=81^{11}$，$5^{33}=(5^3)^{11}=125^{11}$，$6^{22}=(6^2)^{11}=36^{11}$。因为 $32 < 36 < 81 < 125$，所以 $2^{55} < 6^{22} < 3^{44} < 5^{33}$。`,
+    quote: `原文摘引：“$50, 40, 30$ 都是 $10$ 的倍数…… $55, 44, 33, 22$ 都是 $11$ 的倍数。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 4`
+  },
+  {
+    id: `ev-comp-3`,
+    category: `compare`,
+    categoryLabel: `幂的大小比较 · 同底数法`,
+    difficulty: `拓展突破`,
+    title: `大底数转化为 2 的幂后比较指数`,
+    formulaTex: `a = (2^6)^{41} = 2^{246},\\quad c = (2^8)^{31} = 2^{248},\\quad b = (2^{10})^{25} = 2^{250} \\;\\Rightarrow\\; \\boxed{a < c < b}`,
+    summary: `<p>已知 $a = 64^{41}$，$b = 1024^{25}$，$c = 256^{31}$，比较 $a, b, c$ 的大小关系：结论 $a < c < b$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    利用常见 $2$ 的幂：$64 = 2^6$，$1024 = 2^{10}$，$256 = 2^8$。<br>
+    • $a = 64^{41} = (2^6)^{41} = 2^{246}$<br>
+    • $b = 1024^{25} = (2^{10})^{25} = 2^{250}$<br>
+    • $c = 256^{31} = (2^8)^{31} = 2^{248}$<br>
+    因为底数 $2 > 1$ 且指数 $246 < 248 < 250$，所以 $a < c < b$。`,
+    quote: `原文摘引：“$a=64^{41}=(2^6)^{41}=2^{246}$；$b=1024^{25}=(2^{10})^{25}=2^{250}$；$c=256^{31}=(2^8)^{31}=2^{248}$，故 $a < c < b$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 4 Extension`
+  },
+  {
+    id: `ev-ser-1`,
+    category: `series`,
+    categoryLabel: `高阶综合与求和拓展`,
+    difficulty: `能力提升`,
+    title: `连续奇数求和、山峰数列与斐波那契平方和`,
+    formulaTex: `1+3+\\dots+(2n-1) = n^2,\\qquad F_1^2+F_2^2+\\dots+F_n^2 = F_n\\cdot F_{n+1} \\;\\Rightarrow\\; 34\\times 55 = \\boxed{1870}`,
+    summary: `<p>1. <strong>连续奇数和：</strong>$1+3+5+\\dots+(2n-1) = n^2$。</p>
+    <p>2. <strong>山峰数列：</strong>$1+2+\\dots+(n-1)+n+(n-1)+\\dots+2+1 = n^2$。</p>
+    <p>3. <strong>斐波那契平方和：</strong>$1^2+1^2+2^2+3^2+5^2+8^2+13^2+21^2+34^2 = 1870$。</p>`,
+    detail: `<strong>推导过程：</strong><br>
+    • 连续奇数（等差数列）：$(\\text{首项}+\\text{末项})\\times\\text{项数}\\div 2 = [1+(2n-1)]\\times n\\div 2 = n^2$。<br>
+    • 山峰数列：$S_n + S_{n-1} = \\frac{n(n+1)}{2} + \\frac{n(n-1)}{2} = n^2$（或 $2S_n - n = n^2$）。<br>
+    • 斐波那契平方和：利用 $F_k^2 = F_k(F_{k+1}-F_{k-1}) = F_k F_{k+1} - F_{k-1}F_k$ 裂项相消，得 $F_1^2+F_2^2+\\dots+F_n^2 = F_n\\cdot F_{n+1}$。本题最后两项为 $21, 34$，下一项 $F_{n+1}=34+21=55$，故和为 $34\\times 55 = 1870$。`,
+    quote: `原文摘引：“$F_1^2+F_2^2+\\dots+F_n^2 = F_n \\cdot F_{n+1}$，算式 $= 34\\times(34+21) = 1870$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 5 & Extension`
+  },
+  {
+    id: `ev-ser-2`,
+    category: `series`,
+    categoryLabel: `高阶综合与求和拓展`,
+    difficulty: `拓展突破`,
+    title: `自然数平方和公式推导与区间/奇偶变式`,
+    formulaTex: `S_n = 1^2 + 2^2 + \\dots + n^2 = \\boxed{\\frac{n(n+1)(2n+1)}{6}},\\qquad S_{100}-S_{10}=\\boxed{337965}`,
+    summary: `<p><strong>核心公式：</strong>$$S_n = 1^2 + 2^2 + 3^2 + \\dots + n^2 = \\frac{n(n+1)(2n+1)}{6}$$</p>
+    <p>算例：$1^2+\\dots+25^2 = 5525$；$15^2+\\dots+21^2 = 2296$；$11^2+\\dots+100^2 = 337965$。</p>`,
+    detail: `<strong>立方差推导与变式计算：</strong><br>
+    • 推导：由 $(k+1)^3 - k^3 = 3k^2 + 3k + 1$ 从 $k=1$ 累加至 $n$，左边裂项得 $(n+1)^3 - 1 = 3S_n + 3\\cdot\\frac{n(n+1)}{2} + n$，整理即得 $S_n = \\frac{n(n+1)(2n+1)}{6}$。<br>
+    • 区间求和：$15^2+\\dots+21^2 = S_{21}-S_{14} = \\frac{21\\times 22\\times 43}{6} - \\frac{14\\times 15\\times 29}{6} = 3311 - 1015 = 2296$。<br>
+    • 偶数平方和：$2^2+4^2+\\dots+24^2 = 4\\cdot S_{12} = 4\\times 12\\times 13\\times 25\\div 6 = 2600$。<br>
+    • 奇数平方和：$1^2+3^2+\\dots+25^2 = S_{25} - 4S_{12} = 5525 - 2600 = 2925$。<br>
+    • 练习册第12题：$11^2+\\dots+100^2 = S_{100}-S_{10} = 50\\times 101\\times 67 - 5\\times 11\\times 7 = 337965$。`,
+    quote: `原文摘引：“$(k+1)^3 - k^3 = 3k^2 + 3k + 1$，累加得 $(n+1)^3 - 1 = 3S_n + 3\\cdot\\frac{n(n+1)}{2} + n$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 6；《Lesson 1-幂运算-练习册.pdf》第12题`
+  },
+  {
+    id: `ev-ser-3`,
+    category: `series`,
+    categoryLabel: `高阶综合与求和拓展`,
+    difficulty: `拓展突破`,
+    title: `连续自然数积求和与倒序乘积求和模型`,
+    formulaTex: `\\text{顺向：}1\\times 2 + \\dots + n(n+1) = \\boxed{\\frac{n(n+1)(n+2)}{3}},\\qquad 1\\times 99+\\dots+99\\times 1 = \\boxed{166650}`,
+    summary: `<p>1. <strong>顺向积求和：</strong>$1\\times 2 + 2\\times 3 + \\dots + n(n+1) = \\frac{n(n+1)(n+2)}{3}$。</p>
+    <p>2. <strong>倒序积求和：</strong>$1\\times 99 + 2\\times 98 + \\dots + 99\\times 1 = 166650$。</p>`,
+    detail: `<strong>详细步骤：</strong><br>
+    • 通项拆解 $k(k+1) = k^2 + k$，求和得 $S_n + \\frac{n(n+1)}{2} = \\frac{n(n+1)(n+2)}{3}$。<br>
+    • 例：$1\\times 2 + 2\\times 3 + \\dots + 49\\times 50 = 49\\times 50\\times 51\\div 3 = 41650$。<br>
+    • 倒序积：$1\\times(100-1)+2\\times(100-2)+\\dots+99\\times(100-99) = (1+2+\\dots+99)\\times 100 - (1^2+\\dots+99^2) = 166650$。<br>
+    • 连续奇数积 Extension：$1\\times 3 + 3\\times 5 + \\dots + 99\\times 101 = (2^2-1^2)+(4^2-1^2)+\\dots+(100^2-1^2) = 4\\times(1^2+\\dots+50^2) - 50$（注：讲义手写记为 $4\\times 50\\times 51\\times 101\\div 6 - 50$，OCR文本末数字缺位作“17,650”）。`,
+    quote: `原文摘引：“$1\\times 2 + 2\\times 3 + \\dots + k(k+1) = k(k+1)(k+2)\\div 3$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》Exploration 7 & Extension`
+  },
+  {
+    id: `ev-ser-4`,
+    category: `series`,
+    categoryLabel: `高阶综合与求和拓展`,
+    difficulty: `拓展突破`,
+    title: `自然数立方和裂项推导与奇立方和求解`,
+    formulaTex: `1^3 + 2^3 + \\dots + n^3 = \\boxed{\\left[\\frac{n(n+1)}{2}\\right]^2},\\qquad 1^3+3^3+\\dots+99^3 = \\boxed{12497500}`,
+    summary: `<p><strong>核心公式：</strong>$$1^3 + 2^3 + \\dots + n^3 = (1 + 2 + \\dots + n)^2 = \\left[\\frac{n(n+1)}{2}\\right]^2$$</p>
+    <p>算例：$1^3+\\dots+19^3 = 36100$；$1^3+\\dots+24^3 = 90000$；奇立方和 $1^3+3^3+\\dots+99^3 = 12497500$。</p>`,
+    detail: `<strong>裂项推导过程（讲义开篇）：</strong><br>
+    设 $S_k = 1 + 2 + \\dots + k = \\frac{k(k+1)}{2}$，且 $S_k = S_{k-1} + k$。<br>
+    由平方差公式：$S_k^2 - S_{k-1}^2 = (S_k - S_{k-1})(S_k + S_{k-1}) = k \\cdot \\left[\\frac{k(k+1)}{2} + \\frac{(k-1)k}{2}\\right] = k \\cdot k^2 = k^3$。<br>
+    因此 $1^3 + 2^3 + \\dots + n^3 = (S_1^2 - S_0^2) + (S_2^2 - S_1^2) + \\dots + (S_n^2 - S_{n-1}^2) = S_n^2 = \\left[\\frac{n(n+1)}{2}\\right]^2$。<br>
+    <strong>例题计算：</strong><br>
+    • $1^3+\\dots+19^3 = 190^2 = 36100$；$1^3+\\dots+24^3 = (1+2+\\dots+24)^2 = 300^2 = 90000$。<br>
+    • 奇立方和：$1^3+3^3+\\dots+99^3 = (1^3+\\dots+100^3) - 2^3(1^3+\\dots+50^3) = (1+\\dots+100)^2 - 8\\times(1+\\dots+50)^2 = 12497500$。`,
+    quote: `原文摘引：“$S_k^2 - S_{k-1}^2 = k\\cdot k^2 = k^3 \\implies 1^3+2^3+\\dots+n^3 = S_n^2 = [\\frac{n(n+1)}{2}]^2$。”`,
+    source: `来源：《Lesson 1-幂运算.pdf》开篇推导、Warm Up、Exploration 8`
+  }
+];
+
+const CHECKLIST_ITEMS = [
+  { id: `chk-1`, title: `乘方基础概念与 $2^0\\text{–}2^{10}$ 常用幂值记忆`, source: `《Lesson 1-幂运算.pdf》Warm Up` },
+  { id: `chk-2`, title: `同底数幂乘法：$a^m\\times a^n = a^{m+n}$ 及连乘隐含指数 $1$`, source: `Exploration 1 · 练习册第1、10题` },
+  { id: `chk-3`, title: `同底数幂除法：$a^m\\div a^n = a^{m-n}$ 与 $a^0=1\\,(a\\ne 0)$`, source: `Exploration 1 · 练习册第2、3题` },
+  { id: `chk-4`, title: `幂的乘方：$(a^m)^n = a^{mn}$ 与异底化同底技巧`, source: `Exploration 1 · 练习册第6、9题` },
+  { id: `chk-5`, title: `积的乘方：$(ab)^n = a^n b^n$ 正逆双用凑整巧算`, source: `Exploration 2 · 练习册第4、5、7题` },
+  { id: `chk-6`, title: `指数加减逆向拆分与整体代入求值`, source: `Exploration 3 · 练习册第8、11题` },
+  { id: `chk-7`, title: `幂的大小比较（化同底数 / 化同指数）`, source: `Exploration 4 & Extension` },
+  { id: `chk-8`, title: `连续奇数和、山峰数列与斐波那契平方和`, source: `Exploration 5 & Extension` },
+  { id: `chk-9`, title: `自然数平方和公式及区间/奇偶平方和变式`, source: `Exploration 6 · 练习册第12题` },
+  { id: `chk-10`, title: `连续自然数积求和与自然数立方和裂项推导`, source: `Exploration 7、8` }
+];
+
+const QUIZ_BANK = [
+  { id: `q-1`, topic: `laws`, difficulty: `basic`, qtype: `calc`, prompt: `计算：$(1)\\; 2^8\\times 2^4\\times 2^2\\times 2 =$ ______；$(2)\\; 29^{13}\\div 29^7 =$ ______。`, answer: `$(1)\\; 2^{15}$；$(2)\\; 29^6$`, analysis: `$(1)\\; 2^8\\times 2^4\\times 2^2\\times 2 = 2^{8+4+2+1} = 2^{15}$（注意末项 $2$ 的指数为 $1$）；$(2)\\; 29^{13}\\div 29^7 = 29^{13-7} = 29^6$。`, formulaTex: `2^{8+4+2+1}=\\boxed{2^{15}},\\qquad 29^{13-7}=\\boxed{29^6}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第1(1)(3)题` },
+  { id: `q-2`, topic: `laws`, difficulty: `basic`, qtype: `calc`, prompt: `计算：$(1)\\; 29^7\\times 29^{13}\\times 29^{19}\\times 29^{25}\\times 29^{31} =$ ______；$(2)\\; 3^{12}\\div 3^5\\times 3^{19}\\div 3\\div 3^3 =$ ______。`, answer: `$(1)\\; 29^{95}$；$(2)\\; 3^{22}$`, analysis: `$(1)\\; 29^{7+13+19+25+31} = 29^{95}$；$(2)\\; 3^{12-5+19-1-3} = 3^{22}$。`, formulaTex: `29^{7+13+19+25+31}=\\boxed{29^{95}},\\qquad 3^{12-5+19-1-3}=\\boxed{3^{22}}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第1(2)(4)题` },
+  { id: `q-3`, topic: `laws`, difficulty: `basic`, qtype: `calc`, prompt: `计算下列各题（用幂的形式表示）：$(1)\\; (2^8)^5 =$ ______；$(2)\\; (5^3\\times 12^6)^7 =$ ______；$(3)\\; (19^{21}\\times 19^5\\div 19^{12}\\times 19^2)^0 =$ ______。`, answer: `$(1)\\; 2^{40}$；$(2)\\; 5^{21}\\times 12^{42}$；$(3)\\; 1$`, analysis: `$(1)\\; (2^8)^5 = 2^{8\\times 5} = 2^{40}$；$(2)\\; (5^3\\times 12^6)^7 = 5^{21}\\times 12^{42}$；$(3)\\; $ 非零数的零次方等于 $1$。`, formulaTex: `(2^8)^5=\\boxed{2^{40}},\\quad (5^3\\times 12^6)^7=\\boxed{5^{21}\\times 12^{42}},\\quad (\\text{非零数})^0=\\boxed{1}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第2题` },
+  { id: `q-4`, topic: `laws`, difficulty: `basic`, qtype: `calc`, prompt: `计算（答案用幂的形式表示）：$11^{12}\\times 7^{27}\\times 9^{15}\\div 7^{18}\\div 11^7\\div 9^{13} = 11^{(\\;)}\\times 7^{(\\;)}\\times 9^{(\\;)}$，括号里依次填 ______。`, answer: `$5$；$9$；$2$`, analysis: `按同底数归类：$= (11^{12}\\div 11^7)\\times (7^{27}\\div 7^{18})\\times (9^{15}\\div 9^{13}) = 11^{12-7}\\times 7^{27-18}\\times 9^{15-13} = 11^5\\times 7^9\\times 9^2$。`, formulaTex: `11^{12-7}\\times 7^{27-18}\\times 9^{15-13} = \\boxed{11^5\\times 7^9\\times 9^2}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第3题` },
+  { id: `q-5`, topic: `laws`, difficulty: `basic`, qtype: `calc`, prompt: `计算：$(1)\\; a^{10}\\times a^{20} =$ ______；$(2)\\; (a^{100})^2 =$ ______；$(3)\\; a^{100}\\div a^2 =$ ______。`, answer: `$(1)\\; a^{30}$；$(2)\\; a^{200}$；$(3)\\; a^{98}$`, analysis: `$(1)\\; a^{10+20}=a^{30}$；$(2)\\; a^{100\\times 2}=a^{200}$；$(3)\\; a^{100-2}=a^{98}$。`, formulaTex: `a^{10+20}=\\boxed{a^{30}},\\quad a^{100\\times 2}=\\boxed{a^{200}},\\quad a^{100-2}=\\boxed{a^{98}}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第6题` },
+  { id: `q-6`, topic: `laws`, difficulty: `basic`, qtype: `compare`, prompt: `判断正误：$(1)\\; 10^n$ 表示 $n$ 个 $10$ 相乘所得的积；$(2)\\; 7^8$ 表示 $7$ 个 $8$ 相乘；$(3)\\; 18$ 个 $(a+b)$ 相乘写成乘方形式是 $(a+b)^{18}$；$(4)\\; $ 任何数的零次方都等于 $0$。`, answer: `$(1)\\;\\checkmark$；$(2)\\;\\times$；$(3)\\;\\checkmark$；$(4)\\;\\times$`, analysis: `$(2)$ 错：$7^8$ 表示 $8$ 个 $7$ 相乘；$(4)$ 错：$a^0 = 1\\,(a \\ne 0)$，非零数的零次方等于 $1$。`, formulaTex: `7^8 = \\underbrace{7\\times\\dots\\times 7}_{8\\text{ 个}},\\qquad a^0 = \\boxed{1}\\;(a\\ne 0)`, source: `来源：《Lesson 1-幂运算.pdf》Warm Up 判断正误` },
+  { id: `q-7`, topic: `laws`, difficulty: `basic`, qtype: `calc`, prompt: `填空：$9\\times 9\\times 9\\times 9 = 9^{(\\;)} = (9^2)^{(\\;)} = 81^{(\\;)}$；$5\\times 5\\times 5\\times 5\\times 5\\times 5 = 5^{(\\;)} = (5^2)^{(\\;)} = (5^3)^{(\\;)}$。`, answer: `$4,\\; 2,\\; 2$；$6,\\; 3,\\; 2$`, analysis: `$4$ 个 $9$ 相乘为 $9^4 = (9^2)^2 = 81^2$；$6$ 个 $5$ 相乘为 $5^6 = (5^2)^3 = (5^3)^2$。`, formulaTex: `9^4=(9^2)^2=81^2,\\qquad 5^6=(5^2)^3=(5^3)^2`, source: `来源：《Lesson 1-幂运算.pdf》Warm Up 填空` },
+  { id: `q-8`, topic: `laws`, difficulty: `basic`, qtype: `calc`, prompt: `计算：$(1)\\; (5^5)^3 =$ ______；$(2)\\; 9^4\\times 3^3 =$ ______；$(3)\\; 2^6\\times 4^2\\times 8^2 =$ ______。`, answer: `$(1)\\; 5^{15}$；$(2)\\; 3^{11}$；$(3)\\; 2^{16}$`, analysis: `$(1)\\; 5^{5\\times 3}=5^{15}$；$(2)\\; (3^2)^4\\times 3^3 = 3^8\\times 3^3 = 3^{11}$；$(3)\\; 2^6\\cdot(2^2)^2\\cdot(2^3)^2 = 2^6\\times 2^4\\times 2^6 = 2^{16}$。`, formulaTex: `(5^5)^3=\\boxed{5^{15}},\\quad 3^8\\times 3^3=\\boxed{3^{11}},\\quad 2^{6+4+6}=\\boxed{2^{16}}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 1` },
+  { id: `q-9`, topic: `laws`, difficulty: `medium`, qtype: `calc`, prompt: `计算：$(3^2\\times 7^2)^{11}\\div 7^{14}\\times 9^3\\div (3^4)^5 =$ ______。`, answer: `$21^8$`, analysis: `原式 $= 3^{22}\\times 7^{22}\\div 7^{14}\\times 3^6\\div 3^{20} = 3^{22+6-20}\\times 7^{22-14} = 3^8\\times 7^8 = (3\\times 7)^8 = 21^8$。`, formulaTex: `3^{22+6-20}\\times 7^{22-14} = 3^8\\times 7^8 = (3\\times 7)^8 = \\boxed{21^8}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第4题` },
+  { id: `q-10`, topic: `laws`, difficulty: `medium`, qtype: `calc`, prompt: `计算：$3^{10}\\times 4^{15}\\times 5^{10} = (\\quad)^{10}$。`, answer: `$120$`, analysis: `原式 $= 3^{10}\\times (2^2)^{15}\\times 5^{10} = 3^{10}\\times 2^{30}\\times 5^{10} = 3^{10}\\times (2^3)^{10}\\times 5^{10} = 3^{10}\\times 8^{10}\\times 5^{10} = (3\\times 8\\times 5)^{10} = 120^{10}$。`, formulaTex: `3^{10}\\times (2^3)^{10}\\times 5^{10} = (3\\times 8\\times 5)^{10} = \\boxed{120}^{10}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第5题` },
+  { id: `q-11`, topic: `laws`, difficulty: `medium`, qtype: `eval`, prompt: `计算：$(a^2b)^6\\div (ab)^5$。`, answer: `$a^7b$`, analysis: `原式 $= a^{12}b^6\\div (a^5b^5) = a^{12-5}b^{6-5} = a^7b$。`, formulaTex: `\\frac{a^{12}b^6}{a^5b^5} = a^{12-5}b^{6-5} = \\boxed{a^7b}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第7题` },
+  { id: `q-12`, topic: `mixed`, difficulty: `medium`, qtype: `eval`, prompt: `已知 $3^a = 5$，$9^b = 10$，则 $3^{a+2b} =$ ______。`, answer: `$50$`, analysis: `原式 $= 3^a\\cdot 3^{2b} = 3^a\\cdot (3^2)^b = 3^a\\cdot 9^b = 5\\times 10 = 50$。`, formulaTex: `3^{a+2b} = 3^a\\cdot (3^2)^b = 3^a\\cdot 9^b = 5\\times 10 = \\boxed{50}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第8题` },
+  { id: `q-13`, topic: `mixed`, difficulty: `medium`, qtype: `eval`, prompt: `已知 $3^m\\cdot 9^3\\cdot 27^3\\cdot 81^m = 3^{30}$，则 $m =$ ______。`, answer: `$3$`, analysis: `将底数全部化为 $3$：$3^m\\cdot 3^6\\cdot 3^9\\cdot 3^{4m} = 3^{30}$，故 $m+6+9+4m = 30$，即 $5m = 15$，解得 $m = 3$。`, formulaTex: `3^{m+6+9+4m} = 3^{30} \\Rightarrow 5m+15=30 \\Rightarrow \\boxed{m=3}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第9题` },
+  { id: `q-14`, topic: `mixed`, difficulty: `medium`, qtype: `eval`, prompt: `已知 $a, b$ 不为 $0$ 或 $1$，$a^{m+n}\\times b^{m-3}\\times a^{3m} = a^{17}b$，则 $m =$ ______，$n =$ ______。`, answer: `$m = 4$；$n = 1$`, analysis: `合并同底数幂：$a^{m+n+3m}\\times b^{m-3} = a^{17}b$，所以 $m-3=1$ 且 $4m+n=17$，解得 $m=4$，$n=1$。`, formulaTex: `a^{4m+n}b^{m-3}=a^{17}b^1 \\Rightarrow m-3=1,\\; 4m+n=17 \\Rightarrow \\boxed{m=4,\\; n=1}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第11题` },
+  { id: `q-15`, topic: `mixed`, difficulty: `medium`, qtype: `calc`, prompt: `计算：$(1)\\; (7^6)^5\\times (5^3)^7\\div 7^{15}\\div 5^{12} =$ ______；$(2)\\; (6^4)^5\\times 15^{12}\\div 2^8\\div 9^{16} =$ ______。`, answer: `$(1)\\; 7^{15}\\times 5^9$；$(2)\\; 10^{12}$`, analysis: `$(1)\\; 7^{30}\\times 5^{21}\\div 7^{15}\\div 5^{12} = 7^{15}\\times 5^9$；$(2)\\; (2\\times 3)^{20}\\times(3\\times 5)^{12}\\div 2^8\\div (3^2)^{16} = 2^{12}\\times 3^{32}\\times 5^{12}\\div 3^{32} = 2^{12}\\times 5^{12} = 10^{12}$。`, formulaTex: `(1)\\;\\boxed{7^{15}\\times 5^9},\\qquad (2)\\;2^{12}\\times 5^{12}=(2\\times 5)^{12}=\\boxed{10^{12}}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 2` },
+  { id: `q-16`, topic: `mixed`, difficulty: `medium`, qtype: `calc`, prompt: `计算：$2^{50}\\times 3^{51}\\times 5^{52}\\div 30^{50}$。`, answer: `$75$`, analysis: `原式 $= 2^{50}\\times 3^{51}\\times 5^{52}\\div (5\\times 2\\times 3)^{50} = 2^{50-50}\\times 3^{51-50}\\times 5^{52-50} = 3\\times 5^2 = 75$。`, formulaTex: `\\frac{2^{50}\\times 3^{51}\\times 5^{52}}{2^{50}\\times 3^{50}\\times 5^{50}} = 3^1\\times 5^2 = \\boxed{75}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 2 Extension` },
+  { id: `q-17`, topic: `mixed`, difficulty: `medium`, qtype: `eval`, prompt: `已知 $3^m = 6$，$3^n = 4$，求 $3^{2m-n}$ 的值。`, answer: `$9$`, analysis: `$3^{2m-n} = 3^{2m}\\div 3^n = (3^m)^2\\div 3^n = 6^2\\div 4 = 36\\div 4 = 9$。`, formulaTex: `3^{2m-n} = \\frac{(3^m)^2}{3^n} = \\frac{6^2}{4} = \\boxed{9}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 3` },
+  { id: `q-18`, topic: `mixed`, difficulty: `medium`, qtype: `eval`, prompt: `若 $2x + 5y - 3 = 0$，求 $4^x\\cdot 32^y$ 的值。`, answer: `$8$`, analysis: `$4^x\\cdot 32^y = (2^2)^x\\cdot (2^5)^y = 2^{2x}\\cdot 2^{5y} = 2^{2x+5y}$。由 $2x+5y-3=0$ 得 $2x+5y=3$，故原式 $= 2^3 = 8$。`, formulaTex: `4^x\\cdot 32^y = 2^{2x+5y} = 2^3 = \\boxed{8}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 3` },
+  { id: `q-19`, topic: `compare`, difficulty: `medium`, qtype: `compare`, prompt: `比较 $3^{50}$、$4^{40}$、$5^{30}$ 的大小。`, answer: `$5^{30} < 3^{50} < 4^{40}$`, analysis: `$50, 40, 30$ 都是 $10$ 的倍数：$3^{50}=(3^5)^{10}=243^{10}$，$4^{40}=(4^4)^{10}=256^{10}$，$5^{30}=(5^3)^{10}=125^{10}$。因为 $125^{10} < 243^{10} < 256^{10}$，所以 $5^{30} < 3^{50} < 4^{40}$。`, formulaTex: `125^{10} < 243^{10} < 256^{10} \\Rightarrow \\boxed{5^{30} < 3^{50} < 4^{40}}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 4` },
+  { id: `q-20`, topic: `compare`, difficulty: `medium`, qtype: `compare`, prompt: `比较 $2^{55}$、$3^{44}$、$5^{33}$、$6^{22}$ 四个数的大小。`, answer: `$2^{55} < 6^{22} < 3^{44} < 5^{33}$`, analysis: `$55, 44, 33, 22$ 都是 $11$ 的倍数：$2^{55}=32^{11}$，$6^{22}=36^{11}$，$3^{44}=81^{11}$，$5^{33}=125^{11}$。因为 $32 < 36 < 81 < 125$，故 $2^{55} < 6^{22} < 3^{44} < 5^{33}$。`, formulaTex: `32^{11} < 36^{11} < 81^{11} < 125^{11} \\Rightarrow \\boxed{2^{55} < 6^{22} < 3^{44} < 5^{33}}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 4` },
+  { id: `q-21`, topic: `compare`, difficulty: `hard`, qtype: `compare`, prompt: `已知 $a = 64^{41}$，$b = 1024^{25}$，$c = 256^{31}$，比较 $a, b, c$ 的大小关系。`, answer: `$a < c < b$`, analysis: `化为同底数 $2$：$a = (2^6)^{41} = 2^{246}$，$b = (2^{10})^{25} = 2^{250}$，$c = (2^8)^{31} = 2^{248}$。因为 $246 < 248 < 250$ 且底数 $2 > 1$，所以 $a < c < b$。`, formulaTex: `2^{246} < 2^{248} < 2^{250} \\Rightarrow \\boxed{a < c < b}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 4 Extension` },
+  { id: `q-22`, topic: `mixed`, difficulty: `hard`, qtype: `calc`, prompt: `计算：$2^2\\div 2^3\\times 2^4\\div 2^5\\times 2^6\\div \\dots\\div 2^{99}\\times 2^{100}$。`, answer: `$2^{51}$`, analysis: `原式 $= 2^{2-3+4-5+6-\\dots-99+100} = 2^{2+(4-3)+(6-5)+\\dots+(100-99)}$，共有 $(100-2)\\div 2 = 49$ 个 $1$，所以 $= 2^{2+49} = 2^{51}$。`, formulaTex: `2^{2+(4-3)+(6-5)+\\dots+(100-99)} = 2^{2+49} = \\boxed{2^{51}}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 1 Extension` },
+  { id: `q-23`, topic: `mixed`, difficulty: `hard`, qtype: `eval`, prompt: `回答下列问题：$(1)$ 已知 $(8^7)^6 = 2^a$，求 $a$；$(2)$ 已知 $8^{16} = 16^b$，求 $b$。`, answer: `$(1)\\; a = 126$；$(2)\\; b = 12$`, analysis: `$(1)\\; (8^7)^6 = 8^{42} = (2^3)^{42} = 2^{126}$，故 $a = 126$；$(2)\\; 8^{16} = (2^3)^{16} = 2^{48} = (2^4)^{12} = 16^{12}$，故 $b = 12$。`, formulaTex: `(1)\\; 2^{3\\times 42}=2^{126}\\Rightarrow \\boxed{a=126},\\qquad (2)\\; 2^{48}=(2^4)^{12}\\Rightarrow \\boxed{b=12}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 4 Extension` },
+  { id: `q-24`, topic: `mixed`, difficulty: `hard`, qtype: `eval`, prompt: `已知 $a^n = 5$，$b^n = 3$，求 $(ab^2)^{2n}$ 的值。`, answer: `$2025$`, analysis: `$(ab^2)^{2n} = a^{2n}\\cdot b^{4n} = (a^n)^2\\cdot (b^n)^4 = 5^2\\times 3^4 = 25\\times 81 = 2025$。`, formulaTex: `(ab^2)^{2n} = (a^n)^2\\cdot (b^n)^4 = 5^2\\times 3^4 = \\boxed{2025}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 4 Extension` },
+  { id: `q-25`, topic: `mixed`, difficulty: `hard`, qtype: `eval`, prompt: `已知 $x^{20}y^{15}z^5 = 243$，求 $x^8 y^6 z^2$ 的值。`, answer: `$9$`, analysis: `$x^{20}y^{15}z^5 = (x^4y^3z)^5 = 243 = 3^5$，可得 $x^4y^3z = 3$（由奇次方唯一确定），故 $x^8y^6z^2 = (x^4y^3z)^2 = 3^2 = 9$。`, formulaTex: `(x^4y^3z)^5 = 3^5 \\Rightarrow x^4y^3z=3 \\Rightarrow (x^4y^3z)^2 = \\boxed{9}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 4 Extension` },
+  { id: `q-26`, topic: `series`, difficulty: `medium`, qtype: `calc`, prompt: `计算：$20\\times 20^2\\times 20^3\\times \\dots\\times 20^{50}$。`, answer: `$20^{1275}$`, analysis: `原式 $= 20^{1+2+3+\\dots+50} = 20^{(1+50)\\times 50\\div 2} = 20^{1275}$。`, formulaTex: `20^{1+2+\\dots+50} = 20^{\\frac{51\\times 50}{2}} = \\boxed{20^{1275}}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第10题` },
+  { id: `q-27`, topic: `series`, difficulty: `hard`, qtype: `calc`, prompt: `计算：$11^2 + 12^2 + \\dots + 98^2 + 99^2 + 100^2$。`, answer: `$337965$`, analysis: `原式 $= (1^2+\\dots+100^2) - (1^2+\\dots+10^2) = \\frac{100\\times 101\\times 201}{6} - \\frac{10\\times 11\\times 21}{6} = 50\\times 101\\times 67 - 5\\times 11\\times 7 = 337965$。`, formulaTex: `S_{100}-S_{10} = \\frac{100\\times 101\\times 201}{6} - \\frac{10\\times 11\\times 21}{6} = \\boxed{337965}`, source: `来源：《Lesson 1-幂运算-练习册.pdf》第12题` },
+  { id: `q-28`, topic: `series`, difficulty: `hard`, qtype: `calc`, prompt: `计算：$(1)\\; 15^2 + 16^2 + 17^2 + \\dots + 21^2$；$(2)\\; 1^2 + 3^2 + 5^2 + \\dots + 25^2$。`, answer: `$(1)\\; 2296$；$(2)\\; 2925$`, analysis: `$(1)\\; S_{21}-S_{14} = \\frac{21\\times 22\\times 43}{6} - \\frac{14\\times 15\\times 29}{6} = 3311 - 1015 = 2296$；$(2)\\; S_{25} - 4S_{12} = 5525 - 2600 = 2925$。`, formulaTex: `(1)\\; S_{21}-S_{14}=\\boxed{2296},\\qquad (2)\\; S_{25}-4S_{12}=5525-2600=\\boxed{2925}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 6` },
+  { id: `q-29`, topic: `series`, difficulty: `hard`, qtype: `calc`, prompt: `计算：$1\\times 2 + 2\\times 3 + \\dots + 48\\times 49 + 49\\times 50$。`, answer: `$41650$`, analysis: `应用连续自然数积求和公式 $\\frac{n(n+1)(n+2)}{3}$：原式 $= 49\\times 50\\times 51\\div 3 = 41650$。`, formulaTex: `\\frac{49\\times 50\\times 51}{3} = 49\\times 50\\times 17 = \\boxed{41650}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 7` },
+  { id: `q-30`, topic: `series`, difficulty: `hard`, qtype: `calc`, prompt: `计算：$1^2 + 1^2 + 2^2 + 3^2 + 5^2 + 8^2 + 13^2 + 21^2 + 34^2$。`, answer: `$1870$`, analysis: `斐波那契数列平方和公式 $F_1^2 + F_2^2 + \\dots + F_n^2 = F_n\\cdot F_{n+1}$：原式 $= 34\\times(34+21) = 34\\times 55 = 1870$。`, formulaTex: `F_n\\cdot F_{n+1} = 34\\times(34+21) = 34\\times 55 = \\boxed{1870}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 5 Extension` },
+  { id: `q-31`, topic: `series`, difficulty: `hard`, qtype: `calc`, prompt: `计算：$(1)\\; 1^3 + 2^3 + 3^3 + \\dots + 24^3$；$(2)\\; 1^3 + 3^3 + 5^3 + \\dots + 99^3$。`, answer: `$(1)\\; 90000$；$(2)\\; 12497500$`, analysis: `$(1)\\; (1+2+\\dots+24)^2 = 300^2 = 90000$；$(2)\\; (1^3+\\dots+100^3) - 2^3(1^3+\\dots+50^3) = (1+\\dots+100)^2 - 8\\times(1+\\dots+50)^2 = 12497500$。`, formulaTex: `(1)\\; 300^2=\\boxed{90000},\\qquad (2)\\; 5050^2 - 8\\times 1275^2 = \\boxed{12497500}`, source: `来源：《Lesson 1-幂运算.pdf》Exploration 8` }
+];
+
+const TOPIC_NAMES = {
+  all: `全部知识点`,
+  laws: `四则幂法则`,
+  compare: `幂的大小比较`,
+  mixed: `高次混合与逆向求值`,
+  series: `级数求和拓展`
+};
+const DIFF_NAMES = { all: `全难度`, basic: `基础温故`, medium: `能力提升`, hard: `拓展突破` };
+const TYPE_NAMES = { all: `全部题型`, calc: `计算与填空`, eval: `化简与求值`, compare: `大小比较与判断` };
+
+const appState = {
+  activeFilter: `all`,
+  searchQuery: ``,
+  activeLawTab: `mul`,
+  showMatrix: false,
+  demoStepIndex: 0,
+  expandedCards: [],
+  checkedIds: [],
+  quizConfig: { topic: `all`, difficulty: `all`, qtype: `all`, count: 5 },
+  quizQuestionIds: [`q-1`, `q-9`, `q-12`, `q-19`, `q-27`],
+  quizShowAllAnswers: false,
+  quizOpenAnswerIds: [],
+  quizMasteredIds: []
+};
+
+function escapeHtml(str) {
+  return String(str || ``)
+    .replace(/&/g, `&amp;`)
+    .replace(/</g, `&lt;`)
+    .replace(/>/g, `&gt;`)
+    .replace(/"/g, `&quot;`);
+}
+
+function mathFallbackHtml(tex) {
+  let s = String(tex || ``);
+  s = s.replace(/\\text\{([^{}]*)\}/g, `$1`);
+  s = s.replace(/\\underbrace\{([^{}]*)\}_\{([^{}]*)\}/g, `$1（$2）`);
+  s = s.replace(/\\left\s*([()\[\]|])/g, `$1`);
+  s = s.replace(/\\right\s*([()\[\]|])/g, `$1`);
+  s = s.replace(/\\iff/g, ` ⇔ `);
+  s = s.replace(/\\implies/g, ` ⇒ `);
+  s = s.replace(/\\Rightarrow/g, ` ⇒ `);
+  s = s.replace(/\\leftrightarrow/g, ` ↔ `);
+  s = s.replace(/\\rightarrow/g, ` → `);
+  s = s.replace(/\\times/g, `×`);
+  s = s.replace(/\\div/g, `÷`);
+  s = s.replace(/\\cdot/g, `·`);
+  s = s.replace(/\\checkmark/g, `✓`);
+  s = s.replace(/\\le/g, `≤`);
+  s = s.replace(/\\ge/g, `≥`);
+  s = s.replace(/\\ne/g, `≠`);
+  s = s.replace(/\\dots/g, `…`);
+  s = s.replace(/\\qquad/g, ` &nbsp;&nbsp; `);
+  s = s.replace(/\\quad/g, ` &nbsp; `);
+  s = s.replace(/\\[;,|]/g, ` `);
+  for (let pass = 0; pass < 3; pass++) {
+    s = s.replace(/\\overline\{([^{}]+)\}/g, `<span class="math-overline">$1</span>`);
+    s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, `<span class="math-frac"><span class="math-frac-num">$1</span><span class="math-frac-den">$2</span></span>`);
+    s = s.replace(/\\boxed\{([^{}]+)\}/g, `<span class="math-boxed">$1</span>`);
+    s = s.replace(/_\{([^{}]+)\}/g, `<sub>$1</sub>`);
+    s = s.replace(/\^\{([^{}]+)\}/g, `<sup>$1</sup>`);
+  }
+  s = s.replace(/_([0-9a-zA-Z])/g, `<sub>$1</sub>`);
+  s = s.replace(/\^([0-9a-zA-Z])/g, `<sup>$1</sup>`);
+  s = s.replace(/\\\\/g, `<br>`);
+  s = s.replace(/\{|\}/g, ``);
+  return `<span class="math-fallback">${s}</span>`;
+}
+
+function renderMath(tex, displayMode) {
+  if (!tex) return ``;
+  if (typeof window !== `undefined` && window.katex && typeof window.katex.renderToString === `function`) {
+    try {
+      return window.katex.renderToString(tex, {
+        displayMode: Boolean(displayMode),
+        throwOnError: false,
+        strict: false
+      });
+    } catch (e) {
+      return mathFallbackHtml(tex);
+    }
+  }
+  return mathFallbackHtml(tex);
+}
+
+function renderRichMath(htmlStr) {
+  if (!htmlStr) return ``;
+  let out = String(htmlStr);
+  out = out.replace(/\$\$([\s\S]+?)\$\$/g, function(_, tex) {
+    return `<div class="katex-display">${renderMath(tex.trim(), true)}</div>`;
+  });
+  out = out.replace(/\$([^$\n]+?)\$/g, function(_, tex) {
+    return renderMath(tex.trim(), false);
+  });
+  return out;
+}
+
+function buildExponentVisual(cardId) {
+  switch (cardId) {
+    case `ev-warmup-1`:
+      return {
+        title: `乘方结构拆解与常见 2 的幂速记条`,
+        tag: `结构图解`,
+        html: `
+          <div class="power-strip">
+            <div class="power-cell power-cell--yellow"><small>底数 (相同因数)</small><span>13</span></div>
+            <span>的</span>
+            <div class="power-cell power-cell--blue"><small>指数 (连乘个数)</small><span>57</span></div>
+            <span>次方 ⇒</span>
+            <div class="power-cell power-cell--green"><small>运算结果 (幂)</small><span>13<sup>57</sup></span></div>
+          </div>
+          <p class="visual-caption">易错提醒：7<sup>8</sup> 表示 <strong>8 个 7 相乘</strong>（不是 7 个 8）；非零数零次方恒满足 <strong>a<sup>0</sup> = 1 (a ≠ 0)</strong>。</p>
+        `
+      };
+    case `ev-mul-2`:
+      return {
+        title: `多底数分组归类 + 等差指数求和流程图`,
+        tag: `分组归类`,
+        html: `
+          <div class="power-strip">
+            <div class="power-cell power-cell--yellow"><small>底数 3 组</small><span>3<sup>2</sup> × 3<sup>6</sup> → 3<sup>8</sup></span></div>
+            <span>×</span>
+            <div class="power-cell power-cell--blue"><small>底数 5 组 (含 5<sup>1</sup>)</small><span>5<sup>1</sup> × 5<sup>5</sup> × 5<sup>12</sup> → 5<sup>18</sup></span></div>
+            <span>｜</span>
+            <div class="power-cell power-cell--green"><small>20<sup>1</sup>…20<sup>50</sup> 指数求和</small><span>(1+50)×50÷2 = 1275</span></div>
+          </div>
+        `
+      };
+    case `ev-mul-3`:
+      return {
+        title: `逆向拆指数 & 整体代入双路径图`,
+        tag: `逆向拆分`,
+        html: `
+          <div class="power-strip">
+            <div class="power-cell power-cell--yellow"><small>目标式</small><span>3<sup>a+2b</sup></span></div>
+            <span>→ 拆和</span>
+            <div class="power-cell power-cell--blue"><small>同底乘</small><span>3<sup>a</sup> · 3<sup>2b</sup></span></div>
+            <span>→ 换底</span>
+            <div class="power-cell power-cell--yellow"><small>3² = 9</small><span>3<sup>a</sup> · 9<sup>b</sup></span></div>
+            <span>=</span>
+            <div class="power-cell power-cell--green"><small>代入 5×10</small><span>50</span></div>
+          </div>
+        `
+      };
+    case `ev-div-1`:
+      return {
+        title: `同底连除指数相减与隐含指数 1 警示图`,
+        tag: `连除验算`,
+        html: `
+          <div class="ladder-list">
+            <div class="ladder-row"><span>3<sup>12</sup> ÷ 3<sup>5</sup> × 3<sup>19</sup> ÷ 3<sup>1</sup> ÷ 3<sup>3</sup>（乘加除减，切勿漏掉 3<sup>1</sup>）</span><span class="ladder-badge">12 − 5 + 19 − 1 − 3 = 22</span></div>
+            <div class="ladder-row"><span>(19<sup>21</sup> × 19<sup>5</sup> ÷ 19<sup>12</sup> × 19<sup>2</sup>)<sup>0</sup>（括号内为非零数）</span><span class="ladder-badge">直接得 1</span></div>
+          </div>
+        `
+      };
+    case `ev-div-2`:
+      return {
+        title: `乘除交替长串「两两配对消项」示意图`,
+        tag: `配对消项`,
+        html: `
+          <div class="power-strip">
+            <div class="power-cell power-cell--yellow"><small>首项保留</small><span>2</span></div>
+            <span>+</span>
+            <div class="power-cell power-cell--blue"><small>第 1 组</small><span>(4−3)=1</span></div>
+            <span>+</span>
+            <div class="power-cell power-cell--blue"><small>第 2 组</small><span>(6−5)=1</span></div>
+            <span>+ … +</span>
+            <div class="power-cell power-cell--blue"><small>第 49 组</small><span>(100−99)=1</span></div>
+            <span>=</span>
+            <div class="power-cell power-cell--green"><small>总指数 2+49</small><span>2<sup>51</sup></span></div>
+          </div>
+        `
+      };
+    case `ev-pow-1`:
+      return {
+        title: `「2 的幂 / 3 的幂」异底化同底速查家族图`,
+        tag: `统一底数`,
+        html: `
+          <div class="power-strip">
+            <div class="power-cell power-cell--yellow"><small>2 的幂</small><span>4=2<sup>2</sup> · 8=2<sup>3</sup> · 16=2<sup>4</sup></span></div>
+            <div class="power-cell power-cell--blue"><small>大 2 的幂</small><span>64=2<sup>6</sup> · 256=2<sup>8</sup> · 1024=2<sup>10</sup></span></div>
+            <div class="power-cell power-cell--green"><small>3 的幂</small><span>9=3<sup>2</sup> · 27=3<sup>3</sup> · 81=3<sup>4</sup></span></div>
+          </div>
+          <p class="visual-caption">实战：3<sup>m</sup>·9<sup>3</sup>·27<sup>3</sup>·81<sup>m</sup> = 3<sup>m+6+9+4m</sup> = 3<sup>30</sup> ⇒ 5m + 15 = 30 ⇒ <strong>m = 3</strong>。</p>
+        `
+      };
+    case `ev-pow-2`:
+      return {
+        title: `高次多元「提取公指数整体降幂」图解`,
+        tag: `整体换元`,
+        html: `
+          <div class="power-strip">
+            <div class="power-cell power-cell--yellow"><small>原式 (指数 20,15,5)</small><span>x<sup>20</sup>y<sup>15</sup>z<sup>5</sup></span></div>
+            <span>→ 提公指数 5</span>
+            <div class="power-cell power-cell--blue"><small>令 U = x⁴y³z</small><span>U<sup>5</sup> = 243 = 3<sup>5</sup></span></div>
+            <span>→ 奇次方唯一</span>
+            <div class="power-cell power-cell--yellow"><small>得底数</small><span>U = 3</span></div>
+            <span>→ 平方</span>
+            <div class="power-cell power-cell--green"><small>x⁸y⁶z² = U²</small><span>9</span></div>
+          </div>
+        `
+      };
+    case `ev-prod-1`:
+      return {
+        title: `积的乘方「逐项分发外层指数」示意图`,
+        tag: `逐项乘方`,
+        html: `
+          <div class="power-strip">
+            <div class="power-cell power-cell--yellow"><small>整体括号</small><span>(3<sup>5</sup> × 5<sup>2</sup> × 11<sup>1</sup>)<sup>3</sup></span></div>
+            <span>⇒ 指数 3 分发给每一项</span>
+            <div class="power-cell power-cell--blue"><small>3<sup>5×3</sup></small><span>3<sup>15</sup></span></div>
+            <span>×</span>
+            <div class="power-cell power-cell--blue"><small>5<sup>2×3</sup></small><span>5<sup>6</sup></span></div>
+            <span>×</span>
+            <div class="power-cell power-cell--red"><small>别漏 11<sup>1×3</sup></small><span>11<sup>3</sup></span></div>
+          </div>
+        `
+      };
+    case `ev-prod-2`:
+      return {
+        title: `合数拆质底 + 逆用积的乘方「凑整十」流程图`,
+        tag: `拆底凑整`,
+        html: `
+          <div class="ladder-list">
+            <div class="ladder-row"><span>① 拆合数底：(6<sup>4</sup>)<sup>5</sup> = 2<sup>20</sup>×3<sup>20</sup>，15<sup>12</sup> = 3<sup>12</sup>×5<sup>12</sup>，9<sup>16</sup> = 3<sup>32</sup></span><span class="ladder-badge">质底 2,3,5</span></div>
+            <div class="ladder-row"><span>② 同底消元：2<sup>20−8</sup> × 3<sup>20+12−32</sup> × 5<sup>12</sup> = 2<sup>12</sup> × 3<sup>0</sup> × 5<sup>12</sup></span><span class="ladder-badge">3<sup>32</sup> 抵消</span></div>
+            <div class="ladder-row"><span>③ 逆用合并：2<sup>12</sup> × 5<sup>12</sup> = (2 × 5)<sup>12</sup></span><span class="ladder-badge">10<sup>12</sup></span></div>
+          </div>
+        `
+      };
+    case `ev-comp-1`:
+      return {
+        title: `幂的大小比较「双轨决策树」`,
+        tag: `双轨策略`,
+        html: `
+          <div class="funnel-grid">
+            <div class="funnel-step funnel-step--yellow">
+              <strong>路径 A：指数有公因数</strong>
+              <span>提取最大公因数，化为<strong>同指数</strong>后比较底数大小（如 50,40,30 提 10）。</span>
+            </div>
+            <div class="funnel-step funnel-step--ok">
+              <strong>路径 B：底数同源（如 2 的幂）</strong>
+              <span>统一化为<strong>同底数</strong>后比较指数大小（底数 &gt; 1 时指数越大幂越大）。</span>
+            </div>
+          </div>
+        `
+      };
+    case `ev-comp-2`:
+      return {
+        title: `提取指数公因数 10：同指数底数柱状对比图`,
+        tag: `同指数对比`,
+        html: `
+          <svg viewBox="0 0 540 124" width="100%" style="max-width:540px;" role="img" aria-label="同指数底数对比图 125 vs 243 vs 256">
+            <text x="10" y="28" font-size="13" font-weight="800" fill="#1a1a1a">5³⁰ = (5³)¹⁰ = 125¹⁰</text>
+            <rect x="175" y="12" width="155" height="22" fill="#e63b2e" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="338" y="28" font-size="12" font-weight="800" fill="#1a1a1a">底数 125（最小）</text>
+
+            <text x="10" y="68" font-size="13" font-weight="800" fill="#1a1a1a">3⁵⁰ = (3⁵)¹⁰ = 243¹⁰</text>
+            <rect x="175" y="52" width="300" height="22" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="483" y="68" font-size="12" font-weight="800" fill="#1a1a1a">243</text>
+
+            <text x="10" y="108" font-size="13" font-weight="800" fill="#1a1a1a">4⁴⁰ = (4⁴)¹⁰ = 256¹⁰</text>
+            <rect x="175" y="92" width="318" height="22" fill="#0055ff" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="500" y="108" font-size="12" font-weight="800" fill="#1a1a1a">256</text>
+          </svg>
+          <p class="visual-caption">同为 10 次幂，只需比底数：125 &lt; 243 &lt; 256 ⇒ <strong>5<sup>30</sup> &lt; 3<sup>50</sup> &lt; 4<sup>40</sup></strong>。</p>
+        `
+      };
+    case `ev-comp-3`:
+      return {
+        title: `统一化为底数 2：指数标尺直观排序图`,
+        tag: `同底标尺`,
+        html: `
+          <svg viewBox="0 0 540 105" width="100%" style="max-width:540px;" role="img" aria-label="同底数2的指数标尺 246 248 250">
+            <line x1="36" y1="62" x2="504" y2="62" stroke="#1a1a1a" stroke-width="3"/>
+            <polygon points="504,56 518,62 504,68" fill="#1a1a1a"/>
+            <rect x="70" y="16" width="116" height="32" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.2"/>
+            <text x="128" y="37" text-anchor="middle" font-size="13" font-weight="900" fill="#1a1a1a">a = 2²⁴⁶</text>
+            <circle cx="128" cy="62" r="6" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="128" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#4a4a4a">64⁴¹ = (2⁶)⁴¹</text>
+
+            <rect x="216" y="16" width="116" height="32" fill="#e63b2e" stroke="#1a1a1a" stroke-width="2.2"/>
+            <text x="274" y="37" text-anchor="middle" font-size="13" font-weight="900" fill="#ffffff">c = 2²⁴⁸</text>
+            <circle cx="274" cy="62" r="6" fill="#e63b2e" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="274" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#4a4a4a">256³¹ = (2⁸)³¹</text>
+
+            <rect x="362" y="16" width="116" height="32" fill="#0055ff" stroke="#1a1a1a" stroke-width="2.2"/>
+            <text x="420" y="37" text-anchor="middle" font-size="13" font-weight="900" fill="#ffffff">b = 2²⁵⁰</text>
+            <circle cx="420" cy="62" r="6" fill="#0055ff" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="420" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#4a4a4a">1024²⁵ = (2¹⁰)²⁵</text>
+          </svg>
+        `
+      };
+    case `ev-ser-1`:
+      return {
+        title: `斐波那契平方和「矩形面积拼接」辅助直观图（前 5 项示意）`,
+        tag: `矩形拼图`,
+        html: `
+          <svg viewBox="0 0 380 185" width="100%" style="max-width:380px;" role="img" aria-label="斐波那契正方形拼接矩形示意图 1^2+1^2+2^2+3^2+5^2 = 5x8">
+            <rect x="16" y="16" width="140" height="140" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.4"/>
+            <text x="86" y="92" text-anchor="middle" font-size="16" font-weight="900" fill="#1a1a1a">5²</text>
+            <rect x="156" y="16" width="84" height="84" fill="#0055ff" stroke="#1a1a1a" stroke-width="2.4"/>
+            <text x="198" y="64" text-anchor="middle" font-size="15" font-weight="900" fill="#ffffff">3²</text>
+            <rect x="184" y="100" width="56" height="56" fill="#e63b2e" stroke="#1a1a1a" stroke-width="2.4"/>
+            <text x="212" y="133" text-anchor="middle" font-size="14" font-weight="900" fill="#ffffff">2²</text>
+            <rect x="156" y="100" width="28" height="28" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.2"/>
+            <text x="170" y="119" text-anchor="middle" font-size="11" font-weight="900" fill="#1a1a1a">1²</text>
+            <rect x="156" y="128" width="28" height="28" fill="#d8efe0" stroke="#1a1a1a" stroke-width="2.2"/>
+            <text x="170" y="147" text-anchor="middle" font-size="11" font-weight="900" fill="#1a1a1a">1²</text>
+            <text x="256" y="72" font-size="13" font-weight="800" fill="#1a1a1a">宽 = F₅ = 5</text>
+            <text x="256" y="96" font-size="13" font-weight="800" fill="#1a1a1a">长 = F₆ = 5+3 = 8</text>
+            <text x="256" y="124" font-size="12" font-weight="700" fill="#156d3f">面积和 = 5 × 8</text>
+            <text x="16" y="176" font-size="11.5" font-weight="700" fill="#4a4a4a">推广到 34²：1²+1²+2²+…+34² = 34 × (34+21) = 34 × 55 = 1870</text>
+          </svg>
+        `
+      };
+    case `ev-ser-2`:
+      return {
+        title: `自然数平方和「区间做差 & 奇偶拆分」模型图`,
+        tag: `公式变式`,
+        html: `
+          <div class="funnel-grid">
+            <div class="funnel-step">
+              <strong>① 区间平方和（头尾相减）</strong>
+              <span>15²+…+21² = S₂₁ − S₁₄ = 3311 − 1015 = <strong>2296</strong></span>
+            </div>
+            <div class="funnel-step funnel-step--yellow">
+              <strong>② 偶数平方和（提 2² = 4）</strong>
+              <span>2²+4²+…+24² = 4 × S₁₂ = <strong>2600</strong></span>
+            </div>
+            <div class="funnel-step funnel-step--ok">
+              <strong>③ 奇数平方和（全和减偶和）</strong>
+              <span>1²+3²+…+25² = S₂₅ − 4S₁₂ = 5525 − 2600 = <strong>2925</strong></span>
+            </div>
+          </div>
+        `
+      };
+    case `ev-ser-3`:
+      return {
+        title: `顺向连续积 vs 倒序乘积：通项拆解对照图`,
+        tag: `通项拆分`,
+        html: `
+          <div class="funnel-grid">
+            <div class="funnel-step">
+              <strong>顺向积：k(k + 1) = k² + k</strong>
+              <span>1×2 + 2×3 + … + 49×50 = 49×50×51÷3 = <strong>41650</strong></span>
+            </div>
+            <div class="funnel-step funnel-step--ok">
+              <strong>倒序积：k(100 − k) = 100k − k²</strong>
+              <span>100×(1+…+99) − (1²+…+99²) = <strong>166650</strong></span>
+            </div>
+          </div>
+        `
+      };
+    case `ev-ser-4`:
+      return {
+        title: `自然数立方和「平方差裂项对消」阶梯图`,
+        tag: `裂项对消`,
+        html: `
+          <div class="ladder-list">
+            <div class="ladder-row"><span>1³ = S₁² − S₀²（其中 Sₖ = 1+2+…+k）</span><span class="ladder-badge">S₁² 留，后项消</span></div>
+            <div class="ladder-row"><span>2³ = S₂² − S₁²　…　n³ = Sₙ² − Sₙ₋₁²</span><span class="ladder-badge">中间全部对消</span></div>
+            <div class="ladder-row"><span>累加总和：1³ + 2³ + … + n³ = Sₙ² = [n(n+1)/2]²</span><span class="ladder-badge">奇立方和：总 − 8×偶底</span></div>
+          </div>
+        `
+      };
+    default:
+      return null;
+  }
+}
+
+function buildQuizVisual(q) {
+  if (q.topic === `compare`) {
+    return q.id === `q-21`
+      ? `策略：先将 64、256、1024 统一化为底数 2 的幂（2<sup>6</sup>、2<sup>8</sup>、2<sup>10</sup>），再按指数大小排序。`
+      : `策略：观察所有指数的最大公因数（提公指数），化为同指数后直接比较新底数大小。`;
+  }
+  if (q.topic === `series`) {
+    return `策略：先识别数列母模型（等差指数求和 / 平方和 Sₙ / 连续积 / 斐波那契 FₙFₙ₊₁ / 立方和 Sₙ²），再按区间差或奇偶拆分代算。`;
+  }
+  if (q.topic === `mixed`) {
+    return `策略：先将合数底数（4,6,8,9,15,16,27,30,32,81）拆成质底数 2, 3, 5，再结合正逆幂法则或整体换元求解。`;
+  }
+  return `策略：分清乘法（指数相加）、除法（指数相减）、幂的乘方（指数相乘）与积的乘方（逐项乘方），切勿遗漏隐含指数 1 与 a<sup>0</sup>=1。`;
+}
+
+async function persistState() {
+  try {
+    if (typeof localStorage !== `undefined`) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    }
+  } catch (e) {}
+  try {
+    if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+      await window.notebookAppApi.setAppState(appState);
+    }
+  } catch (e) {}
+}
+
+function switchLawTab(lawId) {
+  if (!LAWS_DATA[lawId]) return;
+  appState.activeLawTab = lawId;
+  appState.showMatrix = false;
+  appState.demoStepIndex = 0;
+  renderLawComparison();
+  persistState();
+}
+
+function toggleMatrixView() {
+  appState.showMatrix = !appState.showMatrix;
+  renderLawComparison();
+  persistState();
+}
+
+function stepLawDemoNext() {
+  const law = LAWS_DATA[appState.activeLawTab] || LAWS_DATA.mul;
+  if (appState.demoStepIndex < law.demoSteps.length - 1) {
+    appState.demoStepIndex += 1;
+  } else {
+    appState.demoStepIndex = 0;
+  }
+  renderLawComparison();
+}
+
+function stepLawDemoAll() {
+  const law = LAWS_DATA[appState.activeLawTab] || LAWS_DATA.mul;
+  appState.demoStepIndex = law.demoSteps.length - 1;
+  renderLawComparison();
+}
+
+function renderLawComparison() {
+  const keys = [`mul`, `div`, `pow`, `prod`];
+  keys.forEach(function(k) {
+    const btn = document.getElementById(`tab-` + k);
+    if (btn) {
+      const active = !appState.showMatrix && appState.activeLawTab === k;
+      btn.classList.toggle(`is-active`, active);
+      btn.setAttribute(`aria-selected`, active ? `true` : `false`);
+    }
+  });
+
+  const matrixBtn = document.getElementById(`btn-toggle-matrix`);
+  if (matrixBtn) {
+    matrixBtn.textContent = appState.showMatrix ? `返回单项法则深剖` : `查看四法则横向总览表`;
+  }
+
+  const panel = document.getElementById(`comparison-panel`);
+  if (!panel) return;
+
+  if (appState.showMatrix) {
+    const rows = keys.map(function(k) {
+      const law = LAWS_DATA[k];
+      return `<tr>
+        <td><strong>${escapeHtml(law.name)}</strong><br><span style="font-size:0.76rem; color:var(--on-surface-variant);">${escapeHtml(law.source)}</span></td>
+        <td><div class="formula-panel" style="margin-bottom:6px;">${renderMath(law.formulaTex, false)}</div><div style="font-size:0.8rem; font-weight:700; color:var(--tertiary);">${renderRichMath(law.mnemonic)}</div></td>
+        <td>${renderRichMath(law.conditions)}</td>
+        <td>${renderRichMath(law.essence)}</td>
+        <td>${renderRichMath(law.reverse)}</td>
+        <td>${renderRichMath(law.pitfalls)}</td>
+      </tr>`;
+    }).join(``);
+
+    panel.innerHTML = `
+      <div class="table-wrap">
+        <table class="variant-table" aria-label="四大幂运算法则横向总览对比表">
+          <thead>
+            <tr>
+              <th>法则与来源出处</th>
+              <th>核心公式与口诀</th>
+              <th>运算条件</th>
+              <th>几何或代数本质</th>
+              <th>逆向应用技巧</th>
+              <th>高频易错点</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+    return;
+  }
+
+  const law = LAWS_DATA[appState.activeLawTab] || LAWS_DATA.mul;
+  if (appState.demoStepIndex >= law.demoSteps.length) {
+    appState.demoStepIndex = law.demoSteps.length - 1;
+  }
+  const isLastStep = appState.demoStepIndex >= law.demoSteps.length - 1;
+
+  const stepsHtml = law.demoSteps.map(function(s, idx) {
+    let cls = `demo-step-row`;
+    if (idx === appState.demoStepIndex) cls += ` is-current`;
+    else if (idx < appState.demoStepIndex) cls += ` is-done`;
+    else cls += ` is-locked`;
+    return `<div class="${cls}">${renderRichMath(s)}</div>`;
+  }).join(``);
+
+  const examplesHtml = law.examples.map(function(ex) {
+    return `<li>${renderRichMath(ex)}</li>`;
+  }).join(``);
+
+  panel.innerHTML = `
+    <div class="law-hero">
+      <div>
+        <h3 class="law-name">${escapeHtml(law.name)}</h3>
+        <div class="law-mnemonic">口诀：${renderRichMath(law.mnemonic)}</div>
+      </div>
+      <div class="law-formula-box">${renderMath(law.formulaTex, true)}</div>
+    </div>
+
+    <div class="law-layout">
+      <div style="display:grid; gap:var(--space-md);">
+        <div class="dim-grid">
+          <div class="dim-card">
+            <div class="dim-label">01 · 运算条件与边界</div>
+            <div class="dim-content">${renderRichMath(law.conditions)}</div>
+          </div>
+          <div class="dim-card">
+            <div class="dim-label">02 · 几何或代数本质</div>
+            <div class="dim-content">${renderRichMath(law.essence)}</div>
+          </div>
+          <div class="dim-card">
+            <div class="dim-label">03 · 逆向应用技巧</div>
+            <div class="dim-content">${renderRichMath(law.reverse)}</div>
+          </div>
+          <div class="dim-card">
+            <div class="dim-label">04 · 高频易错点</div>
+            <div class="dim-content">${renderRichMath(law.pitfalls)}</div>
+          </div>
+        </div>
+        <div class="dim-card">
+          <div class="dim-label">05 · 来源典型例题与真题实证</div>
+          <div class="dim-content"><ul class="example-list">${examplesHtml}</ul></div>
+        </div>
+      </div>
+
+      <aside class="sim-box" aria-label="法则典型例题分步拆解演示">
+        <div class="sim-stage">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-xs); flex-wrap:wrap;">
+            <strong style="font-size:0.95rem;">${renderRichMath(law.demoTitle)}</strong>
+            <span class="tag tag--blue">第 ${appState.demoStepIndex + 1} / ${law.demoSteps.length} 步</span>
+          </div>
+          <div class="demo-steps">${stepsHtml}</div>
+        </div>
+        <div class="demo-controls">
+          <button type="button" class="btn btn--primary btn--small" onclick="stepLawDemoNext()">${isLastStep ? `重新从第 1 步演示` : `下一步拆解 →`}</button>
+          ${isLastStep ? `` : `<button type="button" class="btn btn--small" onclick="stepLawDemoAll()">直达最终结果</button>`}
+        </div>
+        <div class="quote-box">
+          <strong>来源边界提示：</strong><br>
+          ${escapeHtml(law.source)}<br>
+          几何图形本质 / 负整数指数拓展：<strong>来源未提及</strong>
+        </div>
+      </aside>
+    </div>
+  `;
+}
+
+function renderFilterPills() {
+  const container = document.getElementById(`filter-pills-container`);
+  if (!container) return;
+  container.innerHTML = FILTER_CATEGORIES.map(function(cat) {
+    const count = cat.id === `all`
+      ? EVIDENCE_CARDS.length
+      : EVIDENCE_CARDS.filter(function(c) { return c.category === cat.id; }).length;
+    const active = appState.activeFilter === cat.id;
+    return `<button type="button" class="pill ${active ? `is-active` : ``}" aria-pressed="${active ? `true` : `false`}" onclick="setFilterCategory('${cat.id}')">${escapeHtml(cat.label)} (${count})</button>`;
+  }).join(``);
+}
+
+function setFilterCategory(catId) {
+  appState.activeFilter = catId;
+  renderFilterPills();
+  renderEvidenceCards();
+  persistState();
+}
+
+function handleSearchInput(val) {
+  appState.searchQuery = (val || ``).trim();
+  renderEvidenceCards();
+  persistState();
+}
+
+function resetAllFilters() {
+  appState.activeFilter = `all`;
+  appState.searchQuery = ``;
+  const searchEl = document.getElementById(`keyword-search`);
+  if (searchEl) searchEl.value = ``;
+  renderFilterPills();
+  renderEvidenceCards();
+  persistState();
+}
+
+function getFilteredCards() {
+  const q = appState.searchQuery.toLowerCase();
+  return EVIDENCE_CARDS.filter(function(card) {
+    const matchCat = appState.activeFilter === `all` || card.category === appState.activeFilter;
+    if (!matchCat) return false;
+    if (!q) return true;
+    const hay = (card.title + ` ` + card.categoryLabel + ` ` + card.summary + ` ` + card.detail + ` ` + card.quote + ` ` + card.source).toLowerCase();
+    return hay.indexOf(q) !== -1;
+  });
+}
+
+function expandAllVisibleCards() {
+  const ids = getFilteredCards().map(function(c) { return c.id; });
+  ids.forEach(function(id) {
+    if (appState.expandedCards.indexOf(id) === -1) appState.expandedCards.push(id);
+  });
+  renderEvidenceCards();
+  persistState();
+}
+
+function collapseAllCards() {
+  appState.expandedCards = [];
+  renderEvidenceCards();
+  persistState();
+}
+
+function toggleEvidenceAccordion(cardId) {
+  const idx = appState.expandedCards.indexOf(cardId);
+  if (idx === -1) appState.expandedCards.push(cardId);
+  else appState.expandedCards.splice(idx, 1);
+  renderEvidenceCards();
+  persistState();
+}
+
+function renderEvidenceCards() {
+  const container = document.getElementById(`evidence-cards-container`);
+  const statusEl = document.getElementById(`filter-match-status`);
+  if (!container) return;
+
+  const filtered = getFilteredCards();
+  if (statusEl) {
+    statusEl.textContent = `当前匹配 ${filtered.length} / ${EVIDENCE_CARDS.length} 组溯源卡片`;
+  }
+
+  if (filtered.length === 0) {
+    const catObj = FILTER_CATEGORIES.find(function(c) { return c.id === appState.activeFilter; });
+    container.innerHTML = `<div class="empty-state">
+      <strong>未检索到符合条件的知识卡片</strong>
+      <span>当前关键字「${escapeHtml(appState.searchQuery)}」与维度「${escapeHtml(catObj ? catObj.label : ``)}」组合下无对应源文条目。</span>
+      <button type="button" class="btn btn--primary btn--small" onclick="resetAllFilters()">清空搜索并查看全部条目</button>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(function(card, idx) {
+    const isOpen = appState.expandedCards.indexOf(card.id) !== -1;
+    const accent = CATEGORY_ACCENT[card.category] || { bar: `blue`, tag: `tag--blue` };
+    const diffClass = card.difficulty === `拓展突破` ? `tag--red` : (card.difficulty === `能力提升` ? `tag--yellow` : `tag--green`);
+    const visual = buildExponentVisual(card.id);
+    const visualHtml = visual ? `
+      <div class="visual-box">
+        <div class="visual-box-head">
+          <span class="visual-box-title">${escapeHtml(visual.title)}</span>
+          <span class="tag tag--yellow">${escapeHtml(visual.tag)}</span>
+        </div>
+        ${visual.html}
+      </div>
+    ` : ``;
+
+    return `<article class="entry-card">
+      <div class="card-accent-bar card-accent-bar--${accent.bar}" aria-hidden="true"></div>
+      <div class="card-body">
+        <div class="card-top-row">
+          <div class="tag-group">
+            <span class="tag tag--black">#${String(idx + 1).padStart(2, `0`)}</span>
+            <span class="tag ${accent.tag}">${escapeHtml(card.categoryLabel)}</span>
+            <span class="tag ${diffClass}">${escapeHtml(card.difficulty)}</span>
+          </div>
+        </div>
+        <h3 class="card-title">${escapeHtml(card.title)}</h3>
+        <div class="card-prompt">${renderRichMath(card.summary)}</div>
+
+        <div>
+          <button type="button" class="accordion-trigger" aria-expanded="${isOpen ? `true` : `false`}" onclick="toggleEvidenceAccordion('${card.id}')">
+            <span>${isOpen ? `收起核心公式、图解推导与原文摘引` : `展开查看核心公式、图解推导与原文摘引`}</span>
+            <span>${isOpen ? `▲` : `▼`}</span>
+          </button>
+          <div class="accordion-panel" ${isOpen ? `` : `hidden`}>
+            <div class="formula-panel">${renderMath(card.formulaTex, true)}</div>
+            ${visualHtml}
+            <div class="answer-callout">${renderRichMath(card.detail)}</div>
+            <div class="quote-box">${renderRichMath(card.quote)}</div>
+          </div>
+        </div>
+      </div>
+      <footer class="card-footer">
+        <span>${escapeHtml(card.source)}</span>
+      </footer>
+    </article>`;
+  }).join(``);
+}
+
+function renderChecklist() {
+  const container = document.getElementById(`checklist-items-container`);
+  const summaryEl = document.getElementById(`checklist-summary-label`);
+  const barEl = document.getElementById(`checklist-progress-bar`);
+  const kpiValEl = document.getElementById(`kpi-progress-val`);
+  const kpiPctEl = document.getElementById(`kpi-progress-pct`);
+  const kpiBarEl = document.getElementById(`kpi-progress-bar`);
+
+  const total = CHECKLIST_ITEMS.length;
+  const done = appState.checkedIds.length;
+  const pct = Math.round((done / total) * 100);
+
+  if (summaryEl) summaryEl.textContent = `已掌握 ${done} / ${total} 项（${pct}%，本地自动同步）`;
+  if (barEl) barEl.style.width = pct + `%`;
+  if (kpiBarEl) kpiBarEl.style.width = pct + `%`;
+  if (kpiValEl) kpiValEl.textContent = `${done} / ${total}`;
+  if (kpiPctEl) kpiPctEl.textContent = `当前掌握率 ${pct}%`;
+
+  if (!container) return;
+  container.innerHTML = CHECKLIST_ITEMS.map(function(item) {
+    const isChecked = appState.checkedIds.indexOf(item.id) !== -1;
+    return `<label class="check-item ${isChecked ? `is-checked` : ``}" for="${item.id}">
+      <input type="checkbox" id="${item.id}" ${isChecked ? `checked` : ``} onchange="toggleChecklistItem('${item.id}')">
+      <span class="check-item-body">
+        <span class="check-item-title">${renderRichMath(item.title)}</span>
+        <span class="check-item-src">来源：${escapeHtml(item.source)}</span>
+      </span>
+    </label>`;
+  }).join(``);
+}
+
+function toggleChecklistItem(itemId) {
+  const idx = appState.checkedIds.indexOf(itemId);
+  if (idx === -1) appState.checkedIds.push(itemId);
+  else appState.checkedIds.splice(idx, 1);
+  resetResetButtons();
+  showChecklistToast(`学习打卡状态已保存`);
+  renderChecklist();
+  persistState();
+}
+
+function checkAllItems() {
+  appState.checkedIds = CHECKLIST_ITEMS.map(function(i) { return i.id; });
+  resetResetButtons();
+  showChecklistToast(`已标记全部 10 项知识点为掌握`);
+  renderChecklist();
+  persistState();
+}
+
+function resetResetButtons() {
+  [`btn-reset-checklist`, `btn-reset-kpi`].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.dataset.armed = `false`;
+      el.textContent = id === `btn-reset-kpi` ? `重置打卡` : `重置打卡进度`;
+    }
+  });
+}
+
+function resetChecklist(btn) {
+  if (!btn) return;
+  if (btn.dataset.armed !== `true`) {
+    btn.dataset.armed = `true`;
+    btn.textContent = `再次点击确认`;
+    showChecklistToast(`请再次点击确认清空打卡进度`);
+    return;
+  }
+  resetResetButtons();
+  appState.checkedIds = [];
+  showChecklistToast(`已清空打卡进度`);
+  renderChecklist();
+  persistState();
+}
+
+function showChecklistToast(msg) {
+  const el = document.getElementById(`checklist-toast`);
+  if (el) el.textContent = msg;
+}
+
+function updateQuizControl(key, value) {
+  if (key === `count`) appState.quizConfig.count = parseInt(value, 10) || 5;
+  else appState.quizConfig[key] = value;
+  persistState();
+}
+
+function syncQuizControlsUI() {
+  const map = [
+    [`quiz-topic`, appState.quizConfig.topic],
+    [`quiz-difficulty`, appState.quizConfig.difficulty],
+    [`quiz-type`, appState.quizConfig.qtype],
+    [`quiz-count`, String(appState.quizConfig.count)]
+  ];
+  map.forEach(function(pair) {
+    const el = document.getElementById(pair[0]);
+    if (el) el.value = pair[1];
+  });
+}
+
+function setQuizStatus(msg) {
+  const el = document.getElementById(`quiz-status-msg`);
+  if (!el) return;
+  if (!msg) { el.hidden = true; el.textContent = ``; return; }
+  el.hidden = false;
+  el.textContent = msg;
+}
+
+function generateQuiz() {
+  const cfg = appState.quizConfig;
+  const pool = QUIZ_BANK.filter(function(q) {
+    const okTopic = cfg.topic === `all` || q.topic === cfg.topic;
+    const okDiff = cfg.difficulty === `all` || q.difficulty === cfg.difficulty;
+    const okType = cfg.qtype === `all` || q.qtype === cfg.qtype;
+    return okTopic && okDiff && okType;
+  });
+
+  if (pool.length === 0) {
+    appState.quizQuestionIds = [];
+    setQuizStatus(`当前组合条件（${TOPIC_NAMES[cfg.topic]} + ${DIFF_NAMES[cfg.difficulty]} + ${TYPE_NAMES[cfg.qtype]}）下暂无完全匹配的题库原题，请放宽任一筛选条件。`);
+    renderQuizPaper();
+    persistState();
+    return;
+  }
+
+  const shuffled = pool.slice();
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = shuffled[i];
+    shuffled[i] = shuffled[j];
+    shuffled[j] = tmp;
+  }
+
+  const targetCount = Math.min(cfg.count, shuffled.length);
+  appState.quizQuestionIds = shuffled.slice(0, targetCount).map(function(q) { return q.id; });
+  appState.quizOpenAnswerIds = [];
+  appState.quizMasteredIds = [];
+
+  if (shuffled.length < cfg.count) {
+    setQuizStatus(`该筛选条件下共有 ${shuffled.length} 道原题（少于请求的 ${cfg.count} 题），已为您抽取全部 ${targetCount} 题。`);
+  } else {
+    setQuizStatus(`已从 31 题源题库随机抽取 ${targetCount} 道原题生成新试卷。`);
+  }
+
+  renderQuizPaper();
+  persistState();
+}
+
+function toggleAllQuizAnswers() {
+  appState.quizShowAllAnswers = !appState.quizShowAllAnswers;
+  appState.quizOpenAnswerIds = appState.quizShowAllAnswers ? appState.quizQuestionIds.slice() : [];
+  renderQuizPaper();
+  persistState();
+}
+
+function toggleSingleQuizAnswer(qId) {
+  const idx = appState.quizOpenAnswerIds.indexOf(qId);
+  if (idx === -1) appState.quizOpenAnswerIds.push(qId);
+  else appState.quizOpenAnswerIds.splice(idx, 1);
+  appState.quizShowAllAnswers = appState.quizQuestionIds.length > 0 &&
+    appState.quizQuestionIds.every(function(id) { return appState.quizOpenAnswerIds.indexOf(id) !== -1; });
+  renderQuizPaper();
+  persistState();
+}
+
+function toggleQuizMastered(qId) {
+  const idx = appState.quizMasteredIds.indexOf(qId);
+  if (idx === -1) appState.quizMasteredIds.push(qId);
+  else appState.quizMasteredIds.splice(idx, 1);
+  renderQuizPaper();
+  persistState();
+}
+
+function resetQuizFiltersAndGenerate() {
+  appState.quizConfig = { topic: `all`, difficulty: `all`, qtype: `all`, count: 5 };
+  syncQuizControlsUI();
+  generateQuiz();
+}
+
+function renderQuizPaper() {
+  const container = document.getElementById(`quiz-questions-container`);
+  const metaEl = document.getElementById(`quiz-paper-meta`);
+  const scoreEl = document.getElementById(`quiz-score-summary`);
+  const toggleAllBtn = document.getElementById(`btn-toggle-all-answers`);
+  const kpiQuizCountEl = document.getElementById(`kpi-quiz-count`);
+
+  const cfg = appState.quizConfig;
+  const items = appState.quizQuestionIds
+    .map(function(id) { return QUIZ_BANK.find(function(q) { return q.id === id; }); })
+    .filter(Boolean);
+
+  if (metaEl) metaEl.textContent = `出题范围：${TOPIC_NAMES[cfg.topic]} · ${DIFF_NAMES[cfg.difficulty]} · ${TYPE_NAMES[cfg.qtype]} · 共 ${items.length} 题`;
+  if (kpiQuizCountEl) kpiQuizCountEl.textContent = `${items.length} 题`;
+  const masteredCount = items.filter(function(q) { return appState.quizMasteredIds.indexOf(q.id) !== -1; }).length;
+  if (scoreEl) scoreEl.textContent = `自评完成：${masteredCount} / ${items.length} 题`;
+  if (toggleAllBtn) toggleAllBtn.textContent = appState.quizShowAllAnswers ? `隐藏全部答案与解析` : `显示全部答案与解析`;
+
+  if (!container) return;
+  if (items.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <strong>当前尚未生成试卷题目</strong>
+      <span>请调整上方的知识点、难度或题型偏好，然后点击「随机生成试卷」。</span>
+      <button type="button" class="btn btn--primary btn--small" onclick="resetQuizFiltersAndGenerate()">恢复默认条件并立即组卷</button>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = items.map(function(q, index) {
+    const isOpen = appState.quizShowAllAnswers || appState.quizOpenAnswerIds.indexOf(q.id) !== -1;
+    const isMastered = appState.quizMasteredIds.indexOf(q.id) !== -1;
+    const diffTag = q.difficulty === `hard` ? `tag--red` : (q.difficulty === `medium` ? `tag--yellow` : `tag--green`);
+    return `<article class="quiz-question">
+      <div class="quiz-q-head">
+        <div class="tag-group">
+          <span class="tag tag--black">第 ${index + 1} 题</span>
+          <span class="tag tag--blue">${escapeHtml(TOPIC_NAMES[q.topic])}</span>
+          <span class="tag ${diffTag}">${escapeHtml(DIFF_NAMES[q.difficulty])}</span>
+        </div>
+        <span style="font-size:0.78rem; color:var(--on-surface-variant); font-weight:600;">${escapeHtml(q.source)}</span>
+      </div>
+
+      <div class="card-prompt">${renderRichMath(q.prompt)}</div>
+      <div class="quiz-scratch-line" aria-hidden="true"></div>
+
+      <div class="quiz-item-actions no-print">
+        <button type="button" class="btn btn--small" onclick="toggleSingleQuizAnswer('${q.id}')">${isOpen ? `隐藏本题解析` : `查看本题答案与解析`}</button>
+        <button type="button" class="btn btn--small ${isMastered ? `btn--primary` : ``}" onclick="toggleQuizMastered('${q.id}')">${isMastered ? `✓ 已自评掌握` : `标记为已掌握`}</button>
+      </div>
+
+      <div class="accordion-panel" ${isOpen ? `` : `hidden`}>
+        <div class="formula-panel">${renderMath(q.formulaTex, true)}</div>
+        <div class="answer-callout">
+          <div><strong>【标准答案】</strong>${renderRichMath(q.answer)}</div>
+          <div style="margin-top:4px;"><strong>【详细解析】</strong>${renderRichMath(q.analysis)}</div>
+        </div>
+        <div class="quote-box">${buildQuizVisual(q)}</div>
+      </div>
+    </article>`;
+  }).join(``);
+}
+
+function printQuiz() {
+  if (typeof window.print === `function`) {
+    setQuizStatus(`正在调起打印预览（如浏览器拦截弹窗，请使用右侧「导出纯文本试卷」）。`);
+    window.print();
+  } else {
+    setQuizStatus(`当前环境不支持直接打印，请使用「导出纯文本试卷 (.txt)」功能。`);
+  }
+}
+
+function exportQuizText() {
+  const items = appState.quizQuestionIds
+    .map(function(id) { return QUIZ_BANK.find(function(q) { return q.id === id; }); })
+    .filter(Boolean);
+
+  if (items.length === 0) {
+    setQuizStatus(`当前试卷为空，请先点击「随机生成试卷」。`);
+    return;
+  }
+
+  const cfg = appState.quizConfig;
+  const lines = [
+    `《Lesson 1 幂运算》专项练习卷`,
+    `出题维度：${TOPIC_NAMES[cfg.topic]} | ${DIFF_NAMES[cfg.difficulty]} | ${TYPE_NAMES[cfg.qtype]} | 共 ${items.length} 题`,
+    `============================================================`,
+    ``
+  ];
+  items.forEach(function(q, idx) {
+    lines.push(`${idx + 1}. ${q.prompt}  [${q.source}]`);
+    lines.push(``);
+  });
+  lines.push(`============================================================`);
+  lines.push(`【参考答案与详细解析】`);
+  lines.push(``);
+  items.forEach(function(q, idx) {
+    lines.push(`${idx + 1}. 答案：${q.answer}`);
+    lines.push(`   解析：${q.analysis}（${q.source}）`);
+    lines.push(``);
+  });
+
+  const content = lines.join(`\n`);
+  try {
+    if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+      window.notebookAppApi.triggerFileDownload({
+        content: content,
+        contentType: `text/plain`,
+        encoding: `UTF-8`,
+        filename: `lesson1-exponents-quiz.txt`
+      });
+      setQuizStatus(`已触发导出文件：lesson1-exponents-quiz.txt`);
+      return;
+    }
+  } catch (e) {}
+
+  try {
+    const blob = new Blob([content], { type: `text/plain;charset=utf-8` });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement(`a`);
+    link.href = url;
+    link.download = `lesson1-exponents-quiz.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setQuizStatus(`已导出试卷文件：lesson1-exponents-quiz.txt`);
+  } catch (e) {
+    setQuizStatus(`当前浏览环境限制文件下载，请点击「一键打印试卷」保存。`);
+  }
+}
+
+async function initApp() {
+  let saved = null;
+  try {
+    if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+      saved = await window.notebookAppApi.getAppState();
+    }
+  } catch (e) {}
+  if (!saved) {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) saved = JSON.parse(raw);
+    } catch (e) {}
+  }
+
+  if (saved && typeof saved === `object`) {
+    if (typeof saved.activeFilter === `string`) appState.activeFilter = saved.activeFilter;
+    if (typeof saved.searchQuery === `string`) appState.searchQuery = saved.searchQuery;
+    if (typeof saved.activeLawTab === `string` && LAWS_DATA[saved.activeLawTab]) appState.activeLawTab = saved.activeLawTab;
+    if (typeof saved.showMatrix === `boolean`) appState.showMatrix = saved.showMatrix;
+    if (Array.isArray(saved.expandedCards)) appState.expandedCards = saved.expandedCards;
+    if (Array.isArray(saved.checkedIds)) appState.checkedIds = saved.checkedIds;
+    if (saved.quizConfig && typeof saved.quizConfig === `object`) {
+      appState.quizConfig = {
+        topic: saved.quizConfig.topic || `all`,
+        difficulty: saved.quizConfig.difficulty || `all`,
+        qtype: saved.quizConfig.qtype || `all`,
+        count: parseInt(saved.quizConfig.count, 10) || 5
+      };
+    }
+    if (Array.isArray(saved.quizQuestionIds)) appState.quizQuestionIds = saved.quizQuestionIds;
+    if (typeof saved.quizShowAllAnswers === `boolean`) appState.quizShowAllAnswers = saved.quizShowAllAnswers;
+    if (Array.isArray(saved.quizOpenAnswerIds)) appState.quizOpenAnswerIds = saved.quizOpenAnswerIds;
+    if (Array.isArray(saved.quizMasteredIds)) appState.quizMasteredIds = saved.quizMasteredIds;
+  }
+
+  const searchEl = document.getElementById(`keyword-search`);
+  if (searchEl) searchEl.value = appState.searchQuery;
+
+  renderFilterPills();
+  renderLawComparison();
+  renderEvidenceCards();
+  renderChecklist();
+  syncQuizControlsUI();
+  renderQuizPaper();
+
+  try {
+    if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+      window.notebookAppApi.notifyAppReady();
+    }
+  } catch (e) {}
+}
+
+if (document.readyState === `loading`) {
+  document.addEventListener(`DOMContentLoaded`, initApp);
+} else {
+  initApp();
+}
+</script>
+</body>
+</html>
