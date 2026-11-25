@@ -2306,16 +2306,19 @@ const PROBLEMS = [
     sourceSection: `Exploration 6 · 第 12 题`,
     category: `探索例题`,
     module: `数字填空`,
-    missingAnswer: true,
-    prompt: `将 1~8 这八个数分别填入右图，使图中四边正好组成加、减、乘、除四个等式。`,
-    equation: `四边框图：加、减、乘、除四个等式（1~8 填入）`,
-    breakthrough: `原文说明需将 1~8 填入四边组成的四个等式，切入点通常先确定乘法与除法边（范围最小），再配平加减法边。`,
+    missingAnswer: false,
+    prompt: `Put 1 ~ 8 into the diagram on the right so that the four sides of the diagram form exactly four equations: addition, subtraction, multiplication and division.\n将 1 ~ 8 这八个数分别填入右图，使图中四边正好组成加、减、乘、除四个等式。`,
+    equation: `上边(左→右)：□ + □ = □；下边(左→右)：□ ÷ □ = □；左边(下→上)：□ − □ = □；右边(下→上)：□ × □ = □`,
+    breakthrough: `将下边除法改写为乘法，发现下边与右边两条乘除法边共用右下角顶点数！在 1~8 中，只能由数字 2 作为共用因数同时组成两道不重复的一位数乘法（2×3=6 与 2×4=8），从而一步锁死右下角为 2。`,
     steps: [
-      `来源 PDF 文本抽取中仅保留局部手写碎片（如 1+7=8、7−5=2、□÷□=□ 旁标 8、4 等）以及图框缺失符号。`,
-      `因原图四边顶点共用关系与运算符位置在 PDF 文字提取中未能完整还原，完整最终填法「来源未提及」。`
+      `审读四边框图方向：上边（左→右）为加法 □+□=□，下边（左→右）为除法 □÷□=□，左边（下→上）为减法 □−□=□，右边（下→上）为乘法 □×□=□。`,
+      `锁定右下角共用因数：下边 □÷□=□ 等价于 商×除数=被除数，与右边乘法共用右下角数字（记为 BR）。若 BR=1 会造成乘数与积重复；若 BR≥3，无法在 1~8 内凑出两道不重复乘法（如 3×2=6 与 3×4=12 超界），故唯一只能 BR = 2。`,
+      `确定乘除法两边：以 2 为公因数、1~8 互不重复的两道乘法只能是 2×3 = 6 和 2×4 = 8，故左下角与右上角必为 6 和 8（两种互换情况），其余数字剩 1, 5, 7 填入左上、上中、左中。`,
+      `情况 ①（左下=6，右上=8）：下边 6÷3=2，右边 2×4=8；剩余 1,5,7 配平上边加法与左边减法，唯一得 1+7=8 与 6−5=1。`,
+      `情况 ②（左下=8，右上=6）：下边 8÷4=2，右边 2×3=6；剩余 1,5,7 配平上边加法与左边减法，唯一得 1+5=6 与 8−7=1。`
     ],
-    answer: `来源未提及（原图布局 OCR 缺失，仅见局部草稿 1+7=8 等）`,
-    quote: `“将1~8这八个数分别填入右图，使图中四边正好组成加、减、乘、除四个等式。”`
+    answer: `共有两组解：① 上 1+7=8、下 6÷3=2、左 6−5=1、右 2×4=8；② 上 1+5=6、下 8÷4=2、左 8−7=1、右 2×3=6`,
+    quote: `“12. Put 1 ~ 8 into the diagram on the right so that the four sides of the diagram form exactly four equations: addition, subtraction, multiplication and division. 将 1 ~ 8 这八个数分别填入右图，使图中四边正好组成加、减、乘、除四个等式。”`
   },
   {
     id: `tb-wu3-13`,
@@ -2789,7 +2792,7 @@ const PROBLEM_FORMULAS = {
   'tb-ex3-2': `11a \\times \\overline{bc} = \\overline{cac} \\;\\Rightarrow\\; \\overline{cac} = 616,\\; a=1,\\,c=6,\\,b=5 \\;\\Rightarrow\\; 11\\times 56 = 616,\\; \\boxed{\\overline{ac}=16}`,
   'tb-ex4-10': `11a \\times 11b = 1001a + 110c \\;\\Rightarrow\\; a(11b-91) = 10c \\;\\Rightarrow\\; b=9,\\; 4a=5c \\;\\Rightarrow\\; \\boxed{55 \\times 99 = 5445}`,
   'tb-ex5-11': `121ab = \\overline{cde} \\le 999 \\Rightarrow ab \\le 8 \\;\\Rightarrow\\; 44\\times 22 = 968,\\; \\frac{22}{44} = \\frac{5}{10} \\;\\Rightarrow\\; \\boxed{968510}`,
-  'tb-ex6-12': `1\\sim 8\\text{ 填入四边等式（原文图框缺失，完整解来源未提及）}`,
+  'tb-ex6-12': `\\text{右下角公因数唯一为 }\\boxed{2}\\text{（}2\\times 3=6,\\;2\\times 4=8\\text{）} \\\\ \\text{解①：}1+7=8,\\;6\\div 3=2,\\;6-5=1,\\;2\\times 4=8 \\qquad \\text{解②：}1+5=6,\\;8\\div 4=2,\\;8-7=1,\\;2\\times 3=6`,
   'tb-wu3-13': `1\\sim 9\\text{ 空格算式（原文方框布局缺失，完整解来源未提及）}`,
   'tb-ex7-14': `\\triangle = \\frac{1+2+3+4+5+6+7+8}{3} = \\frac{(1+8)\\times 8 \\div 2}{3} = \\frac{36}{3} = \\boxed{12}`,
   'tb-ex8': `a+b+c = 6c,\\quad d+e-f = 2 \\Rightarrow f \\in \\{2,5,8\\},\\quad g+h+i = 3i\\;\\text{（均为 3 的倍数）}`,
@@ -2821,8 +2824,96 @@ function makeVGrid(cols, rows) {
   return `<div class="v-grid" style="grid-template-columns: repeat(${cols}, minmax(1.85rem, auto));">${cells}</div>`;
 }
 
+function renderEx6FrameSvg(vals, subtitle) {
+  const v = vals || [``, ``, ``, ``, ``, ``, ``, ``];
+  const isBlank = !vals;
+  const fillCorner = isBlank ? `#ffffff` : `#ffcc00`;
+  const fillBR = isBlank ? `#ffffff` : `#0055ff`;
+  const textBR = isBlank ? `#1a1a1a` : `#ffffff`;
+  const fillMid = `#ffffff`;
+  return `
+    <svg viewBox="0 0 250 225" width="100%" style="max-width:250px;" role="img" aria-label="${escapeHtml(subtitle)}">
+      <!-- Top row: [0] + [1] = [2] -->
+      <rect x="18" y="14" width="44" height="40" fill="${fillCorner}" stroke="#1a1a1a" stroke-width="2.5"/>
+      <text x="40" y="40" text-anchor="middle" font-size="17" font-weight="900" fill="#1a1a1a">${escapeHtml(v[0])}</text>
+      <text x="84" y="40" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">+</text>
+      <rect x="104" y="14" width="44" height="40" fill="${fillMid}" stroke="#1a1a1a" stroke-width="2.5"/>
+      <text x="126" y="40" text-anchor="middle" font-size="17" font-weight="900" fill="#1a1a1a">${escapeHtml(v[1])}</text>
+      <text x="170" y="40" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">=</text>
+      <rect x="190" y="14" width="44" height="40" fill="${fillCorner}" stroke="#1a1a1a" stroke-width="2.5"/>
+      <text x="212" y="40" text-anchor="middle" font-size="17" font-weight="900" fill="#1a1a1a">${escapeHtml(v[2])}</text>
+
+      <!-- Left col vertical symbols: || (equals) and | (minus) -->
+      <line x1="36" y1="62" x2="36" y2="76" stroke="#1a1a1a" stroke-width="2.2"/>
+      <line x1="44" y1="62" x2="44" y2="76" stroke="#1a1a1a" stroke-width="2.2"/>
+      <rect x="18" y="84" width="44" height="40" fill="${fillMid}" stroke="#1a1a1a" stroke-width="2.5"/>
+      <text x="40" y="110" text-anchor="middle" font-size="17" font-weight="900" fill="#1a1a1a">${escapeHtml(v[3])}</text>
+      <line x1="40" y1="132" x2="40" y2="146" stroke="#1a1a1a" stroke-width="2.5"/>
+
+      <!-- Right col vertical symbols: || (equals) and × -->
+      <line x1="208" y1="62" x2="208" y2="76" stroke="#1a1a1a" stroke-width="2.2"/>
+      <line x1="216" y1="62" x2="216" y2="76" stroke="#1a1a1a" stroke-width="2.2"/>
+      <rect x="190" y="84" width="44" height="40" fill="${fillMid}" stroke="#1a1a1a" stroke-width="2.5"/>
+      <text x="212" y="110" text-anchor="middle" font-size="17" font-weight="900" fill="#1a1a1a">${escapeHtml(v[4])}</text>
+      <text x="212" y="146" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">×</text>
+
+      <!-- Bottom row: [5] ÷ [6] = [7] -->
+      <rect x="18" y="154" width="44" height="40" fill="${fillCorner}" stroke="#1a1a1a" stroke-width="2.5"/>
+      <text x="40" y="180" text-anchor="middle" font-size="17" font-weight="900" fill="#1a1a1a">${escapeHtml(v[5])}</text>
+      <text x="84" y="180" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">÷</text>
+      <rect x="104" y="154" width="44" height="40" fill="${fillMid}" stroke="#1a1a1a" stroke-width="2.5"/>
+      <text x="126" y="180" text-anchor="middle" font-size="17" font-weight="900" fill="#1a1a1a">${escapeHtml(v[6])}</text>
+      <text x="170" y="180" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">=</text>
+      <rect x="190" y="154" width="44" height="40" fill="${fillBR}" stroke="#1a1a1a" stroke-width="2.5"/>
+      <text x="212" y="180" text-anchor="middle" font-size="17" font-weight="900" fill="${textBR}">${escapeHtml(v[7])}</text>
+
+      <text x="126" y="216" text-anchor="middle" font-size="11.5" font-weight="700" fill="#4a4a4a">${escapeHtml(subtitle)}</text>
+    </svg>
+  `;
+}
+
+function buildPromptDiagram(id) {
+  if (id === `tb-ex6-12`) {
+    return `
+      <div class="visual-box" style="background:var(--surface-container-low);">
+        <div class="visual-box-head">
+          <span class="visual-box-title">原题空白框图（已去除手写痕迹 · 填入 1~8）</span>
+          <span class="tag">原题图框</span>
+        </div>
+        <div class="v-pair" style="align-items:center;">
+          ${renderEx6FrameSvg(null, `上：□+□=□  下：□÷□=□  左(下→上)：□−□=□  右(下→上)：□×□=□`)}
+          <div class="branch-card branch-card--hi" style="max-width:360px;">
+            <strong>读图说明</strong>
+            <span>• 横向两行（上边加法、下边除法）均从左向右读；</span>
+            <span>• 竖向两列（左边减法「| / ||」、右边乘法「× / ||」）均从下向上读，四角方框被相邻两边共用。</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  return ``;
+}
+
 function buildProblemVisual(id) {
   switch (id) {
+    case `tb-ex6-12`:
+      return {
+        title: `右下角共用因数锁定 2 · 全部两组唯一解对比框图`,
+        tag: `双解框图`,
+        html: `
+          <div class="v-pair">
+            <div class="v-card">
+              <span class="v-card-label">解 ①（左下 6，右上 8）</span>
+              ${renderEx6FrameSvg([`1`, `7`, `8`, `5`, `4`, `6`, `3`, `2`], `1+7=8 | 6÷3=2 | 6−5=1 | 2×4=8`)}
+            </div>
+            <div class="v-card">
+              <span class="v-card-label">解 ②（左下 8，右上 6）</span>
+              ${renderEx6FrameSvg([`1`, `5`, `6`, `7`, `3`, `8`, `4`, `2`], `1+5=6 | 8÷4=2 | 8−7=1 | 2×3=6`)}
+            </div>
+          </div>
+          <p class="visual-caption">蓝底右下角必为 <strong>2</strong>（1~8 中唯一能同时构成两道不重复乘法 2×3=6、2×4=8 的公因数），两组解恰好对称对应。</p>
+        `
+      };
     case `tb-wu1`:
       return {
         title: `横式改写竖式 · 双端锁位图解`,
@@ -3818,6 +3909,7 @@ function renderProblemsList() {
             <p class="card-prompt">${formatMathText(p.prompt)}</p>
 
             <div class="equation-box">${formatEquationHTML(p.equation)}</div>
+            ${buildPromptDiagram(p.id)}
 
             <div class="card-meta-line">
               <span><strong>栏目定位：</strong>${escapeHtml(p.sourceSection)}</span>
