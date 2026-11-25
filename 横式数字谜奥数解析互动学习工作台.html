@@ -2327,16 +2327,19 @@ const PROBLEMS = [
     sourceSection: `Warm Up 3 · 第 13 题`,
     category: `热身题`,
     module: `数字填空`,
-    missingAnswer: true,
-    prompt: `下题是由 1~9 这九个数字组成的算式，其中有一个数字已经知道，请将其余的数字填入空格，使算式成立。`,
-    equation: `（含 = 56、÷ × = 9 等多行空格算式，原图结构未完整保留）`,
-    breakthrough: `从已知数字（如积 56、商 9 或 6）的乘除法等式出发，锁定唯一的一位数乘除因数，再回填其余数字。`,
+    missingAnswer: false,
+    prompt: `下题是由 1 ~ 9 这九个数字组成的算式，其中有一个数字已经知道，请将其余的数字填入空格，使算式成立：`,
+    equation: `{ □ × □ = 5□（两位数，十位已知为 5） ； □□（两位数） ÷ □ × □ = □ }`,
+    breakthrough: `抓住已知数字 5 所在的一式「□ × □ = 5□（两位）」：在 1~9 不重复的乘法口诀中，积为五十几的算式仅有 6×9=54 与 7×8=56 两种候选！逐一验证剩余 5 个数字能否配平二式「□□ ÷ □ × □ = □」，即可快速锁定唯一解。`,
     steps: [
-      `来源 PDF 文本中可见手写试算碎片（如 54、66、12 ÷ 9 × 3 = 4 等），但原图方框布局在文本抽取中缺失。`,
-      `完整题干方框图与标准答案「来源未提及」。`
+      `审题计数：大括号内两道算式共占 9 个数位，由 1~9 各用一次组成；其中一式积的十位已给出为 5，只需将其余 8 个数字（1, 2, 3, 4, 6, 7, 8, 9）填入 8 个空格。`,
+      `锁定一式候选：两个不同的一位数相乘得五十几（且不能重复使用 5），仅有两组可能：情况 ① 6 × 9 = 54（剩余 1, 2, 3, 7, 8）；情况 ② 7 × 8 = 56（剩余 1, 2, 3, 4, 9）。`,
+      `改写二式找约束：设二式为 ab ÷ f × g = h，等价于 ab × g = f × h（且按小学从左到右整除顺序，除数 f 必须整除两位数 ab）。`,
+      `排除情况 ①（6 × 9 = 54，剩 1, 2, 3, 7, 8）：f × h 最大为 7 × 8 = 56；若 g = 1，两位数 ab 需等于其余两数之积（2×7=14、2×8=16、3×7=21、3×8=24、7×8=56 均含已用/重复数字）；若 g ≥ 2，最小两位数乘积也无法匹配余下两数之积，故情况 ① 无解。`,
+      `锁定情况 ②（7 × 8 = 56，剩 1, 2, 3, 4, 9）：右端 f × h 最大为 4 × 9 = 36，余下 {1, 2, 3} 恰好组成 12 × 3 = 36！按从左到右依次整除的标准顺序，唯一得二式 12 ÷ 4 × 3 = 9（12÷4=3，3×3=9）；一式两因数可互换为 7×8=56 或 8×7=56。（拓展提示：若允许中间步骤先产生分数再约分，12÷9×3=4 数值上也成立，但小学整除规范下的标准答案为 12÷4×3=9。）`
     ],
-    answer: `来源未提及（原图空格排版未在 PDF 文本中保留）`,
-    quote: `“下题是由 1 ~ 9 这九个数字组成的算式，其中有一个数字已经知道，请将其余的数字填入空格……”`
+    answer: `一式：7 × 8 = 56（或 8 × 7 = 56）；二式：12 ÷ 4 × 3 = 9`,
+    quote: `“13. 下题是由 1 ~ 9 这九个数字组成的算式，其中有一个数字已经知道，请将其余的数字填入空格，使算式成立：□ × □ = 5□，□□ ÷ □ × □ = □”`
   },
   {
     id: `tb-ex7-14`,
@@ -2793,7 +2796,7 @@ const PROBLEM_FORMULAS = {
   'tb-ex4-10': `11a \\times 11b = 1001a + 110c \\;\\Rightarrow\\; a(11b-91) = 10c \\;\\Rightarrow\\; b=9,\\; 4a=5c \\;\\Rightarrow\\; \\boxed{55 \\times 99 = 5445}`,
   'tb-ex5-11': `121ab = \\overline{cde} \\le 999 \\Rightarrow ab \\le 8 \\;\\Rightarrow\\; 44\\times 22 = 968,\\; \\frac{22}{44} = \\frac{5}{10} \\;\\Rightarrow\\; \\boxed{968510}`,
   'tb-ex6-12': `\\text{右下角公因数唯一为 }\\boxed{2}\\text{（}2\\times 3=6,\\;2\\times 4=8\\text{）} \\\\ \\text{解①：}1+7=8,\\;6\\div 3=2,\\;6-5=1,\\;2\\times 4=8 \\qquad \\text{解②：}1+5=6,\\;8\\div 4=2,\\;8-7=1,\\;2\\times 3=6`,
-  'tb-wu3-13': `1\\sim 9\\text{ 空格算式（原文方框布局缺失，完整解来源未提及）}`,
+  'tb-wu3-13': `\\text{一式候选：}6\\times 9=54\\text{（剩 }1,2,3,7,8\\text{ 无解 ×）}\\quad vs\\quad 7\\times 8=56\\text{（剩 }1,2,3,4,9\\text{ ✓）} \\\\ \\overline{ab}\\times g = f\\times h = 4\\times 9 = 36 = 12\\times 3 \\;\\Rightarrow\\; \\boxed{7\\times 8 = 56,\\; 12\\div 4\\times 3 = 9}`,
   'tb-ex7-14': `\\triangle = \\frac{1+2+3+4+5+6+7+8}{3} = \\frac{(1+8)\\times 8 \\div 2}{3} = \\frac{36}{3} = \\boxed{12}`,
   'tb-ex8': `a+b+c = 6c,\\quad d+e-f = 2 \\Rightarrow f \\in \\{2,5,8\\},\\quad g+h+i = 3i\\;\\text{（均为 3 的倍数）}`,
   'tb-kp-1': `\\overline{BAD} + \\overline{BAD} = \\overline{GOOD}\\quad (3\\nmid\\overline{BAD},\\; 8\\nmid\\overline{GOOD}\\text{；原文仅附题干})`,
@@ -2872,6 +2875,51 @@ function renderEx6FrameSvg(vals, subtitle) {
   `;
 }
 
+function renderWu3SystemSvg(vals, subtitle) {
+  const v = vals || [``, ``, ``, ``, ``, ``, ``, ``];
+  const isBlank = !vals;
+  const fillAns = isBlank ? `#ffffff` : `#eff5ff`;
+  const fillKnown = isBlank ? `#fff7d6` : `#ffcc00`;
+  return `
+    <svg viewBox="0 0 360 162" width="100%" style="max-width:360px;" role="img" aria-label="${escapeHtml(subtitle)}">
+      <!-- Left curly brace enclosing both equations -->
+      <path d="M 28 20 C 16 20 18 32 18 46 L 18 58 C 18 68 12 72 8 72 C 12 72 18 76 18 86 L 18 98 C 18 112 16 124 28 124" fill="none" stroke="#1a1a1a" stroke-width="2.6" stroke-linecap="round"/>
+
+      <!-- Row 1: [0] × [1] = overline(5 [2]) -->
+      <rect x="42" y="22" width="38" height="38" fill="${fillAns}" stroke="#1a1a1a" stroke-width="2.4"/>
+      <text x="61" y="47" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">${escapeHtml(v[0])}</text>
+      <text x="102" y="47" text-anchor="middle" font-size="19" font-weight="900" fill="#1a1a1a">×</text>
+      <rect x="122" y="22" width="38" height="38" fill="${fillAns}" stroke="#1a1a1a" stroke-width="2.4"/>
+      <text x="141" y="47" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">${escapeHtml(v[1])}</text>
+      <text x="182" y="47" text-anchor="middle" font-size="19" font-weight="900" fill="#1a1a1a">=</text>
+      <!-- Overline over 5 and [2] -->
+      <line x1="202" y1="15" x2="278" y2="15" stroke="#1a1a1a" stroke-width="2.5"/>
+      <rect x="204" y="22" width="34" height="38" fill="${fillKnown}" stroke="#1a1a1a" stroke-width="1.6" stroke-dasharray="${isBlank ? `4,3` : `none`}"/>
+      <text x="221" y="47" text-anchor="middle" font-size="19" font-weight="900" fill="#1a1a1a">5</text>
+      <rect x="242" y="22" width="36" height="38" fill="${fillAns}" stroke="#1a1a1a" stroke-width="2.4"/>
+      <text x="260" y="47" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">${escapeHtml(v[2])}</text>
+
+      <!-- Row 2: overline([3][4]) ÷ [5] × [6] = [7] -->
+      <line x1="40" y1="79" x2="122" y2="79" stroke="#1a1a1a" stroke-width="2.5"/>
+      <rect x="42" y="86" width="38" height="38" fill="${fillAns}" stroke="#1a1a1a" stroke-width="2.4"/>
+      <text x="61" y="111" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">${escapeHtml(v[3])}</text>
+      <rect x="82" y="86" width="38" height="38" fill="${fillAns}" stroke="#1a1a1a" stroke-width="2.4"/>
+      <text x="101" y="111" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">${escapeHtml(v[4])}</text>
+      <text x="139" y="111" text-anchor="middle" font-size="19" font-weight="900" fill="#1a1a1a">÷</text>
+      <rect x="156" y="86" width="38" height="38" fill="${fillAns}" stroke="#1a1a1a" stroke-width="2.4"/>
+      <text x="175" y="111" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">${escapeHtml(v[5])}</text>
+      <text x="213" y="111" text-anchor="middle" font-size="19" font-weight="900" fill="#1a1a1a">×</text>
+      <rect x="230" y="86" width="38" height="38" fill="${fillAns}" stroke="#1a1a1a" stroke-width="2.4"/>
+      <text x="249" y="111" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">${escapeHtml(v[6])}</text>
+      <text x="287" y="111" text-anchor="middle" font-size="19" font-weight="900" fill="#1a1a1a">=</text>
+      <rect x="304" y="86" width="38" height="38" fill="${fillAns}" stroke="#1a1a1a" stroke-width="2.4"/>
+      <text x="323" y="111" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">${escapeHtml(v[7])}</text>
+
+      <text x="180" y="150" text-anchor="middle" font-size="11.5" font-weight="700" fill="#4a4a4a">${escapeHtml(subtitle)}</text>
+    </svg>
+  `;
+}
+
 function buildPromptDiagram(id) {
   if (id === `tb-ex6-12`) {
     return `
@@ -2886,6 +2934,24 @@ function buildPromptDiagram(id) {
             <strong>读图说明</strong>
             <span>• 横向两行（上边加法、下边除法）均从左向右读；</span>
             <span>• 竖向两列（左边减法「| / ||」、右边乘法「× / ||」）均从下向上读，四角方框被相邻两边共用。</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  if (id === `tb-wu3-13`) {
+    return `
+      <div class="visual-box" style="background:var(--surface-container-low);">
+        <div class="visual-box-head">
+          <span class="visual-box-title">原题空白算式框图（已去除手写痕迹 · 填入 1~9）</span>
+          <span class="tag">原题图框</span>
+        </div>
+        <div class="v-pair" style="align-items:center;">
+          ${renderWu3SystemSvg(null, `已知数字 5，将其余 8 个数字（1~9 除 5 外）分别填入 8 个空格`)}
+          <div class="branch-card branch-card--hi" style="max-width:340px;">
+            <strong>读图说明</strong>
+            <span>• 上行右侧横线表示两位数「5□」（十位已知为 5）；</span>
+            <span>• 下行左侧横线表示两位数「□□」，按从左到右顺序进行除法与乘法运算。</span>
           </div>
         </div>
       </div>
@@ -2912,6 +2978,36 @@ function buildProblemVisual(id) {
             </div>
           </div>
           <p class="visual-caption">蓝底右下角必为 <strong>2</strong>（1~8 中唯一能同时构成两道不重复乘法 2×3=6、2×4=8 的公因数），两组解恰好对称对应。</p>
+        `
+      };
+    case `tb-wu3-13`:
+      return {
+        title: `一式两条候选分支筛选 & 完整填数框图`,
+        tag: `分支验算`,
+        html: `
+          <div class="v-pair" style="align-items:stretch;">
+            <div class="v-card" style="justify-content:center;">
+              <span class="v-card-label">① 从已知「5□」锁定乘法候选</span>
+              <div class="branch-grid" style="grid-template-columns:1fr; gap:8px; width:100%;">
+                <div class="branch-card branch-card--bad">
+                  <strong>分支 A：6 × 9 = 54 ×</strong>
+                  <span>剩余数字：{1, 2, 3, 7, 8}</span>
+                  <span>无法配平 ab × g = f × h，淘汰</span>
+                </div>
+                <div class="branch-card branch-card--ok">
+                  <strong>分支 B：7 × 8 = 56 ✓</strong>
+                  <span>剩余数字：{1, 2, 3, 4, 9}</span>
+                  <span>最大右积 4 × 9 = 36 = 12 × 3，唯一配平！</span>
+                </div>
+              </div>
+            </div>
+            <span class="v-arrow" aria-hidden="true">→</span>
+            <div class="v-card">
+              <span class="v-card-label">② 填数完成验算图（标准整除解）</span>
+              ${renderWu3SystemSvg([`7`, `8`, `6`, `1`, `2`, `4`, `3`, `9`], `7×8=56（7与8可互换） | 12÷4×3=9`)}
+            </div>
+          </div>
+          <p class="visual-caption">黄底 <strong>5</strong> 为题目已知数字；按从左到右依次整除规范，二式唯一为 <strong>12 ÷ 4 × 3 = 9</strong>（一式 7 与 8 位置可互换）。</p>
         `
       };
     case `tb-wu1`:
