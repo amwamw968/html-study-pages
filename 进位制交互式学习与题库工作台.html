@@ -7,6 +7,8 @@
 <meta name="design-style" content="bauhaus">
 <title>Lesson 3 进位制 · 知识点与题库复习工作台</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.2/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18.2/dist/katex.min.js"></script>
 <style>
 :root {
   color-scheme: light;
@@ -911,6 +913,64 @@ button, input, select, textarea {
   word-break: break-word;
   line-height: 1.5;
 }
+
+/* Visual Diagrams & KaTeX Formula Panels inside Radix Solutions */
+.visual-box {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  box-shadow: var(--offset-shadow-sm);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+.visual-box-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xs);
+  border-bottom: 1.5px solid var(--outline-variant);
+  padding-bottom: var(--space-xs);
+}
+.visual-box-title {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.84rem;
+}
+.visual-caption {
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  margin: 0;
+}
+.formula-panel {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  border-left: 6px solid var(--tertiary);
+  padding: var(--space-sm) var(--space-md);
+  overflow-x: auto;
+}
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.15rem 0; margin: 0.2rem 0; }
+.math-fallback { font-family: var(--font-label); font-weight: 700; font-size: 0.95rem; line-height: 1.7; }
+.math-frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 0.2em; font-size: 0.88em; line-height: 1.1; }
+.math-frac-num { border-bottom: 1.5px solid currentColor; padding: 0 0.25em 1px; }
+.math-frac-den { padding: 1px 0.25em 0; }
+.math-overline { text-decoration: overline; }
+.math-boxed { border: 2px solid var(--outline); background: var(--primary-container); padding: 0 4px; }
+.radix-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-family: var(--font-label); font-weight: 700; }
+.radix-cell { border: var(--border-medium); background: var(--background); padding: 4px 10px; text-align: center; display: inline-grid; gap: 2px; min-width: 56px; }
+.radix-cell small { font-size: 0.7rem; font-weight: 600; color: var(--on-surface-variant); }
+.radix-cell--yellow { background: var(--primary-container); color: var(--on-primary-container); }
+.radix-cell--blue { background: var(--tertiary); color: var(--on-tertiary); }
+.radix-cell--blue small { color: rgba(255,255,255,0.85); }
+.radix-cell--green { background: var(--positive-container); border-color: var(--positive); color: var(--on-positive-container); }
+.radix-cell--red { background: var(--secondary); color: #ffffff; }
+.radix-cell--red small { color: rgba(255,255,255,0.85); }
+.ladder-list { display: grid; gap: 4px; font-family: var(--font-label); font-size: 0.86rem; }
+.ladder-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 10px; background: var(--background); border: 1.5px solid var(--outline-variant); }
+.ladder-rem { background: var(--primary-container); border: 1.5px solid var(--outline); padding: 1px 8px; font-weight: 900; }
+.funnel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: var(--space-xs); }
+.funnel-step { border: var(--border-medium); border-left: 5px solid var(--tertiary); background: var(--background); padding: var(--space-xs) var(--space-sm); font-size: 0.84rem; display: grid; gap: 2px; }
+.funnel-step--ok { border-left-color: var(--positive); background: var(--positive-container); color: var(--on-positive-container); }
 
 .card-footer {
   border-top: var(--border-medium);
@@ -2362,6 +2422,268 @@ button, input, select, textarea {
         .replace(/"/g, `&quot;`);
     }
 
+    function mathFallbackHtml(tex) {
+      let s = String(tex || ``);
+      s = s.replace(/\\text\{([^{}]*)\}/g, `$1`);
+      s = s.replace(/\\max/g, `max`);
+      s = s.replace(/\\Rightarrow/g, `⇒`);
+      s = s.replace(/\\leftrightarrow/g, `↔`);
+      s = s.replace(/\\rightarrow/g, `→`);
+      s = s.replace(/\\to\b/g, `→`);
+      s = s.replace(/\\times/g, `×`);
+      s = s.replace(/\\div/g, `÷`);
+      s = s.replace(/\\le/g, `≤`);
+      s = s.replace(/\\ge/g, `≥`);
+      s = s.replace(/\\ne/g, `≠`);
+      s = s.replace(/\\in/g, `∈`);
+      s = s.replace(/\\sim/g, `~`);
+      s = s.replace(/\\dots/g, `…`);
+      s = s.replace(/\\qquad/g, ` &nbsp;&nbsp; `);
+      s = s.replace(/\\quad/g, ` &nbsp; `);
+      s = s.replace(/\\[;,|]/g, ` `);
+      s = s.replace(/\\\{/g, `&#123;`);
+      s = s.replace(/\\\}/g, `&#125;`);
+      s = s.replace(/\\xrightarrow\{([^{}]+)\}/g, ` —($1)→ `);
+      s = s.replace(/_\{([^{}]+)\}/g, `<sub>$1</sub>`);
+      s = s.replace(/_([0-9a-zA-Z])/g, `<sub>$1</sub>`);
+      s = s.replace(/\^\{([^{}]+)\}/g, `<sup>$1</sup>`);
+      s = s.replace(/\^([0-9a-zA-Z-]+)/g, `<sup>$1</sup>`);
+      for (let pass = 0; pass < 3; pass++) {
+        s = s.replace(/\\overline\{([^{}]+)\}/g, `<span class="math-overline">$1</span>`);
+        s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, `<span class="math-frac"><span class="math-frac-num">$1</span><span class="math-frac-den">$2</span></span>`);
+        s = s.replace(/\\boxed\{([^{}]+)\}/g, `<span class="math-boxed">$1</span>`);
+      }
+      s = s.replace(/\\\\/g, `<br>`);
+      s = s.replace(/\{|\}/g, ``);
+      return `<span class="math-fallback">${s}</span>`;
+    }
+
+    function renderMath(tex, displayMode) {
+      if (!tex) return ``;
+      if (window.katex && typeof window.katex.renderToString === `function`) {
+        try {
+          return window.katex.renderToString(tex, {
+            displayMode: Boolean(displayMode),
+            throwOnError: false,
+            strict: false
+          });
+        } catch (e) {
+          return mathFallbackHtml(tex);
+        }
+      }
+      return mathFallbackHtml(tex);
+    }
+
+    const ITEM_FORMULAS = {
+      'KP-01': `n\\text{ 进制数码：}0,1,\\dots,(n-1)\\quad (n\\ge 2),\\qquad 10\\rightarrow A,\\;11\\rightarrow B,\\;12\\rightarrow C,\\;13\\rightarrow D`,
+      'KP-02': `(324)_{5} = 3\\times 5^{2} + 2\\times 5^{1} + 4\\times 5^{0} = 75 + 10 + 4 = \\boxed{89}`,
+      'KP-03': `(1234)_{10} \\xrightarrow{\\text{除5倒取余}} \\boxed{(14414)_{5}},\\qquad (123)_{10} \\xrightarrow{\\text{除3倒取余}} \\boxed{(11120)_{3}}`,
+      'KP-04': `a^{m} = b \\Rightarrow m\\text{ 位一段直接互化：}(478)_{9} = (11\\,|\\,21\\,|\\,22)_{3} = \\boxed{(112122)_{3}}`,
+      'KP-05': `0.84\\times 5 = 4.2\\;(\\text{取}4),\\quad 0.2\\times 5 = 1\\;(\\text{取}1) \\Rightarrow (0.84)_{10} = \\boxed{(0.41)_{5}}`,
+      'KP-06': `\\{0,1,5,6\\} \\leftrightarrow \\{0,1,2,3\\}\\text{（0是桥梁）},\\qquad (1320)_{4} = \\boxed{120}`,
+      'KP-07': `n\\text{ 进制四则：满 }n\\text{ 进 }1\\text{，借 }1\\text{ 当 }n\\quad\\text{；凑整：个位凑 }n\\text{，高位凑 }(n-1)`,
+      'KP-08': `\\text{① 数码下限 } n > d_{\\max} \\quad\\rightarrow\\quad \\text{② 个位差因数} \\quad\\rightarrow\\quad \\text{③ 比十进制大小}`,
+      'M1-WU1': `(121)_{4}=25,\\quad (2010)_{4}=132,\\quad (321)_{4}=3\\times 16+2\\times 4+1=\\boxed{57}`,
+      'M1-EX1a': `(567)_{10} = \\boxed{(1067)_{8}} = \\boxed{(4232)_{5}} = \\boxed{(1000110111)_{2}}`,
+      'M1-EX1b': `(1444)_{10} = \\boxed{(A04)_{12}}\\;(10\\rightarrow A),\\qquad (188)_{10} = \\boxed{(D6)_{14}}\\;(13\\rightarrow D)`,
+      'M1-EX1d': `(1431)_{5}=125+100+15+1=\\boxed{241},\\qquad (10111)_{3}=81+0+9+3+1=\\boxed{94}`,
+      'M1-EX2a': `(324)_{5}=(89)_{10}=\\boxed{(131)_{8}},\\quad (423)_{5}=(113)_{10}=\\boxed{(161)_{8}},\\quad (1042)_{5}=(147)_{10}=\\boxed{(223)_{8}}`,
+      'M1-EX2b': `(618)_{9}=(503)_{10}=\\boxed{(13313)_{4}},\\qquad (1111)_{5}=(156)_{10}=\\boxed{(312)_{7}}`,
+      'M1-EX3': `(110101)_{2}=\\boxed{(311)_{4}}=\\boxed{(65)_{8}},\\quad (325)_{8}=\\boxed{(11010101)_{2}},\\quad (132321)_{4}=\\boxed{(3671)_{8}}`,
+      'M1-ST1': `(2017)_{10}=\\boxed{(5611)_{7}},\\quad (152)_{6}=(68)_{10}=\\boxed{(75)_{9}},\\quad (1111101)_{2}=\\boxed{(175)_{8}}`,
+      'M1-EX4': `(100)_{10}=(1100100)_{2} \\Rightarrow \\boxed{1100100} \\qquad (100)_{10}=(10201)_{3} \\xrightarrow{1\\to 3,\\,2\\to 7} \\boxed{30703}`,
+      'M2-WU2': `(232)_{6}+(313)_{6}=\\boxed{(545)_{6}},\\quad (215)_{6}+(224)_{6}=\\boxed{(443)_{6}},\\quad (5555)_{6}+(1)_{6}=\\boxed{(10000)_{6}}`,
+      'M2-EX5': `(178)_{9}+(8803)_{9}=\\boxed{(10082)_{9}},\\quad (101011)_{2}-(1110)_{2}=\\boxed{(11101)_{2}},\\quad (63121)_{8}-(30000)_{8}=\\boxed{(33121)_{8}}`,
+      'M2-EX6': `(11101)_{2}\\times(1011)_{2}=\\boxed{(100111111)_{2}},\\quad (A)_{16}\\times(B)_{16}-(68)_{16}=\\boxed{(6)_{16}},\\quad 98\\times 8\\div 16+51=100=\\boxed{(64)_{16}}`,
+      'M2-ST2': `(5467)_{8}+(4265)_{8}=\\boxed{(11754)_{8}},\\quad (12345)_{6}-(5432)_{6}=\\boxed{(2513)_{6}},\\quad (1101)_{2}\\times(101)_{2}=\\boxed{(1000001)_{2}}`,
+      'M3-EX7': `4\\times 13=100:\\; d_{\\max}=4\\Rightarrow n\\ge 5,\\; 4\\times 3=12\\Rightarrow n\\in\\{6,12\\},\\; 52<100\\Rightarrow \\boxed{n=6}`,
+      'M3-EX8': `(\\overline{abc})_{7}=(\\overline{cba})_{9} \\Rightarrow 49a+7b+c=81c+9b+a \\Rightarrow 24a=b+40c \\Rightarrow (503)_{7}=\\boxed{248}`,
+      'M3-EXT1': `(43.2)_{5}=\\boxed{23.4},\\quad (12.21)_{4}=\\boxed{6.5625},\\quad (20.25)_{10}=\\boxed{(24.2)_{8}},\\quad (0.856)_{10}=\\boxed{(0.412)_{5}}`,
+      'M3-EXT2': `(ade)_{5},(adc)_{5},(aab)_{5}\\text{ 连续} \\Rightarrow c=4,\\,b=0,\\,e=3,\\,d=1,\\,a=2 \\Rightarrow (413)_{5}=\\boxed{108}`,
+      'M3-EXT3': `125\\times 125=16324:\\; n\\ge 7,\\; 25-4=21\\Rightarrow n\\in\\{7,21\\},\\; 15625<16324 \\Rightarrow \\boxed{\\text{七进制}}`,
+      'M3-EXT4': `36a+6b+c=81c+9b+a \\Rightarrow 35a=80c+3b \\Rightarrow b=5,\\;7a=16c+3 \\Rightarrow (552)_{6}=\\boxed{212}`,
+      'M3-EXT5': `988501 \\leftrightarrow (433201)_{5} = 14801,\\quad \\text{含 0 为第 1 个} \\Rightarrow 14801+1=\\boxed{14802}`,
+      'M3-EXT6': `d_{\\max}=8 \\Rightarrow n>8,\\quad 7\\times 11\\times 13\\times 138 = 138138 < 157586 \\Rightarrow n<10 \\Rightarrow \\boxed{n=9}`,
+      'WB-P1': `(463)_{8}=4\\times 64+6\\times 8+3=\\boxed{307},\\qquad (245)_{7}=2\\times 49+4\\times 7+5=\\boxed{131}`,
+      'WB-P2': `(107)_{10}=\\boxed{(1101011)_{2}},\\quad (69)_{10}=\\boxed{(2120)_{3}},\\quad (2896)_{10}=\\boxed{(43041)_{5}}`,
+      'WB-P3': `\\text{四进制：}1,2,3,10,11 \\qquad\\text{五进制：}1,2,3,4,10`,
+      'WB-P4': `(2014)_{5}=259 > (3321)_{4}=249 \\Rightarrow \\boxed{(2014)_{5} > (3321)_{4}}`,
+      'WB-P5': `(167)_{9} = 81+54+7 = (142)_{10} \\xrightarrow{\\text{除8倒取余}} \\boxed{(216)_{8}}`,
+      'WB-P6': `(12|01|20|02|10|21|11|20|01)_{3} = \\boxed{(516237461)_{9}}`,
+      'WB-P7': `(132321)_{4} = (011|110|111|001)_{2} = \\boxed{(3671)_{8}}`,
+      'WB-P8': `(101101)_{2}+(10111)_{2}=\\boxed{(1000100)_{2}},\\qquad (101101)_{2}-(10111)_{2}=\\boxed{(10110)_{2}}`,
+      'WB-P9': `(123456)_{8}+(654322)_{8}=(1000000)_{8},\\quad (40000)_{9}-(10000)_{9}=\\boxed{(30000)_{9}},\\quad 201+299=\\boxed{500}`,
+      'WB-C1': `(147)_{10}=(77)_{20},\\; (49)_{10}=(29)_{20} \\Rightarrow \\text{dew ha naw ugens} = (92)_{20} = 9\\times 20+2 = \\boxed{182}`,
+      'WB-C2': `(2015)_{6} = 2\\times 216 + 0\\times 36 + 1\\times 6 + 5\\times 1 = \\boxed{443}`,
+      'WB-C3': `(1234)_{9}\\times(18)_{9}=\\boxed{(23445)_{9}},\\quad (345)_{8}\\times(273)_{8}=\\boxed{(123507)_{8}},\\quad (1210201)_{3}-(1221)_{3}=\\boxed{(1201210)_{3}}`,
+      'WB-E1': `7\\times 12=106:\\; n\\ge 8,\\; 84<106\\Rightarrow n<10,\\; 2\\times 7-6=8 \\Rightarrow \\boxed{\\text{八进制}}`,
+      'WB-E2': `5k+2 = 2(2k+5) \\Rightarrow k=8 \\Rightarrow (123)_{8} = 64+16+3 = \\boxed{83}`,
+      'WB-E3': `10A+B = 9A+3B \\Rightarrow A=2B\\;(A,B<3) \\Rightarrow A=2,\\,B=1 \\Rightarrow \\boxed{21\\text{ 岁}}\\;(210)_{3}=21`
+    };
+
+    function buildRadixVisual(item) {
+      const id = item.id;
+      // 1. Place-value weight blocks
+      const weightConfigs = {
+        'KP-02': { title: `位权展开积木图：(324)₅ → 89`, digits: [[`3`, `5²=25`, `75`], [`2`, `5¹=5`, `10`], [`4`, `5⁰=1`, `4`]], sum: `75 + 10 + 4 = 89` },
+        'M1-WU1': { title: `卡牌集换四进制位权图：(321)₄ → 57`, digits: [[`3`, `4²=16`, `48`], [`2`, `4¹=4`, `8`], [`1`, `4⁰=1`, `1`]], sum: `48 + 8 + 1 = 57` },
+        'M1-EX1d': { title: `五进制位权展开图：(1431)₅ → 241`, digits: [[`1`, `5³=125`, `125`], [`4`, `5²=25`, `100`], [`3`, `5¹=5`, `15`], [`1`, `5⁰=1`, `1`]], sum: `125+100+15+1 = 241` },
+        'WB-P1': { title: `八进制位权展开图：(463)₈ → 307`, digits: [[`4`, `8²=64`, `256`], [`6`, `8¹=8`, `48`], [`3`, `8⁰=1`, `3`]], sum: `256 + 48 + 3 = 307` },
+        'WB-P4': { title: `转十进制大小比较位权图`, digits: [[`(2014)₅`, `2×125+1×5+4`, `259`], [`vs`, `十进制比大小`, `>`], [`(3321)₄`, `3×64+3×16+2×4+1`, `249`]], sum: `259 > 249 ⇒ (2014)₅ > (3321)₄` },
+        'WB-C1': { title: `美洲小镇 20 进制「先个位后二十位」破译图`, digits: [[`dew`, `个位 (20⁰)`, `2`], [`ha`, `连接词`, `+`], [`naw ugens`, `二十位 (20¹)`, `9×20=180`]], sum: `(92)₂₀ = 180 + 2 = 182` }
+      };
+      if (weightConfigs[id]) {
+        const w = weightConfigs[id];
+        return {
+          title: w.title,
+          tag: `位权图解`,
+          html: `
+            <div class="radix-strip">
+              ${w.digits.map(function(d, idx) {
+                const cls = idx % 2 === 0 ? `radix-cell--yellow` : `radix-cell--blue`;
+                return `<div class="radix-cell ${cls}"><small>${escapeHtml(d[1])}</small><span>${escapeHtml(d[0])}</span><small>贡献 ${escapeHtml(d[2])}</small></div>`;
+              }).join(`<span>+</span>`)}
+              <span>=</span>
+              <div class="radix-cell radix-cell--green"><small>十进制结果</small><span>${escapeHtml(w.sum)}</span></div>
+            </div>
+          `
+        };
+      }
+
+      // 2. Short-division ladder
+      const ladderConfigs = {
+        'KP-03': { title: `短除法「除 5 倒取余数」阶梯图：(1234)₁₀ → (14414)₅`, rows: [[`1234 ÷ 5 = 246`, `4`], [`246 ÷ 5 = 49`, `1`], [`49 ÷ 5 = 9`, `4`], [`9 ÷ 5 = 1`, `4`], [`1 ÷ 5 = 0（停）`, `1`]], res: `(14414)₅` },
+        'M1-EX1a': { title: `短除法阶梯图：(567)₁₀ → (1067)₈`, rows: [[`567 ÷ 8 = 70`, `7`], [`70 ÷ 8 = 8`, `6`], [`8 ÷ 8 = 1`, `0`], [`1 ÷ 8 = 0（停）`, `1`]], res: `(1067)₈ → 每位拆3位二进制 = (1000110111)₂` },
+        'M1-EX1b': { title: `大进制短除 + 字母换算阶梯图`, rows: [[`1444 ÷ 12 = 120`, `4`], [`120 ÷ 12 = 10`, `0`], [`10 ÷ 12 = 0`, `10 → A`], [`188 ÷ 14 = 13`, `6`], [`13 ÷ 14 = 0`, `13 → D`]], res: `(A04)₁₂ 与 (D6)₁₄` },
+        'M1-ST1': { title: `短除阶梯图：(2017)₁₀ → (5611)₇`, rows: [[`2017 ÷ 7 = 288`, `1`], [`288 ÷ 7 = 41`, `1`], [`41 ÷ 7 = 5`, `6`], [`5 ÷ 7 = 0（停）`, `5`]], res: `(5611)₇` },
+        'WB-P2': { title: `短除阶梯验算：(2896)₁₀ → (43041)₅`, rows: [[`2896 ÷ 5 = 579`, `1`], [`579 ÷ 5 = 115`, `4`], [`115 ÷ 5 = 23`, `0`], [`23 ÷ 5 = 4`, `3`], [`4 ÷ 5 = 0（停）`, `4`]], res: `↑ 从下往上倒读得 (43041)₅` }
+      };
+      if (ladderConfigs[id]) {
+        const ld = ladderConfigs[id];
+        return {
+          title: ld.title,
+          tag: `短除阶梯`,
+          html: `
+            <div class="ladder-list">
+              ${ld.rows.map(function(r) {
+                return `<div class="ladder-row"><span>${escapeHtml(r[0])}</span><span class="ladder-rem">余 ${escapeHtml(r[1])}</span></div>`;
+              }).join(``)}
+            </div>
+            <p class="visual-caption"><strong>↑ 倒序读出余数：</strong>${escapeHtml(ld.res)}</p>
+          `
+        };
+      }
+
+      // 3. Bridge & Power grouping chunks
+      if (id === `KP-04` || id === `M1-EX3` || id === `WB-P6` || id === `WB-P7`) {
+        const chunkHtml = id === `KP-04`
+          ? `<div class="radix-strip"><div class="radix-cell radix-cell--yellow"><span>4</span><small>→ 11</small></div><div class="radix-cell radix-cell--blue"><span>7</span><small>→ 21</small></div><div class="radix-cell radix-cell--yellow"><span>8</span><small>→ 22</small></div><span>⇒</span><div class="radix-cell radix-cell--green"><span>(112122)₃</span><small>3²=9 两两对应</small></div></div>`
+          : (id === `WB-P6`
+            ? `<div class="radix-strip"><div class="radix-cell radix-cell--yellow"><span>12</span><small>5</small></div><div class="radix-cell"><span>01</span><small>1</small></div><div class="radix-cell radix-cell--yellow"><span>20</span><small>6</small></div><div class="radix-cell"><span>02</span><small>2</small></div><div class="radix-cell radix-cell--yellow"><span>10</span><small>3</small></div><div class="radix-cell"><span>21</span><small>7</small></div><div class="radix-cell radix-cell--yellow"><span>11</span><small>4</small></div><div class="radix-cell"><span>20</span><small>6</small></div><div class="radix-cell radix-cell--yellow"><span>01</span><small>1</small></div><span>⇒</span><div class="radix-cell radix-cell--green"><span>(516237461)₉</span><small>2位一段秒换</small></div></div>`
+            : `<div class="radix-strip"><div class="radix-cell radix-cell--blue"><span>011</span><small>→ 3</small></div><div class="radix-cell radix-cell--yellow"><span>110</span><small>→ 6</small></div><div class="radix-cell radix-cell--blue"><span>111</span><small>→ 7</small></div><div class="radix-cell radix-cell--yellow"><span>001</span><small>→ 1</small></div><span>⇒</span><div class="radix-cell radix-cell--green"><span>(3671)₈</span><small>4进制→2位二进制→3位八进制</small></div></div>`);
+        return { title: `乘方分组切块速换示意图`, tag: `分段切块`, html: chunkHtml };
+      }
+
+      if (id === `M1-EX2a` || id === `M1-EX2b` || id === `WB-P5`) {
+        const txt = id === `M1-EX2a` ? [`(324)₅`, `(89)₁₀`, `(131)₈`] : (id === `M1-EX2b` ? [`(618)₉`, `(503)₁₀`, `(13313)₄`] : [`(167)₉`, `(142)₁₀`, `(216)₈`]);
+        return {
+          title: `非乘方进制「十进制搭桥」双步流程图`,
+          tag: `十进制搭桥`,
+          html: `
+            <div class="radix-strip">
+              <div class="radix-cell radix-cell--yellow"><span>${txt[0]}</span><small>源进制</small></div>
+              <span>按权展开 →</span>
+              <div class="radix-cell radix-cell--blue"><span>${txt[1]}</span><small>十进制中转桥</small></div>
+              <span>短除倒取余 →</span>
+              <div class="radix-cell radix-cell--green"><span>${txt[2]}</span><small>目标进制</small></div>
+            </div>
+          `
+        };
+      }
+
+      // 4. Decimal multiply-by-n flow
+      if (id === `KP-05` || id === `M3-EXT1`) {
+        return {
+          title: `小数「乘 n 取整正序排列」流程图（(0.856)₁₀ → (0.412)₅）`,
+          tag: `小数互化`,
+          html: `
+            <div class="ladder-list">
+              <div class="ladder-row"><span>第 1 步：0.856 × 5 = 4.28（保留小数 0.28）</span><span class="ladder-rem">取整 4</span></div>
+              <div class="ladder-row"><span>第 2 步：0.28 × 5 = 1.40（保留小数 0.40）</span><span class="ladder-rem">取整 1</span></div>
+              <div class="ladder-row"><span>第 3 步：0.40 × 5 = 2.00（小数归 0 停止）</span><span class="ladder-rem">取整 2</span></div>
+            </div>
+            <p class="visual-caption"><strong>↓ 从上往下正序排：</strong>(0.856)₁₀ = (0.412)₅（与整数短除“倒取余”方向相反！）。</p>
+          `
+        };
+      }
+
+      // 5. Counting bridge mapping
+      if (id === `KP-06` || id === `M1-EX4` || id === `M3-EXT5` || id === `WB-P3` || id === `WB-C2`) {
+        const mapPairs = id === `M3-EXT5`
+          ? [[`0`, `0`], [`1`, `1`], [`5`, `2`], [`8`, `3`], [`9`, `4`]]
+          : (id === `M1-EX4` ? [[`0`, `0`], [`3`, `1`], [`7`, `2`]] : [[`0`, `0`], [`1`, `1`], [`2`, `2`], [`3`, `3`], [`4`, `4`], [`5`, `5`]]);
+        return {
+          title: `「0 是桥梁」数字一一映射表`,
+          tag: `计数映射`,
+          html: `
+            <div class="radix-strip">
+              ${mapPairs.map(function(pair) {
+                return `<div class="radix-cell radix-cell--yellow"><small>题目数码</small><span>${pair[0]}</span><small>↔ 进制位 ${pair[1]}</small></div>`;
+              }).join(``)}
+            </div>
+            <p class="visual-caption">${id === `M3-EXT5` ? `注意 0 是第 1 个数，故 (433201)₅ = 14801 后需 +1 得第 14802 个！` : `按一一对应替换数码，直接将排位问题转化为标准 n 进制互化。`}</p>
+          `
+        };
+      }
+
+      // 6. Three-step base judgment funnel
+      if (id === `KP-08` || id === `M3-EX7` || id === `M3-EXT3` || id === `M3-EXT6` || id === `WB-E1` || id === `WB-E2`) {
+        const s1 = id === `M3-EX7` ? `最大数码 4 ⇒ n ≥ 5` : (id === `M3-EXT3` ? `最大数码 6 ⇒ n ≥ 7` : (id === `M3-EXT6` ? `出现数字 8 ⇒ n ≥ 9` : (id === `WB-E1` ? `最大数码 7 ⇒ n ≥ 8` : `数码限制 k > 5`)));
+        const s2 = id === `M3-EX7` ? `4×3=12 末位 0 ⇒ n ∈ {6, 12}` : (id === `M3-EXT3` ? `5×5−4=21 ⇒ n ∈ {7, 21}` : (id === `M3-EXT6` ? `十进制 138138 < 157586` : (id === `WB-E1` ? `2×7−6=8 ⇒ 8 的因数` : `5k+2 = 2(2k+5) ⇒ k=8`)));
+        const s3 = id === `M3-EX7` ? `52 < 100 ⇒ n < 10 ⇒ 六进制 ✓` : (id === `M3-EXT3` ? `15625 < 16324 ⇒ n < 10 ⇒ 七进制 ✓` : (id === `M3-EXT6` ? `8 < n < 10 ⇒ 九进制 ✓` : (id === `WB-E1` ? `84 < 106 ⇒ n < 10 ⇒ 八进制 ✓` : `(123)₈ = 83 ✓`)));
+        return {
+          title: `未知进制「三步漏斗」精准锁位图`,
+          tag: `判断进制`,
+          html: `
+            <div class="funnel-grid">
+              <div class="funnel-step"><strong>① 看最大数码（下限）</strong><span>${s1}</span></div>
+              <div class="funnel-step"><strong>② 个位差 / 列方程</strong><span>${s2}</span></div>
+              <div class="funnel-step funnel-step--ok"><strong>③ 比十进制 → 终解</strong><span>${s3}</span></div>
+            </div>
+          `
+        };
+      }
+
+      // 7. Arithmetic & pairing
+      if (id === `KP-07` || id === `M2-WU2` || id === `M2-EX5` || id === `M2-EX6` || id === `M2-ST2` || id === `WB-P8` || id === `WB-P9` || id === `WB-C3`) {
+        const pairText = id === `WB-P9`
+          ? `八进制凑整：(123456)₈ + (654322)₈ = (1000000)₈，(22)₈ + (56)₈ = (100)₈`
+          : (id === `M2-EX5` ? `八进制连减凑整：(1247)₈ + (26531)₈ = (30000)₈（个位凑 8、高位凑 7）` : `牢记「满 n 进 1，借 1 当 n」；复杂跨进制乘除先化十进制计算再转回`);
+        return {
+          title: `n 进制四则运算与凑整巧算结构卡`,
+          tag: `满n进1`,
+          html: `
+            <div class="funnel-grid">
+              <div class="funnel-step"><strong>进退位口诀</strong><span>满底数 n 进 1，不够减借 1 当 n</span></div>
+              <div class="funnel-step funnel-step--ok"><strong>本题巧算要点</strong><span>${pairText}</span></div>
+            </div>
+          `
+        };
+      }
+
+      // 8. Remaining advanced equation/concept cards
+      return {
+        title: `位值结构与合法数码约束图`,
+        tag: `结构示意`,
+        html: `
+          <div class="funnel-grid">
+            <div class="funnel-step"><strong>数码边界检查</strong><span>每位数字严格小于所在进制底数 n，且多位数首位不为 0</span></div>
+            <div class="funnel-step funnel-step--ok"><strong>破题切入点</strong><span>按位值原理展开为十进制方程或分析进位关系锁定唯一整数解</span></div>
+          </div>
+        `
+      };
+    }
+
     async function persistState() {
       if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
         try {
@@ -2554,6 +2876,24 @@ button, input, select, textarea {
           return `<span class="tag tag--subtle">${escapeHtml(b)}</span>`;
         }).join(``);
 
+        const visualObj = buildRadixVisual(item);
+        const formulaTex = ITEM_FORMULAS[item.id] || ``;
+        const visualBlockHtml = visualObj ? `
+          <div class="visual-box">
+            <div class="visual-box-head">
+              <span class="visual-box-title">${escapeHtml(visualObj.title)}</span>
+              <span class="tag tag--blue">${escapeHtml(visualObj.tag)}</span>
+            </div>
+            ${visualObj.html}
+          </div>
+        ` : ``;
+        const formulaBlockHtml = formulaTex ? `
+          <div>
+            <span class="field-label" style="display:block; margin-bottom:4px;">核心数学公式（KaTeX）</span>
+            <div class="formula-panel">${renderMath(formulaTex, true)}</div>
+          </div>
+        ` : ``;
+
         return `
           <article class="problem-card ${isReviewed ? `is-mastered` : ``}" id="card-${escapeHtml(item.id)}">
             <div>
@@ -2564,6 +2904,7 @@ button, input, select, textarea {
                     <span class="tag ${accent.tag}">${escapeHtml(item.id)}</span>
                     <span class="tag tag--yellow">${escapeHtml(item.difficulty)}</span>
                     <span class="tag">${escapeHtml(item.qtype)}</span>
+                    <span class="tag tag--yellow">含图解与公式</span>
                   </div>
                   <button type="button"
                     class="mastery-btn ${isReviewed ? `is-done` : ``}"
@@ -2584,7 +2925,7 @@ button, input, select, textarea {
 
                 <div class="accordion-actions">
                   <button type="button" class="accordion-trigger" onclick="toggleAnswerPanel('${item.id}')" aria-expanded="${isAnsOpen}">
-                    <span>${isAnsOpen ? `收起答案与解析` : `展开答案与解析`}</span>
+                    <span>${isAnsOpen ? `收起答案、图解与公式` : `展开答案、图解与公式`}</span>
                     <span aria-hidden="true">${isAnsOpen ? `▲` : `▼`}</span>
                   </button>
                   <button type="button" class="accordion-trigger" onclick="toggleQuotePanel('${item.id}')" aria-expanded="${isQuoteOpen}">
@@ -2594,6 +2935,8 @@ button, input, select, textarea {
                 </div>
 
                 <div class="accordion-panel" ${isAnsOpen ? `` : `hidden`}>
+                  ${visualBlockHtml}
+                  ${formulaBlockHtml}
                   <span class="field-label">答案与解析</span>
                   <div class="answer-callout">${item.answerHtml}</div>
                 </div>

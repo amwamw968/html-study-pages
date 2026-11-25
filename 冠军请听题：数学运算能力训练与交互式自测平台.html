@@ -2522,17 +2522,21 @@ button, input, select, textarea {
     // =========================================================================
     function mathFallbackHtml(tex) {
       let s = String(tex || ``);
-      s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, `<span class="math-frac"><span class="math-frac-num">$1</span><span class="math-frac-den">$2</span></span>`);
-      s = s.replace(/\\text\{([^{}]+)\}/g, `$1`);
+      s = s.replace(/\\text\{([^{}]*)\}/g, `$1`);
+      s = s.replace(/\\Rightarrow/g, `⇒`);
       s = s.replace(/\\times/g, `×`);
       s = s.replace(/\\div/g, `÷`);
       s = s.replace(/\\cdot/g, `·`);
       s = s.replace(/\\dots/g, `…`);
       s = s.replace(/\\qquad/g, ` &nbsp;&nbsp; `);
       s = s.replace(/\\quad/g, ` &nbsp; `);
-      s = s.replace(/\\;/g, ` `);
+      s = s.replace(/\\[;,]/g, ` `);
+      for (let pass = 0; pass < 3; pass++) {
+        s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, `<span class="math-frac"><span class="math-frac-num">$1</span><span class="math-frac-den">$2</span></span>`);
+      }
       s = s.replace(/\^\{([^{}]+)\}/g, `<sup>$1</sup>`);
       s = s.replace(/\^([0-9a-zA-Z])/g, `<sup>$1</sup>`);
+      s = s.replace(/_\{([^{}]+)\}/g, `<sub>$1</sub>`);
       s = s.replace(/\\\\/g, `<br>`);
       s = s.replace(/\{|\}/g, ``);
       return `<span class="math-fallback">${s}</span>`;
@@ -2643,8 +2647,112 @@ button, input, select, textarea {
           </div>
         `;
       }
+      if (type === `decimalScale`) {
+        return `
+          <div class="diagram-box">
+            <svg viewBox="0 0 520 76" width="100%" style="max-width:520px;" role="img" aria-label="小数山顶数缩放转化流程图">
+              <rect x="8" y="14" width="142" height="44" fill="#eee9e0" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="79" y="34" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a1a">小数山顶数</text>
+              <text x="79" y="50" text-anchor="middle" font-size="11" fill="#4a4a4a">0.1 + 0.2 + … + k</text>
+              <text x="172" y="40" text-anchor="middle" font-size="12" font-weight="900" fill="#0055ff">×10 →</text>
+              <rect x="196" y="14" width="148" height="44" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="270" y="34" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a1a">整数山顶 (10k)²</text>
+              <text x="270" y="50" text-anchor="middle" font-size="11" fill="#1a1a1a">1 + 2 + … + 10k</text>
+              <text x="366" y="40" text-anchor="middle" font-size="12" font-weight="900" fill="#e63b2e">÷10 →</text>
+              <rect x="390" y="14" width="122" height="44" fill="#d8efe0" stroke="#156d3f" stroke-width="2"/>
+              <text x="451" y="34" text-anchor="middle" font-size="12" font-weight="800" fill="#114b2c">最终结果</text>
+              <text x="451" y="50" text-anchor="middle" font-size="11" font-weight="700" fill="#114b2c">(10k)² ÷ 10</text>
+            </svg>
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);">小数山顶数巧算图：先整体放大 10 倍转为整数山顶数，求平方后再统一除以 10</span>
+          </div>
+        `;
+      }
+      if (type === `nonStdMountain`) {
+        return `
+          <div class="diagram-box">
+            <svg viewBox="0 0 520 92" width="100%" style="max-width:520px;" role="img" aria-label="非标准山峰补全与提公因数示意图">
+              <rect x="20" y="52" width="38" height="24" fill="#ffffff" stroke="#e63b2e" stroke-width="2" stroke-dasharray="4 2"/>
+              <text x="39" y="68" text-anchor="middle" font-size="11" font-weight="700" fill="#e63b2e">+缺</text>
+              <rect x="64" y="38" width="44" height="38" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="114" y="24" width="44" height="52" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="164" y="10" width="48" height="66" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+              <text x="188" y="48" text-anchor="middle" font-size="12" font-weight="900">山顶 n</text>
+              <rect x="218" y="24" width="44" height="52" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="268" y="38" width="44" height="38" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="318" y="52" width="38" height="24" fill="#ffffff" stroke="#e63b2e" stroke-width="2" stroke-dasharray="4 2"/>
+              <text x="337" y="68" text-anchor="middle" font-size="11" font-weight="700" fill="#e63b2e">+缺</text>
+              <text x="442" y="34" text-anchor="middle" font-size="12" font-weight="800" fill="#0055ff">① 步长≠1 先提公因数</text>
+              <text x="442" y="58" text-anchor="middle" font-size="12" font-weight="800" fill="#e63b2e">② 补全两端再减去 2×缺</text>
+            </svg>
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);">非标准山峰转化口诀：「不从 1 起先转化，缺少补全或找倍」</span>
+          </div>
+        `;
+      }
+      if (type === `altSquareDiff`) {
+        return `
+          <div class="diagram-box">
+            <svg viewBox="0 0 520 82" width="100%" style="max-width:520px;" role="img" aria-label="交错平方差两两分组示意图">
+              <rect x="10" y="12" width="112" height="34" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="66" y="34" text-anchor="middle" font-size="12" font-weight="900">(n² − (n-1)²)</text>
+              <text x="136" y="34" text-anchor="middle" font-size="14" font-weight="900">+</text>
+              <rect x="150" y="12" width="128" height="34" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="214" y="34" text-anchor="middle" font-size="12" font-weight="800">((n-2)² − (n-3)²)</text>
+              <text x="304" y="34" text-anchor="middle" font-size="13" font-weight="900">+ … +</text>
+              <rect x="332" y="12" width="84" height="34" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="374" y="34" text-anchor="middle" font-size="12" font-weight="900">(2² − 1²)</text>
+              <text x="260" y="70" text-anchor="middle" font-size="12" font-weight="800" fill="#156d3f">每组差均为 1 ⇒ 退化为连续等差和 n + (n-1) + … + 2 + 1 = n(n+1) ÷ 2</text>
+            </svg>
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);">交错平方差两两配对：相邻两数平方差正好等于两数之和</span>
+          </div>
+        `;
+      }
+      if (type === `truncSquares`) {
+        return `
+          <div class="diagram-box">
+            <svg viewBox="0 0 520 86" width="100%" style="max-width:520px;" role="img" aria-label="截断区间平方和作差示意图">
+              <rect x="12" y="12" width="496" height="28" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="260" y="30" text-anchor="middle" font-size="12" font-weight="800" fill="#1a1a1a">完整平方和：1² + 2² + … + (k-1)² + k² + … + n²</text>
+              <rect x="12" y="48" width="160" height="28" fill="#fdeceb" stroke="#e63b2e" stroke-width="2" stroke-dasharray="4 2"/>
+              <text x="92" y="66" text-anchor="middle" font-size="12" font-weight="800" fill="#e63b2e">减去前段 1² ~ (k-1)²</text>
+              <rect x="176" y="48" width="332" height="28" fill="#d8efe0" stroke="#156d3f" stroke-width="2"/>
+              <text x="342" y="66" text-anchor="middle" font-size="12" font-weight="900" fill="#114b2c">所求区间：k² + (k+1)² + … + n²</text>
+            </svg>
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);">截断平方和策略：补全从 1² 起算到 n²，再减去多算的 1² 到 (k-1)²（切勿把 k² 减掉）</span>
+          </div>
+        `;
+      }
+      if (type === `oddEvenSquares`) {
+        return `
+          <div class="diagram-box">
+            <svg viewBox="0 0 520 96" width="100%" style="max-width:520px;" role="img" aria-label="奇偶平方和容斥与末项统一公式图">
+              <rect x="12" y="10" width="150" height="40" fill="#dce8ff" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="87" y="34" text-anchor="middle" font-size="12" font-weight="800">全体 1²+2²+…+m²</text>
+              <text x="178" y="35" text-anchor="middle" font-size="16" font-weight="900">−</text>
+              <rect x="194" y="10" width="146" height="40" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="267" y="34" text-anchor="middle" font-size="12" font-weight="800">偶数 4(1²+…+k²)</text>
+              <text x="356" y="35" text-anchor="middle" font-size="16" font-weight="900">=</text>
+              <rect x="372" y="10" width="136" height="40" fill="#d8efe0" stroke="#156d3f" stroke-width="2"/>
+              <text x="440" y="34" text-anchor="middle" font-size="12" font-weight="900" fill="#114b2c">奇数平方和</text>
+              <rect x="12" y="58" width="496" height="30" fill="#fff3c4" stroke="#1a1a1a" stroke-width="2"/>
+              <text x="260" y="78" text-anchor="middle" font-size="12" font-weight="900" fill="#1a1a1a">奇偶末项统一公式（末项为 m）：m × (m + 1) × (m + 2) ÷ 6</text>
+            </svg>
+            <span style="font-size:0.8rem; color:var(--on-surface-variant);">从 1² 起的连续奇数或从 2² 起的连续偶数平方和，均可记为「末项连乘三数再除 6」</span>
+          </div>
+        `;
+      }
       return ``;
     }
+
+    const AUTO_DIAGRAM_MAP = {
+      s1_task1: `mountain`, s1_prac1: `mountain`, ex_c1: `mountain`, ex_c2: `mountain`,
+      s1_task2: `decimalScale`, s1_prac2: `decimalScale`, ex_c3: `decimalScale`, ex_c4: `decimalScale`, ex_class1: `decimalScale`,
+      s2_try: `nonStdMountain`, s2_task3: `nonStdMountain`, s2_prac3: `nonStdMountain`, ex_c5: `nonStdMountain`, ex_c6: `nonStdMountain`, ex_class2: `nonStdMountain`,
+      s3_task4: `altSquareDiff`, s3_prac4: `altSquareDiff`, ex_c7: `altSquareDiff`, ex_c8: `altSquareDiff`, ex_class3: `altSquareDiff`,
+      ex_land: `squareDiff`, ex_exp1: `squareDiff`, ex_exp4: `altSquareDiff`,
+      ex_c9: `sumSquaresTri`, ex_exp2: `sumSquaresTri`,
+      s4_task5: `truncSquares`, s4_prac5: `truncSquares`, ex_c10: `truncSquares`, ex_class4: `truncSquares`,
+      s5_moment1: `oddEvenSquares`, s5_moment2: `oddEvenSquares`, s5_derivation_odd_even: `oddEvenSquares`, ex_exp3: `oddEvenSquares`
+    };
 
     // =========================================================================
     // 5. PERSISTENCE HELPERS (window.notebookAppApi)
@@ -2769,7 +2877,8 @@ button, input, select, textarea {
           `;
         }).join(``);
 
-        const diagramHtml = item.diagramType ? buildSourceDiagram(item.diagramType) : ``;
+        const effectiveDiagramType = item.diagramType || AUTO_DIAGRAM_MAP[item.id] || ``;
+        const diagramHtml = effectiveDiagramType ? buildSourceDiagram(effectiveDiagramType) : ``;
         const scienceHtml = item.scienceTip
           ? `<div class="science-box"><strong>科普拓展：</strong>${escapeHtml(item.scienceTip)}</div>`
           : ``;
@@ -2785,6 +2894,7 @@ button, input, select, textarea {
                     <span class="tag ${accent.tag}">${escapeHtml(item.stage)}</span>
                     <span class="tag ${typeTagClass}">${escapeHtml(item.type)}</span>
                     <span class="tag">${escapeHtml(item.difficulty)}</span>
+                    ${effectiveDiagramType ? `<span class="tag tag--yellow">含直观图解</span>` : ``}
                   </div>
                   <button type="button" class="mastery-btn${isMastered ? ` is-done` : ``}" onclick="toggleMastered('${item.id}')" aria-pressed="${isMastered}">
                     <span>${isMastered ? `✓ 已掌握` : `○ 待复习`}</span>

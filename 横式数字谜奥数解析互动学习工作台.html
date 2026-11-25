@@ -7,6 +7,8 @@
 <meta name="design-style" content="bauhaus">
 <title>横式数字谜：全题型解析与破题策略工作台</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.2/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.18.2/dist/katex.min.js"></script>
 <style>
 :root {
   color-scheme: light;
@@ -1037,6 +1039,277 @@ button, input, select, textarea {
   padding: var(--space-xs) var(--space-sm);
   font-size: 0.83rem;
   color: var(--on-surface-variant);
+}
+
+/* Rich Visual Diagrams & KaTeX Formulas inside Problem Solutions */
+.solution-visual-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-md);
+}
+
+.visual-box {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  box-shadow: var(--offset-shadow-sm);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.visual-box-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xs);
+  border-bottom: 1.5px solid var(--outline-variant);
+  padding-bottom: var(--space-xs);
+}
+
+.visual-box-title {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: var(--on-surface);
+}
+
+.visual-caption {
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  margin: 0;
+}
+
+.formula-panel {
+  background: var(--surface-white);
+  border: var(--border-medium);
+  border-left: 6px solid var(--tertiary);
+  padding: var(--space-sm) var(--space-md);
+  overflow-x: auto;
+}
+
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.15rem 0;
+  margin: 0.25rem 0;
+}
+
+.math-fallback {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.math-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 0.2em;
+  font-size: 0.88em;
+  line-height: 1.1;
+}
+.math-frac-num { border-bottom: 1.5px solid currentColor; padding: 0 0.25em 1px; }
+.math-frac-den { padding: 1px 0.25em 0; }
+.math-overline { text-decoration: overline; }
+.math-boxed { border: 2px solid var(--outline); background: var(--primary-container); padding: 0 4px; }
+
+/* Reusable Bauhaus Vertical Cryptarithm Grids */
+.v-pair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.v-card {
+  display: inline-grid;
+  gap: 4px;
+  justify-items: center;
+}
+
+.v-card-label {
+  font-family: var(--font-label);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--on-surface-variant);
+}
+
+.v-grid {
+  display: inline-grid;
+  gap: 2px;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.98rem;
+  background: var(--background);
+  border: var(--border-medium);
+  padding: var(--space-xs) var(--space-sm);
+  justify-items: center;
+  align-items: center;
+}
+
+.vc {
+  min-width: 1.85rem;
+  height: 1.85rem;
+  padding: 0 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vc--yellow { background: var(--primary-container); color: var(--on-primary-container); border: 1.5px solid var(--outline); }
+.vc--blue { background: var(--tertiary); color: var(--on-tertiary); }
+.vc--red { background: var(--secondary); color: var(--on-secondary); }
+.vc--green { background: var(--positive-container); color: var(--on-positive-container); border: 1.5px solid var(--positive); }
+.vc--muted { color: var(--on-surface-variant); font-size: 0.85rem; }
+.vc-rule { grid-column: 1 / -1; width: 100%; height: 2px; background: var(--outline); margin: 2px 0; }
+
+.v-arrow {
+  font-family: var(--font-label);
+  font-weight: 900;
+  font-size: 1.4rem;
+  color: var(--tertiary);
+}
+
+/* Filter Chip Matrix & Branch Cards */
+.chip-matrix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.m-chip {
+  border: var(--border-medium);
+  padding: 4px 10px;
+  font-family: var(--font-label);
+  font-size: 0.84rem;
+  font-weight: 700;
+  background: var(--surface-container-low);
+  display: inline-grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.m-chip small {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+}
+
+.m-chip--ok {
+  background: var(--positive-container);
+  border-color: var(--positive);
+  color: var(--on-positive-container);
+}
+
+.m-chip--hi {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.m-chip--no {
+  background: var(--surface-container-high);
+  color: var(--on-surface-variant);
+  border-style: dashed;
+  opacity: 0.72;
+}
+
+.m-chip--no .m-chip-val {
+  text-decoration: line-through;
+}
+
+.branch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: var(--space-sm);
+}
+
+.branch-card {
+  border: var(--border-medium);
+  padding: var(--space-sm);
+  background: var(--background);
+  display: grid;
+  gap: 4px;
+  font-size: 0.86rem;
+}
+
+.branch-card--ok {
+  border-left: 6px solid var(--positive);
+  background: var(--positive-container);
+  color: var(--on-positive-container);
+}
+
+.branch-card--no {
+  border-left: 6px solid var(--secondary);
+  background: var(--surface-container);
+  color: var(--on-surface-variant);
+}
+
+.branch-card--hi {
+  border-left: 6px solid var(--tertiary);
+  background: var(--surface-white);
+}
+
+.radar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-label);
+  font-weight: 700;
+}
+
+.radar-slot {
+  display: inline-grid;
+  justify-items: center;
+  border: var(--border-medium);
+  min-width: 46px;
+  padding: 4px 6px;
+  background: var(--surface-white);
+}
+
+.radar-slot--ban {
+  border-color: var(--secondary);
+}
+
+.radar-slot--ban small {
+  color: var(--secondary);
+  font-size: 0.68rem;
+}
+
+.radar-slot--only {
+  background: var(--primary-container);
+  border-color: var(--outline);
+  box-shadow: 2px 2px 0 var(--outline);
+}
+
+.radar-slot--only small {
+  color: var(--on-primary-container);
+  font-size: 0.68rem;
+}
+
+.nine-grid {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 2.5rem);
+  gap: 4px;
+  font-family: var(--font-label);
+  font-weight: 700;
+}
+
+.nine-cell {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: var(--border-medium);
+  background: var(--surface-white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nine-cell--hi {
+  background: var(--primary-container);
 }
 
 .card-footer {
@@ -2449,6 +2722,755 @@ function formatEquationHTML(str) {
     .replace(/○/g, `<span class="sym-cir">○</span>`);
 }
 
+// ============================================================
+// KaTeX Math Renderer (with safe HTML fallback) & Problem Visuals
+// ============================================================
+function mathFallbackHtml(tex) {
+  let s = String(tex || ``);
+  s = s.replace(/\\text\{([^{}]*)\}/g, `$1`);
+  s = s.replace(/\\triangle/g, `△`);
+  s = s.replace(/\\square/g, `□`);
+  s = s.replace(/\\circ/g, `○`);
+  s = s.replace(/\\nmid/g, `∤`);
+  s = s.replace(/\\mid/g, `∣`);
+  s = s.replace(/\\sim/g, `~`);
+  s = s.replace(/\\min/g, `min`);
+  s = s.replace(/\\Rightarrow/g, `⇒`);
+  s = s.replace(/\\times/g, `×`);
+  s = s.replace(/\\div/g, `÷`);
+  s = s.replace(/\\le/g, `≤`);
+  s = s.replace(/\\ge/g, `≥`);
+  s = s.replace(/\\ne/g, `≠`);
+  s = s.replace(/\\in/g, `∈`);
+  s = s.replace(/\\dots/g, `…`);
+  s = s.replace(/\\qquad/g, ` &nbsp;&nbsp; `);
+  s = s.replace(/\\quad/g, ` &nbsp; `);
+  s = s.replace(/\\[;,]/g, ` `);
+  s = s.replace(/\\\{/g, `&#123;`);
+  s = s.replace(/\\\}/g, `&#125;`);
+  for (let pass = 0; pass < 3; pass++) {
+    s = s.replace(/\\overline\{([^{}]+)\}/g, `<span class="math-overline">$1</span>`);
+    s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, `<span class="math-frac"><span class="math-frac-num">$1</span><span class="math-frac-den">$2</span></span>`);
+    s = s.replace(/\\boxed\{([^{}]+)\}/g, `<span class="math-boxed">$1</span>`);
+  }
+  s = s.replace(/_\{([^{}]+)\}/g, `<sub>$1</sub>`);
+  s = s.replace(/_([0-9a-zA-Z])/g, `<sub>$1</sub>`);
+  s = s.replace(/\^\{([^{}]+)\}/g, `<sup>$1</sup>`);
+  s = s.replace(/\^([0-9a-zA-Z])/g, `<sup>$1</sup>`);
+  s = s.replace(/\\\\/g, `<br>`);
+  s = s.replace(/\{|\}/g, ``);
+  return `<span class="math-fallback">${s}</span>`;
+}
+
+function renderMath(tex, displayMode) {
+  if (!tex) return ``;
+  if (window.katex && typeof window.katex.renderToString === `function`) {
+    try {
+      return window.katex.renderToString(tex, {
+        displayMode: Boolean(displayMode),
+        throwOnError: false,
+        strict: false
+      });
+    } catch (e) {
+      return mathFallbackHtml(tex);
+    }
+  }
+  return mathFallbackHtml(tex);
+}
+
+const PROBLEM_FORMULAS = {
+  'tb-wu1': `\\overline{\\text{兵炮马卒}} + \\overline{\\text{兵炮车卒}} = \\overline{\\text{车卒马兵卒}} \\;\\Rightarrow\\; \\boxed{5240 + 5210 = 10450}`,
+  'tb-ex1-1': `\\text{令 } \\overline{KLMNP} = x,\\quad 4(10x + 4) = 400000 + x \\;\\Rightarrow\\; 39x = 399984 \\;\\Rightarrow\\; x = 10256,\\; \\boxed{M = 2}`,
+  'tb-ex1-2': `\\text{① } (4000+x)-(10x+4)=1071 \\Rightarrow 9x=2925 \\Rightarrow \\boxed{x=325} \\\\ \\text{② } (10x+4)-(4000+x)=1071 \\Rightarrow 9x=5067 \\Rightarrow \\boxed{x=563}`,
+  'tb-ex1-5': `(10a+b)+(10b+a)+b = 110a+b \\;\\Rightarrow\\; 11b = 99a \\;\\Rightarrow\\; b = 9a \\;\\Rightarrow\\; a=1,\\,b=9,\\; \\boxed{a+b=10}`,
+  'tb-ex2-6': `2019 \\times x = \\dots 2018 \\;\\Rightarrow\\; x_{\\min} = 422,\\quad 2019 \\times 422 = 852018 \\;\\Rightarrow\\; 8+5+2+0+1+8 = \\boxed{24}`,
+  'tb-wu2': `\\overline{\\triangle\\triangle} \\times \\square = (10\\triangle + \\triangle)\\times \\square = \\boxed{11} \\times \\triangle \\times \\square`,
+  'tb-ex3-1': `11 \\times \\triangle^2 = \\overline{\\circ\\square\\triangle},\\quad \\triangle \\in \\{0,1,5,6\\} \\;\\Rightarrow\\; \\boxed{55\\times 5 = 275},\\; \\boxed{66\\times 6 = 396}`,
+  'tb-ex3-2': `11a \\times \\overline{bc} = \\overline{cac} \\;\\Rightarrow\\; \\overline{cac} = 616,\\; a=1,\\,c=6,\\,b=5 \\;\\Rightarrow\\; 11\\times 56 = 616,\\; \\boxed{\\overline{ac}=16}`,
+  'tb-ex4-10': `11a \\times 11b = 1001a + 110c \\;\\Rightarrow\\; a(11b-91) = 10c \\;\\Rightarrow\\; b=9,\\; 4a=5c \\;\\Rightarrow\\; \\boxed{55 \\times 99 = 5445}`,
+  'tb-ex5-11': `121ab = \\overline{cde} \\le 999 \\Rightarrow ab \\le 8 \\;\\Rightarrow\\; 44\\times 22 = 968,\\; \\frac{22}{44} = \\frac{5}{10} \\;\\Rightarrow\\; \\boxed{968510}`,
+  'tb-ex6-12': `1\\sim 8\\text{ 填入四边等式（原文图框缺失，完整解来源未提及）}`,
+  'tb-wu3-13': `1\\sim 9\\text{ 空格算式（原文方框布局缺失，完整解来源未提及）}`,
+  'tb-ex7-14': `\\triangle = \\frac{1+2+3+4+5+6+7+8}{3} = \\frac{(1+8)\\times 8 \\div 2}{3} = \\frac{36}{3} = \\boxed{12}`,
+  'tb-ex8': `a+b+c = 6c,\\quad d+e-f = 2 \\Rightarrow f \\in \\{2,5,8\\},\\quad g+h+i = 3i\\;\\text{（均为 3 的倍数）}`,
+  'tb-kp-1': `\\overline{BAD} + \\overline{BAD} = \\overline{GOOD}\\quad (3\\nmid\\overline{BAD},\\; 8\\nmid\\overline{GOOD}\\text{；原文仅附题干})`,
+  'tb-kp-2': `\\text{美} \\times \\overline{\\text{妙数学}} = \\overline{\\text{数数妙}},\\qquad \\text{美} + \\overline{\\text{妙数学}} = \\overline{\\text{妙数数}}\\quad\\text{（原文仅附题干）}`,
+  'tb-kp-3': `\\overline{FORTY} + \\overline{TEN} + \\overline{TEN} = \\overline{SIXTY}\\quad\\text{（原文仅附题干）}`,
+  'wb-1': `\\overline{AAA} + \\overline{BBB} + \\overline{CCC} = \\overline{CBBC} \\;\\Rightarrow\\; A+B=10,\\; C=1 \\;\\Rightarrow\\; 888+222+111=1221,\\; \\boxed{A=8}`,
+  'wb-2': `111111111 = \\boxed{12345679} \\times 9 \\;\\Rightarrow\\; \\text{来}=1,\\; \\text{赛}=9`,
+  'wb-3': `\\overline{\\square 43} \\times \\overline{2\\square} = \\overline{6\\square\\square 8} \\;\\Rightarrow\\; 243\\times 6 = 1458,\\; 243\\times 20 = 4860 \\;\\Rightarrow\\; \\boxed{243 \\times 26 = 6318}`,
+  'wb-4': `1000\\times\\text{喜} + 200\\times\\text{爱} + 30\\times\\text{数} + 4\\times\\text{学} = 2018 \\;\\Rightarrow\\; \\boxed{\\text{喜}=1,\\,\\text{爱}=4,\\,\\text{数}=7,\\,\\text{学}=2}`,
+  'wb-5': `\\overline{\\square\\square} \\div \\overline{\\square\\square} = 8 \\;\\Rightarrow\\; 8\\times\\overline{\\square\\square} = \\overline{\\square\\square} \\le 99 \\;\\Rightarrow\\; \\boxed{96 \\div 12 = 45 - 37 = 8}`,
+  'wb-6': `\\overline{\\text{好好}} = 11\\times\\text{好} \\;\\Rightarrow\\; 11 \\mid \\overline{5\\square 7} \\;\\Rightarrow\\; (5+7)-\\square = 11 \\;\\Rightarrow\\; \\square = 1,\\; \\boxed{517}`,
+  'wb-7': `2 \\times \\overline{\\square\\square\\square} = \\overline{\\square\\square\\square}\\;(4\\sim 9) \\;\\Rightarrow\\; \\text{首位}=4,\\; \\text{末位}=8 \\;\\Rightarrow\\; \\boxed{2 \\times 478 = 956}`,
+  'wb-8': `\\text{乘法候选：}2\\times 3 = 6\\;(\\text{剩2偶4奇 ✓})\\quad vs\\quad 2\\times 4 = 8\\;(\\text{剩1偶5奇 ×}) \\;\\Rightarrow\\; \\boxed{4+5=9,\\; 8-7=1,\\; 2\\times 3=6}`,
+  'wb-9': `\\overline{DEE} = (C\\times F)^2 < 200 \\;\\Rightarrow\\; \\overline{DEE} \\in \\{100,\\,144\\} \\;\\Rightarrow\\; \\boxed{786142}\\;\\text{或}\\;\\boxed{782105}`,
+  'wb-10': `12\\div 4=3,\\quad 3\\times 2=6,\\quad 1+5=6,\\quad 12-11=1`,
+  'wb-11': `a\\times b = \\overline{cd} = \\overline{ef} \\div g \\;\\Rightarrow\\; f = 0 \\;\\Rightarrow\\; \\boxed{3 \\times 4 = 12 = 60 \\div 5}`,
+  'wb-12': `2\\times\\overline{ABC} = \\overline{DEF}\\;(2\\sim 7),\\; 13\\mid\\overline{DEF} \\;\\Rightarrow\\; 546 = 13\\times 42 \\;\\Rightarrow\\; \\boxed{2\\times 273 = 546}`
+};
+
+function makeVGrid(cols, rows) {
+  const cells = rows.map(function(row) {
+    if (row === `RULE`) return `<span class="vc-rule"></span>`;
+    return row.map(function(cell) {
+      if (typeof cell === `string`) return `<span class="vc">${escapeHtml(cell)}</span>`;
+      return `<span class="vc ${cell.c || ``}">${escapeHtml(cell.t)}</span>`;
+    }).join(``);
+  }).join(``);
+  return `<div class="v-grid" style="grid-template-columns: repeat(${cols}, minmax(1.85rem, auto));">${cells}</div>`;
+}
+
+function buildProblemVisual(id) {
+  switch (id) {
+    case `tb-wu1`:
+      return {
+        title: `横式改写竖式 · 双端锁位图解`,
+        tag: `竖式对齐`,
+        html: `
+          <div class="v-pair">
+            <div class="v-card">
+              <span class="v-card-label">① 符号竖式（找两端突破口）</span>
+              ${makeVGrid(6, [
+                [``, ``, `兵`, `炮`, `马`, { t: `卒`, c: `vc--yellow` }],
+                [`+`, ``, `兵`, `炮`, `车`, { t: `卒`, c: `vc--yellow` }],
+                `RULE`,
+                [``, { t: `车`, c: `vc--blue` }, { t: `卒`, c: `vc--yellow` }, `马`, `兵`, { t: `卒`, c: `vc--yellow` }]
+              ])}
+            </div>
+            <span class="v-arrow" aria-hidden="true">→</span>
+            <div class="v-card">
+              <span class="v-card-label">② 还原数值验算</span>
+              ${makeVGrid(6, [
+                [``, ``, `5`, `2`, `4`, { t: `0`, c: `vc--green` }],
+                [`+`, ``, `5`, `2`, `1`, { t: `0`, c: `vc--green` }],
+                `RULE`,
+                [``, { t: `1`, c: `vc--green` }, { t: `0`, c: `vc--green` }, `4`, `5`, { t: `0`, c: `vc--green` }]
+              ])}
+            </div>
+          </div>
+          <p class="visual-caption">蓝底「车=1」由千位进位唯一确定；黄底「卒=0」由 卒+卒 末位仍为 卒 唯一确定。</p>
+        `
+      };
+
+    case `tb-ex1-1`:
+      return {
+        title: `整体打包移位图解（令五位数 KLMNP = x）`,
+        tag: `位值滑块`,
+        html: `
+          <svg viewBox="0 0 560 118" width="100%" style="max-width:560px;" role="img" aria-label="整体设元移位示意图">
+            <rect x="10" y="18" width="150" height="44" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="85" y="45" text-anchor="middle" font-size="14" font-weight="800" fill="#1a1a1a">K L M N P = x</text>
+            <rect x="160" y="18" width="42" height="44" fill="#0055ff" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="181" y="45" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff">4</text>
+            <text x="106" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1a1a">左移1位 + 4 ⇒ 10x + 4</text>
+            <text x="106" y="104" text-anchor="middle" font-size="11" fill="#4a4a4a">乘以 4 得 40x + 16</text>
+
+            <text x="242" y="46" text-anchor="middle" font-size="18" font-weight="900" fill="#e63b2e">×4 =</text>
+
+            <rect x="284" y="18" width="42" height="44" fill="#0055ff" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="305" y="45" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff">4</text>
+            <rect x="326" y="18" width="150" height="44" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="401" y="45" text-anchor="middle" font-size="14" font-weight="800" fill="#1a1a1a">K L M N P = x</text>
+            <text x="380" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1a1a">十万位 4 + x ⇒ 400000 + x</text>
+            <text x="380" y="104" text-anchor="middle" font-size="11" fill="#156d3f" font-weight="700">解得 x = 10256 → M = 2</text>
+          </svg>
+        `
+      };
+
+    case `tb-ex1-2`:
+      return {
+        title: `三位数左右添 4 的位值对比与双分支求解`,
+        tag: `双情况对比`,
+        html: `
+          <svg viewBox="0 0 560 96" width="100%" style="max-width:560px;" role="img" aria-label="左右添4位值示意图">
+            <rect x="12" y="12" width="42" height="38" fill="#0055ff" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="33" y="36" text-anchor="middle" font-size="14" font-weight="800" fill="#ffffff">4</text>
+            <rect x="54" y="12" width="110" height="38" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="109" y="36" text-anchor="middle" font-size="13" font-weight="800" fill="#1a1a1a">a b c = x</text>
+            <text x="88" y="72" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1a1a">左添 4：4000 + x</text>
+
+            <text x="230" y="38" text-anchor="middle" font-size="15" font-weight="900" fill="#e63b2e">差 = 1071</text>
+
+            <rect x="296" y="12" width="110" height="38" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="351" y="36" text-anchor="middle" font-size="13" font-weight="800" fill="#1a1a1a">a b c = x</text>
+            <rect x="406" y="12" width="42" height="38" fill="#0055ff" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="427" y="36" text-anchor="middle" font-size="14" font-weight="800" fill="#ffffff">4</text>
+            <text x="372" y="72" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1a1a">右添 4：10x + 4</text>
+          </svg>
+          <div class="branch-grid">
+            <div class="branch-card branch-card--ok"><strong>情况 ① 左添更大</strong><span>(4000+x)−(10x+4)=1071 ⇒ 9x=2925 ⇒ <strong>x = 325</strong>（4325−3254=1071）</span></div>
+            <div class="branch-card branch-card--ok"><strong>情况 ② 右添更大</strong><span>(10x+4)−(4000+x)=1071 ⇒ 9x=5067 ⇒ <strong>x = 563</strong>（5634−4563=1071）</span></div>
+          </div>
+        `
+      };
+
+    case `tb-ex1-5`:
+      return {
+        title: `位值系数合并表（ab + ba + b = aab）`,
+        tag: `位值展开`,
+        html: `
+          <div class="branch-grid">
+            <div class="branch-card branch-card--hi">
+              <strong>等号左边展开</strong>
+              <span>ab = 10a + b<br>ba = 10b + a<br>b = b<br><strong>合计 = 11a + 12b</strong></span>
+            </div>
+            <div class="branch-card branch-card--hi">
+              <strong>等号右边展开</strong>
+              <span>aab = 100a + 10a + b<br><strong>合计 = 110a + b</strong></span>
+            </div>
+            <div class="branch-card branch-card--ok">
+              <strong>消元锁唯一解</strong>
+              <span>11b = 99a ⇒ <strong>b = 9a</strong><br>a, b 为非零一位数 ⇒ <strong>a=1, b=9</strong></span>
+            </div>
+          </div>
+        `
+      };
+
+    case `tb-ex2-6`:
+      return {
+        title: `乘法竖式逐位反推图（2019 × 422 = 852018）`,
+        tag: `竖式反推`,
+        html: `
+          <div class="v-pair">
+            <div class="v-card">
+              <span class="v-card-label">由末四位 2018 从个位往百位反推</span>
+              ${makeVGrid(7, [
+                [``, ``, ``, `2`, `0`, `1`, `9`],
+                [`×`, ``, ``, ``, { t: `4`, c: `vc--blue` }, { t: `2`, c: `vc--yellow` }, { t: `2`, c: `vc--yellow` }],
+                `RULE`,
+                [``, ``, ``, `4`, `0`, `3`, { t: `8`, c: `vc--green` }],
+                [``, ``, `4`, `0`, `3`, { t: `8`, c: `vc--green` }, { t: `0`, c: `vc--muted` }],
+                [``, `8`, `0`, `7`, { t: `6`, c: `vc--green` }, { t: `0`, c: `vc--muted` }, { t: `0`, c: `vc--muted` }],
+                `RULE`,
+                [``, `8`, `5`, { t: `2`, c: `vc--green` }, { t: `0`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `8`, c: `vc--green` }]
+              ])}
+            </div>
+            <div class="branch-card branch-card--hi" style="max-width:340px;">
+              <strong>逐位尾数锁死过程</strong>
+              <span>① 个位 8：9×a 末位 8 ⇒ <strong>a = 2</strong></span>
+              <span>② 十位 1：3 + (9×b 末位) 尾 1 ⇒ 9×b 末位 8 ⇒ <strong>b = 2</strong></span>
+              <span>③ 百位 0：4 + (9×c 末位) 尾 0 ⇒ 9×c 末位 6 ⇒ <strong>c = 4</strong></span>
+              <span>④ 最小自然数 852018，数字和 = 8+5+2+0+1+8 = <strong>24</strong></span>
+            </div>
+          </div>
+        `
+      };
+
+    case `tb-wu2`:
+      return {
+        title: `叠字两位数拆解积木图（天然含因数 11）`,
+        tag: `倍数结构`,
+        html: `
+          <svg viewBox="0 0 500 76" width="100%" style="max-width:500px;" role="img" aria-label="叠数拆解为11的倍数">
+            <rect x="8" y="16" width="84" height="42" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="50" y="42" text-anchor="middle" font-size="16" font-weight="900" fill="#1a1a1a">△△</text>
+            <text x="115" y="42" text-anchor="middle" font-size="16" font-weight="900">=</text>
+            <rect x="138" y="16" width="128" height="42" fill="#f2ede5" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="202" y="42" text-anchor="middle" font-size="14" font-weight="700">10×△ + 1×△</text>
+            <text x="288" y="42" text-anchor="middle" font-size="16" font-weight="900">=</text>
+            <rect x="310" y="16" width="60" height="42" fill="#0055ff" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="340" y="42" text-anchor="middle" font-size="16" font-weight="900" fill="#ffffff">11</text>
+            <text x="425" y="42" text-anchor="middle" font-size="15" font-weight="800" fill="#1a1a1a">× △ × □</text>
+          </svg>
+        `
+      };
+
+    case `tb-ex3-1`:
+      return {
+        title: `自守个位候选筛查（△ × △ 末位仍为 △）`,
+        tag: `尾数筛选`,
+        html: `
+          <div class="chip-matrix">
+            <div class="m-chip m-chip--no"><span class="m-chip-val">△ = 0</span><small>00×0 = 0（非三位数）</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">△ = 1</span><small>11×1 = 11（非三位数）</small></div>
+            <div class="m-chip m-chip--ok"><span class="m-chip-val">△ = 5 ✓</span><small>55×5 = 275（2,7,5 互异）</small></div>
+            <div class="m-chip m-chip--ok"><span class="m-chip-val">△ = 6 ✓</span><small>66×6 = 396（3,9,6 互异）</small></div>
+          </div>
+        `
+      };
+
+    case `tb-ex3-2`:
+      return {
+        title: `11 的倍数型 cac 全枚举筛查条`,
+        tag: `11倍数筛选`,
+        html: `
+          <div class="chip-matrix">
+            <div class="m-chip m-chip--no"><span class="m-chip-val">121</span><small>11×11 重复</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">242</span><small>22×11</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">363</span><small>33×11</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">484</span><small>44×11</small></div>
+            <div class="m-chip m-chip--ok"><span class="m-chip-val">616 ✓</span><small>11×56=616 (a=1,b=5,c=6)</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">737</span><small>末位不符</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">858</span><small>末位不符</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">979</span><small>末位不符</small></div>
+          </div>
+          <p class="visual-caption">结合个位 a×c 末位为 c 锁定 a=1、c=6，唯一得出 11 × 56 = 616，故「数学」= 16。</p>
+        `
+      };
+
+    case `tb-ex4-10`:
+      return {
+        title: `叠数位值分解与范围锁死流程图（团团 × 圆圆 = 团结结团）`,
+        tag: `因数分离`,
+        html: `
+          <div class="branch-grid">
+            <div class="branch-card branch-card--hi">
+              <strong>① 同除 11 降阶</strong>
+              <span>11a × 11b = 1001a + 110c<br>⇒ 11ab = 91a + 10c<br>⇒ <strong>a(11b − 91) = 10c</strong></span>
+            </div>
+            <div class="branch-card branch-card--hi">
+              <strong>② 正数下界锁死 b</strong>
+              <span>若 b ≤ 8，则 11b ≤ 88 &lt; 91（负值 ❌）<br>唯一可能：<strong>b = 9</strong>（11×9−91 = 8）</span>
+            </div>
+            <div class="branch-card branch-card--ok">
+              <strong>③ 互质比锁死 a, c</strong>
+              <span>8a = 10c ⇒ <strong>4a = 5c</strong><br>一位数互异 ⇒ <strong>a = 5, c = 4</strong><br>验算：55 × 99 = 5445</span>
+            </div>
+          </div>
+        `
+      };
+
+    case `tb-ex5-11`:
+      return {
+        title: `121 倍数（ab ≤ 8）数字查重筛查矩阵`,
+        tag: `查重筛选`,
+        html: `
+          <div class="chip-matrix">
+            <div class="m-chip m-chip--no"><span class="m-chip-val">ab=2 → 242</span><small>数字 2 重复</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">ab=3 → 363</span><small>数字 3 重复</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">ab=4 → 484</span><small>数字 4 重复</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">ab=5 → 605</span><small>5 与因数 1×5 冲突</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">ab=6 → 726</span><small>与 2×3 重复 2</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">ab=7 → 847</span><small>与 1×7 重复 7</small></div>
+            <div class="m-chip m-chip--ok"><span class="m-chip-val">ab=8 → 968 ✓</span><small>a=4,b=2 ⇒ 44×22=968</small></div>
+          </div>
+          <p class="visual-caption">代入第二式 bb ÷ aa = 22 ÷ 44 = 1/2 = 5 ÷ 10（f=5, g=1, h=0），八个数字 4,2,9,6,8,5,1,0 互异 ⇒ 968510。</p>
+        `
+      };
+
+    case `tb-ex7-14`:
+      return {
+        title: `1~8 整体求和守恒均分图（无需枚举每个 ○）`,
+        tag: `整体守恒`,
+        html: `
+          <svg viewBox="0 0 540 100" width="100%" style="max-width:540px;" role="img" aria-label="1到8总和36均分3个三角形">
+            <rect x="10" y="10" width="520" height="32" fill="#f2ede5" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="270" y="31" text-anchor="middle" font-size="13" font-weight="800" fill="#1a1a1a">1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 = (1 + 8) × 8 ÷ 2 = 36</text>
+            <rect x="10" y="54" width="166" height="36" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="93" y="77" text-anchor="middle" font-size="14" font-weight="900" fill="#1a1a1a">△ = 12</text>
+            <rect x="187" y="54" width="166" height="36" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="270" y="77" text-anchor="middle" font-size="14" font-weight="900" fill="#1a1a1a">△ = 12</text>
+            <rect x="364" y="54" width="166" height="36" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="447" y="77" text-anchor="middle" font-size="14" font-weight="900" fill="#1a1a1a">△ = 12</text>
+          </svg>
+        `
+      };
+
+    case `tb-ex8`:
+      return {
+        title: `3×3 顺序运算九宫格 · 原文代数约束图`,
+        tag: `结构示意`,
+        html: `
+          <div class="v-pair">
+            <div class="nine-grid" aria-label="3乘3九宫格字母位置">
+              <span class="nine-cell">a</span><span class="nine-cell">b</span><span class="nine-cell nine-cell--hi">c</span>
+              <span class="nine-cell">d</span><span class="nine-cell">e</span><span class="nine-cell nine-cell--hi">f</span>
+              <span class="nine-cell">g</span><span class="nine-cell">h</span><span class="nine-cell nine-cell--hi">i</span>
+            </div>
+            <div class="branch-card branch-card--hi">
+              <strong>原文三行 3 的倍数约束</strong>
+              <span>第 1 行：(a+b)÷c ⇒ a+b+c = 3 的倍数</span>
+              <span>第 2 行：d+e−f = 2（4−2 / 7−5 / 10−8）⇒ <strong>f ∈ {2, 5, 8}</strong></span>
+              <span>第 3 行：(g+h)÷i = 2 ⇒ g+h+i = <strong>3i</strong>（3 的倍数）</span>
+            </div>
+          </div>
+          <p class="visual-caption">注：完整终盘表格在原始 PDF 中 OCR 混淆未定稿，仅展示原文明确写出的代数约束。</p>
+        `
+      };
+
+    case `tb-kp-1`:
+      return {
+        title: `竖式对齐线索图（原文 Key Points 仅附题干）`,
+        tag: `审题竖式`,
+        html: `
+          <div class="v-pair">
+            ${makeVGrid(5, [
+              [``, ``, `B`, `A`, { t: `D`, c: `vc--yellow` }],
+              [`+`, ``, `B`, `A`, { t: `D`, c: `vc--yellow` }],
+              `RULE`,
+              [``, { t: `G`, c: `vc--blue` }, `O`, `O`, { t: `D`, c: `vc--yellow` }]
+            ])}
+            <div class="branch-card branch-card--hi">
+              <strong>视觉线索（非原文解析）</strong>
+              <span>① 三位数+三位数=四位数 ⇒ 最高位进位蓝底 <strong>G</strong></span>
+              <span>② 个位黄底 D+D 尾数仍为 D</span>
+              <span>③ 结合附加条件：BAD 非 3 倍数、GOOD 非 8 倍数</span>
+            </div>
+          </div>
+        `
+      };
+
+    case `tb-kp-2`:
+      return {
+        title: `双式联立数位对照图（原文 Key Points 仅附题干）`,
+        tag: `结构线索`,
+        html: `
+          <div class="v-pair">
+            ${makeVGrid(4, [
+              [``, { t: `妙`, c: `vc--blue` }, { t: `数`, c: `vc--yellow` }, `学`],
+              [`+`, ``, ``, `美`],
+              `RULE`,
+              [``, { t: `妙`, c: `vc--blue` }, { t: `数`, c: `vc--yellow` }, `数`]
+            ])}
+            <div class="branch-card branch-card--hi">
+              <strong>第二式直观观察（非原文解析）</strong>
+              <span>百位「妙」不变、十位「数」不变，重点观察个位「学 + 美」是否进位，再联立第一式「美 × 妙数学 = 数数妙」。</span>
+            </div>
+          </div>
+        `
+      };
+
+    case `tb-kp-3`:
+      return {
+        title: `三数加法竖式线索图（原文 Key Points 仅附题干）`,
+        tag: `审题竖式`,
+        html: `
+          <div class="v-pair">
+            ${makeVGrid(6, [
+              [``, `F`, `O`, `R`, { t: `T`, c: `vc--blue` }, { t: `Y`, c: `vc--yellow` }],
+              [``, ``, ``, `T`, { t: `E`, c: `vc--blue` }, { t: `N`, c: `vc--yellow` }],
+              [`+`, ``, ``, `T`, { t: `E`, c: `vc--blue` }, { t: `N`, c: `vc--yellow` }],
+              `RULE`,
+              [``, `S`, `I`, `X`, { t: `T`, c: `vc--blue` }, { t: `Y`, c: `vc--yellow` }]
+            ])}
+            <div class="branch-card branch-card--hi">
+              <strong>末两位对齐线索（非原文解析）</strong>
+              <span>① 黄底个位 Y+N+N 尾数为 Y ⇒ 2N 尾数为 0</span>
+              <span>② 蓝底十位 T+E+E+进位 尾数为 T ⇒ 2E+进位 尾数为 0</span>
+            </div>
+          </div>
+        `
+      };
+
+    case `wb-1`:
+      return {
+        title: `横式改写竖式 · 个位与千位双锁定`,
+        tag: `竖式对齐`,
+        html: `
+          <div class="v-pair">
+            <div class="v-card">
+              <span class="v-card-label">① 符号竖式</span>
+              ${makeVGrid(5, [
+                [``, ``, `A`, `A`, { t: `A`, c: `vc--yellow` }],
+                [``, ``, `B`, `B`, { t: `B`, c: `vc--yellow` }],
+                [`+`, ``, `C`, `C`, { t: `C`, c: `vc--yellow` }],
+                `RULE`,
+                [``, { t: `C`, c: `vc--blue` }, `B`, `B`, { t: `C`, c: `vc--yellow` }]
+              ])}
+            </div>
+            <span class="v-arrow" aria-hidden="true">→</span>
+            <div class="v-card">
+              <span class="v-card-label">② 验证竖式（C=1, B=2, A=8）</span>
+              ${makeVGrid(5, [
+                [``, ``, `8`, `8`, `8`],
+                [``, ``, `2`, `2`, `2`],
+                [`+`, ``, `1`, `1`, `1`],
+                `RULE`,
+                [``, { t: `1`, c: `vc--green` }, { t: `2`, c: `vc--green` }, { t: `2`, c: `vc--green` }, { t: `1`, c: `vc--green` }]
+              ])}
+            </div>
+          </div>
+          <p class="visual-caption">黄底个位 A+B+C 尾数为 C ⇒ A+B=10；蓝底千位 C ≤ 2（三数之和 &lt; 3000），排除 C=2 后得 C=1, B=2, A=8。</p>
+        `
+      };
+
+    case `wb-2`:
+      return {
+        title: `经典「缺 8 数」竖式对照图`,
+        tag: `缺8数性质`,
+        html: `
+          <div class="v-pair">
+            ${makeVGrid(10, [
+              [``, `1`, `2`, `3`, `4`, `5`, `6`, `7`, { t: `9`, c: `vc--yellow` }, ``],
+              [`×`, ``, ``, ``, ``, ``, ``, ``, { t: `9`, c: `vc--blue` }, ``],
+              `RULE`,
+              [{ t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, ``]
+            ])}
+            <div class="branch-card branch-card--ok">
+              <strong>记牢经典恒等式</strong>
+              <span>12345679 × 9 = 111111111（9 个 1）</span>
+              <span>「来」= 1，「赛」= 9，八位数为 <strong>12345679</strong></span>
+            </div>
+          </div>
+        `
+      };
+
+    case `wb-3`:
+      return {
+        title: `三位数 × 两位数乘法竖式还原图`,
+        tag: `乘法竖式`,
+        html: `
+          <div class="v-pair">
+            <div class="v-card">
+              <span class="v-card-label">① 填入空格前</span>
+              ${makeVGrid(5, [
+                [``, ``, { t: `□`, c: `vc--blue` }, `4`, `3`],
+                [`×`, ``, ``, `2`, { t: `□`, c: `vc--yellow` }],
+                `RULE`,
+                [``, `6`, `□`, `□`, { t: `8`, c: `vc--yellow` }]
+              ])}
+            </div>
+            <span class="v-arrow" aria-hidden="true">→</span>
+            <div class="v-card">
+              <span class="v-card-label">② 完整部分积还原</span>
+              ${makeVGrid(5, [
+                [``, ``, { t: `2`, c: `vc--blue` }, `4`, `3`],
+                [`×`, ``, ``, `2`, { t: `6`, c: `vc--yellow` }],
+                `RULE`,
+                [``, `1`, `4`, `5`, { t: `8`, c: `vc--yellow` }],
+                [``, `4`, `8`, `6`, { t: `0`, c: `vc--muted` }],
+                `RULE`,
+                [``, { t: `6`, c: `vc--green` }, { t: `3`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `8`, c: `vc--green` }]
+              ])}
+            </div>
+          </div>
+          <p class="visual-caption">先由 3 × □ 末位 8 锁死黄底 6，再由 2 × □43 凑总积首位 6 锁死蓝底 2。</p>
+        `
+      };
+
+    case `wb-4`:
+      return {
+        title: `阶梯位值累加对齐图（直观看出 1000 / 200 / 30 / 4 系数）`,
+        tag: `位值阶梯`,
+        html: `
+          <div class="v-pair">
+            ${makeVGrid(5, [
+              [``, { t: `喜`, c: `vc--blue` }, { t: `爱`, c: `vc--yellow` }, `数`, `学`],
+              [``, ``, { t: `爱`, c: `vc--yellow` }, `数`, `学`],
+              [``, ``, ``, `数`, `学`],
+              [`+`, ``, ``, ``, `学`],
+              `RULE`,
+              [``, `2`, `0`, `1`, `8`]
+            ])}
+            <div class="branch-card branch-card--hi">
+              <strong>逐位计数合并</strong>
+              <span>千位 1 个「喜」⇒ 1000×喜（喜=1）</span>
+              <span>百位 2 个「爱」⇒ 200×爱（爱=4，余 218）</span>
+              <span>十位 3 个「数」⇒ 30×数（数=7，余 8）</span>
+              <span>个位 4 个「学」⇒ 4×学（学=2）</span>
+            </div>
+          </div>
+        `
+      };
+
+    case `wb-5`:
+      return {
+        title: `除法转乘法放缩筛查图（8 × □□ = □□ ≤ 99）`,
+        tag: `极值放缩`,
+        html: `
+          <div class="chip-matrix">
+            <div class="m-chip m-chip--no"><span class="m-chip-val">8 × 10 = 80</span><small>含数字 0（题目限 1~9）</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">8 × 11 = 88</span><small>数字 1、8 重复</small></div>
+            <div class="m-chip m-chip--ok"><span class="m-chip-val">8 × 12 = 96 ✓</span><small>唯一合法！已用 1,2,6,8,9</small></div>
+            <div class="m-chip m-chip--hi"><span class="m-chip-val">余 3,4,5,7</span><small>配平减法：45 − 37 = 8</small></div>
+          </div>
+        `
+      };
+
+    case `wb-6`:
+      return {
+        title: `11 的整除特征「奇偶位数字和之差」图解`,
+        tag: `11整除图解`,
+        html: `
+          <svg viewBox="0 0 480 104" width="100%" style="max-width:480px;" role="img" aria-label="三位数5方框7奇偶位差示意图">
+            <rect x="20" y="14" width="54" height="44" fill="#0055ff" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="47" y="42" text-anchor="middle" font-size="18" font-weight="900" fill="#ffffff">5</text>
+            <text x="47" y="75" text-anchor="middle" font-size="11" font-weight="700" fill="#0055ff">奇数位</text>
+
+            <rect x="86" y="14" width="54" height="44" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="113" y="42" text-anchor="middle" font-size="18" font-weight="900" fill="#1a1a1a">□</text>
+            <text x="113" y="75" text-anchor="middle" font-size="11" font-weight="700" fill="#8f5800">偶数位</text>
+
+            <rect x="152" y="14" width="54" height="44" fill="#0055ff" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="179" y="42" text-anchor="middle" font-size="18" font-weight="900" fill="#ffffff">7</text>
+            <text x="179" y="75" text-anchor="middle" font-size="11" font-weight="700" fill="#0055ff">奇数位</text>
+
+            <path d="M 47 82 Q 113 102 179 82" fill="none" stroke="#0055ff" stroke-width="2"/>
+            <text x="345" y="34" text-anchor="middle" font-size="13" font-weight="800" fill="#1a1a1a">奇数位和 − 偶数位 = 11</text>
+            <text x="345" y="58" text-anchor="middle" font-size="14" font-weight="900" fill="#156d3f">(5 + 7) − □ = 11 ⇒ □ = 1</text>
+            <text x="345" y="80" text-anchor="middle" font-size="12" fill="#4a4a4a">乘积为 517（11 × 47 = 517）</text>
+          </svg>
+        `
+      };
+
+    case `wb-7`:
+      return {
+        title: `乘法竖式进位追踪图（2 × 478 = 956）`,
+        tag: `进位追踪`,
+        html: `
+          <div class="v-pair">
+            ${makeVGrid(4, [
+              [``, { t: `4`, c: `vc--blue` }, `7`, { t: `8`, c: `vc--yellow` }],
+              [`×`, ``, ``, `2`],
+              `RULE`,
+              [``, { t: `9`, c: `vc--green` }, { t: `5`, c: `vc--green` }, { t: `6`, c: `vc--green` }]
+            ])}
+            <div class="branch-card branch-card--hi">
+              <strong>进位链条核验（数字池 4,5,6,7,8,9）</strong>
+              <span>① 首位 &lt; 5 ⇒ 百位唯一为 <strong>4</strong></span>
+              <span>② 个位 8×2 = 16（写 6 进 <strong>1</strong>）</span>
+              <span>③ 十位 7×2 + 1 = 15（写 5 进 <strong>1</strong>）</span>
+              <span>④ 百位 4×2 + 1 = <strong>9</strong>（六数各用一次 ✓）</span>
+            </div>
+          </div>
+        `
+      };
+
+    case `wb-8`:
+      return {
+        title: `乘法候选 + 奇偶个数排除对比图`,
+        tag: `奇偶分析`,
+        html: `
+          <div class="branch-grid">
+            <div class="branch-card branch-card--no">
+              <strong>候选 ①：2 × 4 = 8 ❌ 排除</strong>
+              <span>剩余数字：1, 3, 5, 6, 7, 9</span>
+              <span>仅剩 <strong>1 个偶数 + 5 个奇数</strong></span>
+              <span>加减等式每式需 0 个或 2 个偶数，无法配平两式！</span>
+            </div>
+            <div class="branch-card branch-card--ok">
+              <strong>候选 ②：2 × 3 = 6 ✓ 成立</strong>
+              <span>剩余数字：1, 4, 5, 7, 8, 9</span>
+              <span>剩余 <strong>2 个偶数 + 4 个奇数</strong>（各分 1 偶 2 奇）</span>
+              <span>标准解：<strong>4 + 5 = 9</strong>，<strong>8 − 7 = 1</strong></span>
+            </div>
+          </div>
+        `
+      };
+
+    case `wb-9`:
+      return {
+        title: `完全平方数 DEE = (C×F)² 分支筛选树`,
+        tag: `平方数分支`,
+        html: `
+          <div class="chip-matrix" style="margin-bottom:4px;">
+            <div class="m-chip m-chip--ok"><span class="m-chip-val">DEE = 100</span><small>&lt; 200 保留</small></div>
+            <div class="m-chip m-chip--ok"><span class="m-chip-val">DEE = 144</span><small>&lt; 200 保留</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">400</span><small>两位数和 &lt; 200 淘汰</small></div>
+            <div class="m-chip m-chip--no"><span class="m-chip-val">900</span><small>两位数和 &lt; 200 淘汰</small></div>
+          </div>
+          <div class="branch-grid">
+            <div class="branch-card branch-card--ok">
+              <strong>分支 ① DEE = 144（C×F = 12）</strong>
+              <span>C=2 ⇒ 144−22=122（三位数 ❌）</span>
+              <span>C=6, F=2 ⇒ 144−66=78 ✓ ⇒ <strong>ABCDEF = 786142</strong></span>
+            </div>
+            <div class="branch-card branch-card--ok">
+              <strong>分支 ② DEE = 100（C×F = 10）</strong>
+              <span>C=5 ⇒ 100−55=45（数字 5 重复 ❌）</span>
+              <span>C=2, F=5 ⇒ 100−22=78 ✓ ⇒ <strong>ABCDEF = 782105</strong></span>
+            </div>
+          </div>
+        `
+      };
+
+    case `wb-10`:
+      return {
+        title: `四边等式几何框图（1, 2, 3, 4, 5, 6, 11, 12 填入结果）`,
+        tag: `四边框图`,
+        html: `
+          <svg viewBox="0 0 420 220" width="100%" style="max-width:420px;" role="img" aria-label="四边加减乘除等式框图">
+            <!-- Top row: 12 ÷ 4 = 3 -->
+            <rect x="20" y="16" width="54" height="42" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="47" y="43" text-anchor="middle" font-size="16" font-weight="900">12</text>
+            <text x="108" y="43" text-anchor="middle" font-size="18" font-weight="900" fill="#0055ff">÷</text>
+            <rect x="142" y="16" width="54" height="42" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="169" y="43" text-anchor="middle" font-size="16" font-weight="900">4</text>
+            <text x="230" y="43" text-anchor="middle" font-size="18" font-weight="900">=</text>
+            <rect x="264" y="16" width="54" height="42" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="291" y="43" text-anchor="middle" font-size="16" font-weight="900">3</text>
+
+            <!-- Left col: 12 - 11 = 1 -->
+            <text x="47" y="81" text-anchor="middle" font-size="18" font-weight="900" fill="#e63b2e">−</text>
+            <rect x="20" y="92" width="54" height="42" fill="#eee9e0" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="47" y="119" text-anchor="middle" font-size="16" font-weight="900">11</text>
+            <text x="47" y="155" text-anchor="middle" font-size="16" font-weight="900">=</text>
+
+            <!-- Right col: 3 × 2 = 6 -->
+            <text x="291" y="81" text-anchor="middle" font-size="18" font-weight="900" fill="#0055ff">×</text>
+            <rect x="264" y="92" width="54" height="42" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="291" y="119" text-anchor="middle" font-size="16" font-weight="900">2</text>
+            <text x="291" y="155" text-anchor="middle" font-size="16" font-weight="900">=</text>
+
+            <!-- Bottom row: 1 + 5 = 6 -->
+            <rect x="20" y="164" width="54" height="42" fill="#ffcc00" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="47" y="191" text-anchor="middle" font-size="16" font-weight="900">1</text>
+            <text x="108" y="191" text-anchor="middle" font-size="18" font-weight="900" fill="#156d3f">+</text>
+            <rect x="142" y="164" width="54" height="42" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+            <text x="169" y="191" text-anchor="middle" font-size="16" font-weight="900">5</text>
+            <text x="230" y="191" text-anchor="middle" font-size="18" font-weight="900">=</text>
+            <rect x="264" y="164" width="54" height="42" fill="#d8efe0" stroke="#156d3f" stroke-width="2.5"/>
+            <text x="291" y="191" text-anchor="middle" font-size="16" font-weight="900" fill="#114b2c">6</text>
+
+            <text x="366" y="116" text-anchor="middle" font-size="11" font-weight="700" fill="#4a4a4a">四角共用顶点</text>
+            <text x="366" y="134" text-anchor="middle" font-size="11" fill="#4a4a4a">四边同时成立</text>
+          </svg>
+        `
+      };
+
+    case `wb-11`:
+      return {
+        title: `「0 禁位雷达图」：为什么 0 只能填在被除数个位 f？`,
+        tag: `0位置锁定`,
+        html: `
+          <div class="radar-row">
+            <div class="radar-slot radar-slot--ban"><span>a</span><small>≠0 乘数</small></div>
+            <span>×</span>
+            <div class="radar-slot radar-slot--ban"><span>b</span><small>≠0 乘数</small></div>
+            <span>=</span>
+            <div class="radar-slot radar-slot--ban"><span>c</span><small>≠0 首位</small></div>
+            <div class="radar-slot radar-slot--ban"><span>d</span><small>≠0 防重</small></div>
+            <span>=</span>
+            <div class="radar-slot radar-slot--ban"><span>e</span><small>≠0 首位</small></div>
+            <div class="radar-slot radar-slot--only"><span>f = 0</span><small>唯一位 ✓</small></div>
+            <span>÷</span>
+            <div class="radar-slot radar-slot--ban"><span>g</span><small>≠0 除数</small></div>
+          </div>
+          <p class="visual-caption">若 d=0 则 ef = cd×g 末位 f 也为 0（冲突），故唯一只能 f=0；1~6 中不含 0 且不重复的两位数积只有 3×4=12 ⇒ <strong>3 × 4 = 12 = 60 ÷ 5</strong>。</p>
+        `
+      };
+
+    case `wb-12`:
+      return {
+        title: `偶数末位 F 分支枚举 + 13 整除终筛图`,
+        tag: `分支终筛`,
+        html: `
+          <div class="branch-grid">
+            <div class="branch-card branch-card--no">
+              <strong>分支 F = 2 ❌</strong>
+              <span>C=6, A=3, D=7 ⇒ 2×3B6=7E2</span>
+              <span>余下 4, 5 无法成立</span>
+            </div>
+            <div class="branch-card branch-card--no">
+              <strong>分支 F = 4 ❌（非13倍数）</strong>
+              <span>2×267 = 534（÷13 余 1）</span>
+              <span>2×327 = 654（÷13 余 4）</span>
+            </div>
+            <div class="branch-card branch-card--ok">
+              <strong>分支 F = 6 ✓ 唯一整除</strong>
+              <span>C=3, A=2 ⇒ <strong>2 × 273 = 546</strong></span>
+              <span>546 ÷ 13 = <strong>42</strong>（整除！）</span>
+            </div>
+          </div>
+        `
+      };
+
+    default:
+      return null;
+  }
+}
+
 function getFilteredProblems() {
   const q = appState.searchQuery.trim().toLowerCase();
   return PROBLEMS.filter(function(p) {
@@ -2746,6 +3768,29 @@ function renderProblemsList() {
       ? `<span class="tag tag--muted">原文缺完整答案</span>`
       : ``;
 
+    const visualObj = buildProblemVisual(p.id);
+    const formulaTex = PROBLEM_FORMULAS[p.id] || ``;
+    const visualBadge = visualObj
+      ? `<span class="tag tag--yellow">含直观图解</span>`
+      : ``;
+
+    const visualBlockHtml = visualObj ? `
+      <div class="visual-box">
+        <div class="visual-box-head">
+          <span class="visual-box-title">${escapeHtml(visualObj.title)}</span>
+          <span class="tag tag--blue">${escapeHtml(visualObj.tag)}</span>
+        </div>
+        ${visualObj.html}
+      </div>
+    ` : ``;
+
+    const formulaBlockHtml = formulaTex ? `
+      <div>
+        <span class="compare-row-label">核心数学公式与推导链</span>
+        <div class="formula-panel" style="margin-top:4px;">${renderMath(formulaTex, true)}</div>
+      </div>
+    ` : ``;
+
     return `
       <article class="${cardClasses}" id="card-${p.id}">
         <div>
@@ -2755,6 +3800,7 @@ function renderProblemsList() {
               <div class="tag-group">
                 <span class="tag ${styleInfo.tagClass}">${escapeHtml(p.module)}</span>
                 <span class="tag">${escapeHtml(p.category)}</span>
+                ${visualBadge}
                 ${missingTag}
               </div>
               <button
@@ -2785,7 +3831,7 @@ function renderProblemsList() {
                 aria-controls="body-${p.id}"
                 onclick="toggleProblem('${p.id}')"
               >
-                <span>${isExpanded ? `收起破题解析与原文摘录` : `展开破题解析与答案`}</span>
+                <span>${isExpanded ? `收起破题解析、图解与原文摘录` : `展开破题解析、图解与公式`}</span>
                 <span aria-hidden="true">${isExpanded ? `▲` : `▼`}</span>
               </button>
 
@@ -2794,6 +3840,9 @@ function renderProblemsList() {
                   <span class="compare-row-label">破题突破口</span>
                   <div class="breakthrough-callout" style="margin-top:4px;">${formatMathText(p.breakthrough)}</div>
                 </div>
+
+                ${visualBlockHtml}
+                ${formulaBlockHtml}
 
                 <div>
                   <span class="compare-row-label">最终答案</span>
