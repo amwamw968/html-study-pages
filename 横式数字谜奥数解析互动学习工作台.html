@@ -1896,7 +1896,7 @@ button, input, select, textarea {
           <span class="math-expr">4abc = 4000 + x，abc4 = 10x + 4</span>
         </li>
         <li>
-          <span><strong>经典缺 8 数性质（练习册 第 2 题）</strong></span>
+          <span><strong>经典缺 8 数性质（<a href="#sec-missing8" onclick="event.preventDefault();jumpToMissing8();" style="color:var(--tertiary); text-decoration:underline;">深度拓展</a> · <a href="#card-wb-2" onclick="event.preventDefault();jumpToProblem('wb-2');" style="color:var(--secondary); text-decoration:underline;">练习册 第 2 题</a>）</strong></span>
           <span class="math-expr">12345679 × 9 = 111111111</span>
         </li>
         <li>
@@ -1908,6 +1908,65 @@ button, input, select, textarea {
           <span class="math-expr">1+2+…+8 = 36，均分 3 组得 △ = 12</span>
         </li>
       </ul>
+    </div>
+  </section>
+
+  <!-- Section 3.5: Expanded "Missing 8 Number (12345679)" Special Module linked with wb-2 -->
+  <section class="section-open section-open--yellow" id="sec-missing8" aria-labelledby="sec-missing8-title">
+    <div class="section-header">
+      <div>
+        <span class="kicker-block kicker-block--yellow">奥数数论拓展 · 双向关联 练习册 第 2 题</span>
+        <h2 class="section-heading" id="sec-missing8-title">经典「缺 8 数」（12345679）深度拓展与互动演算台</h2>
+        <p class="section-desc">由「练习册 · 第 2 题（来参加奥运会比赛 × 赛 = 来来来来来来来来来）」引出的奥数明星数字 <strong>12345679</strong>：从来源本质、三大神奇乘法家族，到原题唯一性严密证明一站打通。</p>
+      </div>
+      <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+        <button type="button" class="btn btn--primary" onclick="jumpToProblem('wb-2')">定位并展开：练习册 · 第 2 题 →</button>
+      </div>
+    </div>
+
+    <div class="sop-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+      <article class="sop-card">
+        <span class="sop-num" style="background:var(--tertiary);">01</span>
+        <h3 class="sop-title">身世来历：为什么唯独缺了 8？</h3>
+        <p style="margin:0; font-size:0.9rem;">将 9 个 1 除以 9 即得 <span class="math-expr">111111111 ÷ 9 = 12345679</span>。换个角度看，分数 <span class="math-expr">1/81 = 0.012345679012345679…</span>（9 位循环节），十进制连续进位把本该出现的 8 “顶”成了 9。</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>质因数分解：</strong><span class="math-expr">12345679 = 37 × 333667</span>；<span class="math-expr">111111111 = 3² × 37 × 333667</span>。</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num" style="background:var(--secondary);">02</span>
+        <h3 class="sop-title">三大神奇乘法家族（奥数速算利器）</h3>
+        <p style="margin:0; font-size:0.9rem;">① <strong>乘 9 的倍数（9k）</strong>：得 9 个相同数字「清一色」（如 ×18 得九个 2，×81 得九个 9）；<br>② <strong>乘 3 的非 9 倍数</strong>：得「三位循环节」（×3 = 37037037，×6 = 74074074）；<br>③ <strong>乘与 9 互质的一位数 d ∈ {1,2,4,5,7,8}</strong>：积仍是 8 个互异非零数字，且<strong>唯独缺 (9 − d)</strong>（如 ×8 = 98765432 倒序缺 1）！</p>
+      </article>
+
+      <article class="sop-card">
+        <span class="sop-num" style="background:var(--positive);">03</span>
+        <h3 class="sop-title">严密关联：为什么练习册第 2 题解唯一？</h3>
+        <p style="margin:0; font-size:0.9rem;">设「来」= k、「赛」= s，则八位数 = <span class="math-expr">12345679 × (9k ÷ s)</span>。若 <span class="math-expr">s &lt; 9</span>，则商 <span class="math-expr">q = 9k/s &gt; k</span>，导致乘积八位数首位 ≥ q &gt; k（不可能等于首位「来」），直接矛盾！</p>
+        <p style="margin:0; font-size:0.82rem; color:var(--on-surface-variant);"><strong>锁定唯一解：</strong>必有 <strong>赛 = 9</strong>，再由末位 9 × 9 = 81 锁死 <strong>来 = 1</strong>，唯一算式为 <strong>12345679 × 9 = 111111111</strong>。</p>
+      </article>
+    </div>
+
+    <div class="toolbar-panel" style="gap:var(--space-md);">
+      <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:var(--space-sm);">
+        <div>
+          <strong style="font-family:var(--font-headline); font-size:1.08rem;">缺 8 数乘法实时演算台（点击任意乘数验证三大规律）</strong>
+          <div style="font-size:0.84rem; color:var(--on-surface-variant);">切换「清一色 (9k)」「三位循环 (3 的倍数)」「走马灯缺位 (与 9 互质)」体验 12345679 的全部魔力</div>
+        </div>
+        <button type="button" class="btn btn--small" onclick="jumpToProblem('wb-2')">回到 练习册 第 2 题 卡片 ↗</button>
+      </div>
+
+      <div style="display:grid; gap:var(--space-xs);">
+        <div class="field-label">① 清一色家族（乘 9 的倍数，练习册第 2 题直接考查 ×9）：</div>
+        <div class="filter-pills" id="m8-pills-9"></div>
+        <div class="field-label" style="margin-top:4px;">② 三位循环节家族（乘 3 的倍数，非 9 倍数）：</div>
+        <div class="filter-pills" id="m8-pills-3"></div>
+        <div class="field-label" style="margin-top:4px;">③ 走马灯互异数字家族（乘与 9 互质的一位数 d，结果唯独缺 9 − d）：</div>
+        <div class="filter-pills" id="m8-pills-coprime"></div>
+      </div>
+
+      <div id="missing8-demo-output" class="visual-box" style="background:var(--background);">
+        <!-- Rendered by JS -->
+      </div>
     </div>
   </section>
 
@@ -2632,11 +2691,12 @@ const PROBLEMS = [
     missingAnswer: false,
     prompt: `在算式“来参加奥运会比赛 × 赛 = 来来来来来来来来来”中，“来参加奥运会比赛”所表示的数是？`,
     equation: `来参加奥运会比赛 × 赛 = 来来来来来来来来来（9 个“来”）`,
-    breakthrough: `改写成竖式，利用经典缺 8 数（12345679 × 9 = 111111111）性质直接试算锁定。`,
+    breakthrough: `改写成竖式，利用经典缺 8 数（12345679 × 9 = 111111111）性质与首位放缩法，一步锁定“赛 = 9、来 = 1”。`,
     steps: [
-      `把横式改写成八位数乘以一位数得九个相同数字“来”的竖式。`,
-      `观察乘积为 9 个相同数字，即 111111111 × 来。已知 111111111 = 12345679 × 9。`,
-      `由于“赛”是一位数且“来参加奥运会比赛”首位为“来”，试算出唯一算式为 12345679 × 9 = 111111111（其中“来”= 1，“赛”= 9）。`
+      `把横式改写成八位数乘以一位数得九个相同数字“来”的竖式：右边 = 111111111 × 来 = 12345679 × (9 × 来)。`,
+      `证明“赛”唯一只能是 9：记“来”= k、“赛”= s，则八位数 = 12345679 × (9k ÷ s)。若 s < 9，则商 q = 9k ÷ s > k，此时 12345679 × q 的首位数字 ≥ q > k，与八位数首位为“来（= k）”矛盾！因此必有 赛 = 9。`,
+      `锁定“来”= 1：当 赛 = 9 时，八位数 = 12345679 × k，观察个位“赛 × 赛 = 9 × 9 = 81”，积的个位“来”必为 1（也可用 k ≥ 2 时末位不为 9 排除）。`,
+      `代入检验：12345679 × 9 = 111111111，8 个汉字依次对应 1, 2, 3, 4, 5, 6, 7, 9 互不相同（唯独缺 8），完全成立！（延伸性质可点击下方按钮查看「经典缺 8 数」专题拓展台）`
     ],
     answer: `12345679`,
     quote: `“解析：改写成竖式，很容易可以试算出算式是 12345679 × 9 = 111111111。”`
@@ -2979,7 +3039,7 @@ const PROBLEM_FORMULAS = {
   'tb-kp-2': `\\text{美} \\times \\overline{\\text{妙数学}} = \\overline{\\text{数数妙}},\\qquad \\text{美} + \\overline{\\text{妙数学}} = \\overline{\\text{妙数数}}\\quad\\text{（原文仅附题干）}`,
   'tb-kp-3': `\\overline{FORTY} + \\overline{TEN} + \\overline{TEN} = \\overline{SIXTY}\\quad\\text{（原文仅附题干）}`,
   'wb-1': `\\overline{AAA} + \\overline{BBB} + \\overline{CCC} = \\overline{CBBC} \\;\\Rightarrow\\; A+B=10,\\; C=1 \\;\\Rightarrow\\; 888+222+111=1221,\\; \\boxed{A=8}`,
-  'wb-2': `111111111 = \\boxed{12345679} \\times 9 \\;\\Rightarrow\\; \\text{来}=1,\\; \\text{赛}=9`,
+  'wb-2': `111111111\\times\\text{来} = 12345679\\times(9\\times\\text{来}) \\;\\Rightarrow\\; \\text{赛}=9,\\; \\text{来}=1 \\;\\Rightarrow\\; \\boxed{12345679} \\times 9 = 111111111`,
   'wb-3': `\\overline{\\square 43} \\times \\overline{2\\square} = \\overline{6\\square\\square 8} \\;\\Rightarrow\\; 243\\times 6 = 1458,\\; 243\\times 20 = 4860 \\;\\Rightarrow\\; \\boxed{243 \\times 26 = 6318}`,
   'wb-4': `1000\\times\\text{喜} + 200\\times\\text{爱} + 30\\times\\text{数} + 4\\times\\text{学} = 2018 \\;\\Rightarrow\\; \\boxed{\\text{喜}=1,\\,\\text{爱}=4,\\,\\text{数}=7,\\,\\text{学}=2}`,
   'wb-5': `\\overline{\\square\\square} \\div \\overline{\\square\\square} = 8 \\;\\Rightarrow\\; 8\\times\\overline{\\square\\square} = \\overline{\\square\\square} \\le 99 \\;\\Rightarrow\\; \\boxed{96 \\div 12 = 45 - 37 = 8}`,
@@ -3550,7 +3610,7 @@ function buildProblemVisual(id) {
 
     case `wb-2`:
       return {
-        title: `经典「缺 8 数」竖式对照图`,
+        title: `经典「缺 8 数」竖式对照图 & 拓展联动`,
         tag: `缺8数性质`,
         html: `
           <div class="v-pair">
@@ -3561,9 +3621,12 @@ function buildProblemVisual(id) {
               [{ t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, { t: `1`, c: `vc--green` }, ``]
             ])}
             <div class="branch-card branch-card--ok">
-              <strong>记牢经典恒等式</strong>
-              <span>12345679 × 9 = 111111111（9 个 1）</span>
-              <span>「来」= 1，「赛」= 9，八位数为 <strong>12345679</strong></span>
+              <strong>记牢经典缺 8 数（12345679）</strong>
+              <span>• 清一色：12345679 × 9k = kkkkkkkkk（9 个 k）</span>
+              <span>• 本题锁定：赛 = 9，来 = 1 ⇒ <strong>12345679 × 9 = 111111111</strong></span>
+              <span style="margin-top:6px;">
+                <button type="button" class="btn btn--primary btn--small" onclick="jumpToMissing8()">展开「经典缺 8 数」深度拓展与互动演算台 ↓</button>
+              </span>
             </div>
           </div>
         `
@@ -4444,6 +4507,99 @@ function handleResetProgress(btn) {
 }
 
 // ========================
+// 6.4 Classic "Missing 8 Number (12345679)" Interactive Explorer
+// ========================
+let activeMissing8Mult = 9;
+const MISSING8_GROUPS = {
+  nine: [9, 18, 27, 36, 45, 54, 63, 72, 81],
+  three: [3, 6, 12, 15],
+  coprime: [1, 2, 4, 5, 7, 8]
+};
+
+function selectMissing8Mult(m) {
+  activeMissing8Mult = Number(m) || 9;
+  renderMissing8Explorer();
+}
+
+function jumpToMissing8() {
+  const sec = document.getElementById(`sec-missing8`);
+  if (sec && typeof sec.scrollIntoView === `function`) {
+    sec.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+}
+
+function renderMissing8Explorer() {
+  const base = 12345679;
+  const m = activeMissing8Mult;
+  const prod = base * m;
+  const prodStr = String(prod);
+
+  const renderGroup = function(containerId, list) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = list.map(function(val) {
+      const active = val === m;
+      const badge = val === 9 ? ` ★原题` : ``;
+      return `<button type="button" class="filter-chip ${active ? `is-active` : ``}" aria-pressed="${active ? `true` : `false`}" onclick="selectMissing8Mult(${val})">× ${val}${badge}</button>`;
+    }).join(``);
+  };
+
+  renderGroup(`m8-pills-9`, MISSING8_GROUPS.nine);
+  renderGroup(`m8-pills-3`, MISSING8_GROUPS.three);
+  renderGroup(`m8-pills-coprime`, MISSING8_GROUPS.coprime);
+
+  const out = document.getElementById(`missing8-demo-output`);
+  if (!out) return;
+
+  let familyTag = ``;
+  let breakdownTex = ``;
+  let explanation = ``;
+  let extraBadge = ``;
+
+  if (m % 9 === 0) {
+    const k = m / 9;
+    familyTag = `清一色家族（9 的倍数）`;
+    breakdownTex = `12345679 \\times ${m} = (12345679 \\times 9) \\times ${k} = 111111111 \\times ${k} = \\boxed{${prodStr}}`;
+    explanation = m === 9
+      ? `这正是「练习册 · 第 2 题」的唯一标准算式！9 个 1 对应 9 个「来」（来 = 1，赛 = 9），八位数 12345679 恰好不含 8 且 8 位互异。`
+      : `把 ×${m} 拆成 ×9×${k}：先用 12345679 × 9 变出「九个 1」，再乘 ${k} 直接得到「九个 ${k}」！奥数巧算见 12345679 × ${m} 可 1 秒口算。`;
+    extraBadge = `9 个「${k}」清一色`;
+  } else if (m % 3 === 0) {
+    const t = m / 3;
+    const chunk = prodStr.slice(0, 3);
+    familyTag = `三位循环节家族（3 的倍数）`;
+    breakdownTex = `12345679 \\times ${m} = (12345679 \\times 3) \\times ${t} = 37037037 \\times ${t} = \\boxed{${prodStr}}`;
+    explanation = `因为 12345679 = 37 × 333667 且 12345679 × 3 = 37037037（即 37 × 1001001），所以乘以 3 的非 9 倍数时，结果呈现出整齐的三位循环节（${chunk} 连续重复出现）！`;
+    extraBadge = `循环节：${chunk}`;
+  } else {
+    const missingDigit = 9 - m;
+    familyTag = `走马灯互异数字家族（与 9 互质）`;
+    breakdownTex = `12345679 \\times ${m} = \\boxed{${prodStr}}\\quad\\text{（8 位互异非零数字，唯独缺 }${missingDigit}\\text{）}`;
+    explanation = m === 8
+      ? `惊艳对称！12345679 × 8 = 98765432，8 个数字恰好从 9 倒序排到 2，唯独缺了 9 − 8 = 1！`
+      : `当乘数 d = ${m} 与 9 互质时，乘积恰好由 1~9 中除了「9 − ${m} = ${missingDigit}」之外的全部 8 个数字各出现一次组成，且数字位置像走马灯一样循环重排！`;
+    extraBadge = `唯独缺数字「${missingDigit}」`;
+  }
+
+  const digitCells = prodStr.split(``).map(function(ch) {
+    return `<span style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:38px; border:2px solid var(--outline); background:var(--primary-container); font-family:var(--font-label); font-weight:900; font-size:1.15rem;">${ch}</span>`;
+  }).join(``);
+
+  out.innerHTML = `
+    <div class="visual-box-head">
+      <span class="visual-box-title">${escapeHtml(familyTag)} · 12345679 × ${m}</span>
+      <span class="tag tag--blue">${escapeHtml(extraBadge)}</span>
+    </div>
+    <div class="formula-panel">${renderMath(breakdownTex, true)}</div>
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
+      <span style="font-family:var(--font-label); font-weight:700; font-size:0.86rem;">乘积数位拆解：</span>
+      ${digitCells}
+    </div>
+    <p class="visual-caption" style="font-size:0.88rem; color:var(--on-surface);">${escapeHtml(explanation)}</p>
+  `;
+}
+
+// ========================
 // 6.5 Offline Auto-Quiz Generator
 // ========================
 function updateQuizConfig() {
@@ -4673,6 +4829,7 @@ async function initApp() {
   renderSimulator();
   updateFilterChipsUI();
   renderProblemsList();
+  renderMissing8Explorer();
   syncQuizControlsUI();
   if (!Array.isArray(appState.quizIds) || appState.quizIds.length === 0) {
     generateQuiz();
