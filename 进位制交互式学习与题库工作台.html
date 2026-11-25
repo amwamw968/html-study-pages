@@ -1481,7 +1481,7 @@ button, input, select, textarea {
       <ul class="formula-list">
         <li>
           <span><strong>n 进制 → 十进制（KP-02）</strong></span>
-          <span class="math-inline">(324)<sub>5</sub> = 4×1 + 2×5 + 3×25 = 89</span>
+          <span class="math-inline">(324)<sub>5</sub> = 3×5<sup>2</sup> + 2×5<sup>1</sup> + 4×5<sup>0</sup> = 75 + 10 + 4 = 89</span>
         </li>
         <li>
           <span><strong>十进制 → n 进制（KP-03）</strong></span>
@@ -1493,7 +1493,7 @@ button, input, select, textarea {
         </li>
         <li>
           <span><strong>小数互化口诀（KP-05）</strong></span>
-          <span class="math-inline">n→10 乘 n<sup>-k</sup>；10→n 连续乘 n 取整正排</span>
+          <span class="math-inline">n→10 乘 1/n<sup>k</sup>；10→n 连续乘 n 取整正排</span>
         </li>
         <li>
           <span><strong>加减凑整巧算（KP-07）</strong></span>
@@ -1583,7 +1583,7 @@ button, input, select, textarea {
 
   <!-- Footer -->
   <footer class="site-footer">
-    <div><strong>来源边界声明：</strong>本工具展示的所有数字、公式、法则与例题均严格取材于上传文件《Lesson 3-进位制.pdf》与《Lesson 3-进位制-练习册.pdf》。未在资料中出现的进制、规则或题型均已显式标注「来源未提及」，不作任何外部增补或编造。</div>
+    <div><strong>来源边界声明：</strong>本工具收录的 44 条题库与讲义法则均严格取材于《Lesson 3-进位制.pdf》与《Lesson 3-进位制-练习册.pdf》；「按权展开法」对比表中为补齐二进制、三进制小数教学示例而增补的 2 道小学奥数典型案例，均已显式加注「补充示例」标签，其余未覆盖项均标明「来源未提及」。</div>
     <div>注：针对原始 PDF 扫描识别中的个别印刷/识别模糊处（如《Lesson 3-进位制-练习册.pdf》Practice 第 2(3) 题短除竖式明确得余数 1、4、0、3、4 即 (43041)<sub>5</sub>，以及 Challenge 第 3(1) 题竖式结果为 (23445)<sub>9</sub>），均已在解析与原文对照中如实说明。</div>
   </footer>
 
@@ -1616,8 +1616,8 @@ button, input, select, textarea {
         difficulty: `基础入门`,
         qtype: `概念规则`,
         isQuizEligible: false,
-        stemHtml: `将 n进制数转化为十进制数，采用「位值原理，按权相加」。从个位起向左各数位的位权依次为 <span class="math-inline">n<sup>0</sup>(=1), n<sup>1</sup>, n<sup>2</sup>, n<sup>3</sup>...</span>。讲义示例：<span class="math-inline">(324)<sub>5</sub> = 4×1 + 2×5 + 3×25 = 89</span>（即 3 个 25、2 个 5、4 个 1）。`,
-        answerHtml: `核心步骤：写出每位数字对应 <span class="math-inline">n</span> 的幂次（权），再相乘求和。`,
+        stemHtml: `将 n进制数转化为十进制数，采用「位值原理，按权相加」。按从高位到低位顺序，整数各数位的位权依次递减至 <span class="math-inline">n<sup>2</sup>, n<sup>1</sup>, n<sup>0</sup>(=1)</span>。讲义示例：<span class="math-inline">(324)<sub>5</sub> = 3×5<sup>2</sup> + 2×5<sup>1</sup> + 4×5<sup>0</sup> = 75 + 10 + 4 = 89</span>（即 3 个 25、2 个 5、4 个 1）。`,
+        answerHtml: `核心步骤：从高位到低位依次写出每位数字与对应 <span class="math-inline">n</span> 的幂次（位权）之积，再求和。`,
         quote: `二、进制的互化：\n1.n进制转化为十进制：位值原理，按权相加\n(324)_5 = 4×1 + 2×5 + 3×25 = 89\n3个25  2个5  4个1\n5^2    5^1    5^0`,
         sourceFile: `Lesson 3-进位制.pdf`,
         sourceSection: `Key Points · 二、进制的互化 (1)`
@@ -1661,7 +1661,7 @@ button, input, select, textarea {
         difficulty: `进阶探索`,
         qtype: `概念规则`,
         isQuizEligible: false,
-        stemHtml: `小数部分互化规则：① <span class="math-inline">n→10</span>：小数点后第 k 位乘以 <span class="math-inline">n<sup>-k</sup></span>（如 <span class="math-inline">1/5, 1/4, 1/16</span>）再相加（如 <span class="math-inline">(231.21)<sub>4</sub></span>）；② <span class="math-inline">10→n</span>：小数部分连续乘 n 取整数部分，顺序排列。示例：<span class="math-inline">0.84</span> 化五进制：<span class="math-inline">0.84×5=4.2</span>（取4），<span class="math-inline">0.2×5=1</span>（取1）。`,
+        stemHtml: `小数部分互化规则：① <span class="math-inline">n→10</span>：小数点后第 k 位按从左到右（高位到低位）依次乘以分数次方 <span class="math-inline">1/n<sup>k</sup></span>（如 <span class="math-inline">1/5<sup>1</sup>, 1/4<sup>1</sup>, 1/4<sup>2</sup></span>）再相加（如 <span class="math-inline">(231.21)<sub>4</sub></span>）；② <span class="math-inline">10→n</span>：小数部分连续乘 n 取整数部分，顺序排列。示例：<span class="math-inline">0.84</span> 化五进制：<span class="math-inline">0.84×5=4.2</span>（取4），<span class="math-inline">0.2×5=1</span>（取1）。`,
         answerHtml: `整数部分「短除倒取余」，小数部分「乘n取整正序排」。`,
         quote: `④小数\n(1) n→10  (231.21)_4\n(2) 10→n  123.84 → (...4)_5\n0.84×5=4.2\n0.2×5=1`,
         sourceFile: `Lesson 3-进位制.pdf`,
@@ -1767,7 +1767,7 @@ button, input, select, textarea {
         qtype: `进制互化`,
         isQuizEligible: true,
         stemHtml: `计算：<br>(1) <span class="math-inline">(1431)<sub>5</sub> = (____)<sub>10</sub></span>；<br>(2) <span class="math-inline">(10111)<sub>3</sub> = (____)<sub>10</sub></span>。`,
-        answerHtml: `(1) <span class="math-inline">(241)<sub>10</sub></span>（<span class="math-inline">1×1 + 3×5 + 4×25 + 1×125 = 241</span>）；<br>(2) <span class="math-inline">(94)<sub>10</sub></span>（<span class="math-inline">1×1 + 1×3 + 1×9 + 0×27 + 1×81 = 94</span>）。`,
+        answerHtml: `(1) <span class="math-inline">(241)<sub>10</sub></span>（<span class="math-inline">1×5<sup>3</sup> + 4×5<sup>2</sup> + 3×5<sup>1</sup> + 1×5<sup>0</sup> = 125 + 100 + 15 + 1 = 241</span>）；<br>(2) <span class="math-inline">(94)<sub>10</sub></span>（<span class="math-inline">1×3<sup>4</sup> + 0×3<sup>3</sup> + 1×3<sup>2</sup> + 1×3<sup>1</sup> + 1×3<sup>0</sup> = 81 + 0 + 9 + 3 + 1 = 94</span>）。`,
         quote: `Exploration 1:\n计算：(1431)_5 = (241)_10。 1×1 + 3×5 + 4×25 + 1×125 = 241\n计算：(10111)_3 = (94)_10。 1×1 + 1×3 + 1×9 + 0×27 + 1×81 = 94`,
         sourceFile: `Lesson 3-进位制.pdf`,
         sourceSection: `Module 1 · Exploration 1`
@@ -1782,7 +1782,7 @@ button, input, select, textarea {
         qtype: `综合与小数`,
         isQuizEligible: true,
         stemHtml: `「五星制」（5进制）：1 张 UR = 5 张 SSR，1 张 SSR = 5 张 SR；「八卦制」（8进制）：1 张 VR = 8 张 TTR，1 张 TTR = 8 张 SR。<br>(1) 1 张 UR 最多换多少张 SR？<br>(2) 小华有 3 张 UR、2 张 SSR、4 张 SR，全部兑换成八卦制后，VR、TTR、SR 各是多少张？<br>(3) 计算：<span class="math-inline">(423)<sub>5</sub> = (____)<sub>8</sub></span>；(4) <span class="math-inline">(1042)<sub>5</sub> = (____)<sub>8</sub></span>。`,
-        answerHtml: `(1) <span class="math-inline">5<sup>2</sup> = 25</span> 张 SR；<br>(2) <span class="math-inline">(324)<sub>5</sub> = 4×1 + 2×5 + 3×25 = (89)<sub>10</sub> = (131)<sub>8</sub></span>，即 1 张 VR、3 张 TTR、1 张 SR；<br>(3) <span class="math-inline">(423)<sub>5</sub> = (113)<sub>10</sub> = (161)<sub>8</sub></span>；<br>(4) <span class="math-inline">(1042)<sub>5</sub> = (147)<sub>10</sub> = (223)<sub>8</sub></span>。`,
+        answerHtml: `(1) <span class="math-inline">5<sup>2</sup> = 25</span> 张 SR；<br>(2) <span class="math-inline">(324)<sub>5</sub> = 3×5<sup>2</sup> + 2×5<sup>1</sup> + 4×5<sup>0</sup> = (89)<sub>10</sub> = (131)<sub>8</sub></span>，即 1 张 VR、3 张 TTR、1 张 SR；<br>(3) <span class="math-inline">(423)<sub>5</sub> = (113)<sub>10</sub> = (161)<sub>8</sub></span>；<br>(4) <span class="math-inline">(1042)<sub>5</sub> = (147)<sub>10</sub> = (223)<sub>8</sub></span>。`,
         quote: `Exploration 2: “五星制”标准(5进制)和“八卦制”标准(8进制)\n(1) 5^2 = 25\n(2) (324)_5 = (89)_10 = (131)_8\n(3) (423)_5 = (113)_10 = (161)_8\n(4) (1042)_5 = (147)_10 = (223)_8`,
         sourceFile: `Lesson 3-进位制.pdf`,
         sourceSection: `Module 1 · Exploration 2`
@@ -1947,7 +1947,7 @@ button, input, select, textarea {
         qtype: `综合与小数`,
         isQuizEligible: true,
         stemHtml: `填空：<br>(1) <span class="math-inline">(43.2)<sub>5</sub> = (____)<sub>10</sub></span>；<br>(2) <span class="math-inline">(12.21)<sub>4</sub> = (____)<sub>10</sub></span>；<br>(3) <span class="math-inline">(20.25)<sub>10</sub> = (____)<sub>8</sub></span>；<br>(4) <span class="math-inline">(0.856)<sub>10</sub> = (____)<sub>5</sub></span>。`,
-        answerHtml: `(1) <strong>23.4</strong>（<span class="math-inline">4×5 + 3×1 + 2×1/5 = 23.4</span>）；<br>(2) <strong>6.5625</strong>（<span class="math-inline">1×4 + 2×1 + 2×1/4 + 1×1/16 = 6.5625</span>）；<br>(3) <strong>(24.2)<sub>8</sub></strong>（整数 20→24，小数 <span class="math-inline">0.25×8 = 2</span>）；<br>(4) <strong>(0.412)<sub>5</sub></strong>（<span class="math-inline">0.856×5=4.28</span> 取4，<span class="math-inline">0.28×5=1.4</span> 取1，<span class="math-inline">0.4×5=2</span> 取2）。`,
+        answerHtml: `(1) <strong>23.4</strong>（<span class="math-inline">4×5<sup>1</sup> + 3×5<sup>0</sup> + 2×(1/5<sup>1</sup>) = 20 + 3 + 0.4 = 23.4</span>）；<br>(2) <strong>6.5625</strong>（<span class="math-inline">1×4<sup>1</sup> + 2×4<sup>0</sup> + 2×(1/4<sup>1</sup>) + 1×(1/4<sup>2</sup>) = 4 + 2 + 0.5 + 0.0625 = 6.5625</span>）；<br>(3) <strong>(24.2)<sub>8</sub></strong>（整数 20→24，小数 <span class="math-inline">0.25×8 = 2</span>）；<br>(4) <strong>(0.412)<sub>5</sub></strong>（<span class="math-inline">0.856×5=4.28</span> 取4，<span class="math-inline">0.28×5=1.4</span> 取1，<span class="math-inline">0.4×5=2</span> 取2）。`,
         quote: `Extension:\n(1)(43.2)_5 = (23.4)_10\n(2)(12.21)_4 = (6.5625)_10\n(3)(20.25)_10 = (24.2)_8 (0.25×8=2)\n(4)(0.856)_10 = (0.412)_5 (0.856×5=4.28, 0.28×5=1.4, 0.4×5=2)`,
         sourceFile: `Lesson 3-进位制.pdf`,
         sourceSection: `Module 3 · Extension`
@@ -1962,7 +1962,7 @@ button, input, select, textarea {
         qtype: `综合与小数`,
         isQuizEligible: true,
         stemHtml: `用 a, b, c, d, e 分别代表五进制中五个互不相同的数字，如果 <span class="math-inline">(ade)<sub>5</sub></span>、<span class="math-inline">(adc)<sub>5</sub></span>、<span class="math-inline">(aab)<sub>5</sub></span> 是由小到大排列的连续正整数，那么 <span class="math-inline">(cde)<sub>5</sub></span> 所表示的整数写成十进制的表示是多少？`,
-        answerHtml: `<strong>108</strong>。<br>解析：五进制数字为 0~4。<span class="math-inline">(adc)<sub>5</sub> + 1 = (aab)<sub>5</sub></span> 发生十位进位，故个位 <span class="math-inline">c = 4</span>，进位后 <span class="math-inline">b = 0</span>，<span class="math-inline">e = c - 1 = 3</span>；十位 <span class="math-inline">d + 1 = a</span> 且五字母互异（0,3,4已用），得 <span class="math-inline">d = 1, a = 2</span>。故 <span class="math-inline">(cde)<sub>5</sub> = (413)<sub>5</sub> = 3×1 + 1×5 + 4×25 = 108</span>。`,
+        answerHtml: `<strong>108</strong>。<br>解析：五进制数字为 0~4。<span class="math-inline">(adc)<sub>5</sub> + 1 = (aab)<sub>5</sub></span> 发生十位进位，故个位 <span class="math-inline">c = 4</span>，进位后 <span class="math-inline">b = 0</span>，<span class="math-inline">e = c - 1 = 3</span>；十位 <span class="math-inline">d + 1 = a</span> 且五字母互异（0,3,4已用），得 <span class="math-inline">d = 1, a = 2</span>。故 <span class="math-inline">(cde)<sub>5</sub> = (413)<sub>5</sub> = 4×5<sup>2</sup> + 1×5<sup>1</sup> + 3×5<sup>0</sup> = 100 + 5 + 3 = 108</span>。`,
         quote: `Extension: 用a,b,c,d,e分别代表五进制中五个互不相同的数字，如果(ade)_5，(adc)_5，(aab)_5是由小到大排列的连续正整数，那么(cde)_5写成十进制是多少？\nb=0, c=4, e=3, d+1=a -> d=1, a=2 -> (413)_5 = 108`,
         sourceFile: `Lesson 3-进位制.pdf`,
         sourceSection: `Module 3 · Extension`
@@ -1992,7 +1992,7 @@ button, input, select, textarea {
         qtype: `综合与小数`,
         isQuizEligible: true,
         stemHtml: `已知六进制的 <span class="math-inline"><span class="overline">abc</span></span> 化为九进制后可以写成 <span class="math-inline"><span class="overline">cba</span></span>，那么这个数写成十进制是多少？`,
-        answerHtml: `<strong>212</strong>。<br>解析：六进制数字 0~5，方程 <span class="math-inline">36a + 6b + c = 81c + 9b + a</span> 化简得 <span class="math-inline">35a = 80c + 3b</span>。因 35a 与 80c 均为 5 的倍数，故 <span class="math-inline">b = 0</span> 或 <span class="math-inline">5</span>。若 <span class="math-inline">b = 0</span> 则 <span class="math-inline">7a = 16c</span> 在 1~5 内无解；故 <span class="math-inline">b = 5</span>，得 <span class="math-inline">7a = 16c + 3</span>，解得 <span class="math-inline">a = 5, c = 2</span>。则 <span class="math-inline">(552)<sub>6</sub> = 2×1 + 5×6 + 5×36 = 212</span>。`,
+        answerHtml: `<strong>212</strong>。<br>解析：六进制数字 0~5，方程 <span class="math-inline">36a + 6b + c = 81c + 9b + a</span> 化简得 <span class="math-inline">35a = 80c + 3b</span>。因 35a 与 80c 均为 5 的倍数，故 <span class="math-inline">b = 0</span> 或 <span class="math-inline">5</span>。若 <span class="math-inline">b = 0</span> 则 <span class="math-inline">7a = 16c</span> 在 1~5 内无解；故 <span class="math-inline">b = 5</span>，得 <span class="math-inline">7a = 16c + 3</span>，解得 <span class="math-inline">a = 5, c = 2</span>。则 <span class="math-inline">(552)<sub>6</sub> = 5×6<sup>2</sup> + 5×6<sup>1</sup> + 2×6<sup>0</sup> = 180 + 30 + 2 = 212</span>。`,
         quote: `Extension: 已知六进制的abc化为九进制后可以写成cba，那么这个数写成十进制是多少？\n35a = 80c + 3b -> b=5 -> 7a = 16c + 3 -> a=5, c=2 -> (552)_6 = 212`,
         sourceFile: `Lesson 3-进位制.pdf`,
         sourceSection: `Module 3 · Extension`
@@ -2007,7 +2007,7 @@ button, input, select, textarea {
         qtype: `计数排位`,
         isQuizEligible: true,
         stemHtml: `用数字 <span class="math-inline">0、1、5、8、9</span> 中的一个或几个组成的数，从小到大排列，<span class="math-inline">988501</span> 排在第几个？`,
-        answerHtml: `<strong>第 14802 个</strong>。<br>解析：将 <span class="math-inline">0, 1, 5, 8, 9</span> 一一映射为五进制数字 <span class="math-inline">0, 1, 2, 3, 4</span>，则 <span class="math-inline">988501</span> 对应 <span class="math-inline">(433201)<sub>5</sub> = 1 + 0×5 + 2×25 + 3×125 + 3×625 + 4×3125 = 14801</span>。因数字 0 是第 1 个（对应五进制 0），所以 <span class="math-inline">988501</span> 排在第 <span class="math-inline">14801 + 1 = 14802</span> 个。`,
+        answerHtml: `<strong>第 14802 个</strong>。<br>解析：将 <span class="math-inline">0, 1, 5, 8, 9</span> 一一映射为五进制数字 <span class="math-inline">0, 1, 2, 3, 4</span>，则 <span class="math-inline">988501</span> 对应 <span class="math-inline">(433201)<sub>5</sub> = 4×5<sup>5</sup> + 3×5<sup>4</sup> + 3×5<sup>3</sup> + 2×5<sup>2</sup> + 0×5<sup>1</sup> + 1×5<sup>0</sup> = 12500 + 1875 + 375 + 50 + 0 + 1 = 14801</span>。因数字 0 是第 1 个（对应五进制 0），所以 <span class="math-inline">988501</span> 排在第 <span class="math-inline">14801 + 1 = 14802</span> 个。`,
         quote: `Extension: 用数字0、1、5、8、9中的一个或几个组成的数，从小到大排列，988501排在第 14802 个。\n(433201)_5 = 1+0×5+2×25+3×125+3×625+4×3125 = 14801，0是第1个，所以为第14802个`,
         sourceFile: `Lesson 3-进位制.pdf`,
         sourceSection: `Module 3 · Extension`
@@ -2037,7 +2037,7 @@ button, input, select, textarea {
         qtype: `进制互化`,
         isQuizEligible: true,
         stemHtml: `把下列各数转化为十进制数：<br>(1) <span class="math-inline">(463)<sub>8</sub> = (____)<sub>10</sub></span>；<br>(2) <span class="math-inline">(245)<sub>7</sub> = (____)<sub>10</sub></span>。`,
-        answerHtml: `(1) <strong>(307)<sub>10</sub></strong>（<span class="math-inline">3×8<sup>0</sup> + 6×8<sup>1</sup> + 4×8<sup>2</sup> = 3 + 48 + 256 = 307</span>）；<br>(2) <strong>(131)<sub>10</sub></strong>（<span class="math-inline">5×7<sup>0</sup> + 4×7<sup>1</sup> + 2×7<sup>2</sup> = 5 + 28 + 98 = 131</span>）。`,
+        answerHtml: `(1) <strong>(307)<sub>10</sub></strong>（<span class="math-inline">4×8<sup>2</sup> + 6×8<sup>1</sup> + 3×8<sup>0</sup> = 256 + 48 + 3 = 307</span>）；<br>(2) <strong>(131)<sub>10</sub></strong>（<span class="math-inline">2×7<sup>2</sup> + 4×7<sup>1</sup> + 5×7<sup>0</sup> = 98 + 28 + 5 = 131</span>）。`,
         quote: `Practice: 把下列各数转化为十进制数：\n(1) (463)_8 = (307)_10  (3×8^0 + 6×8^1 + 4×8^2 = 3+48+256=307)\n(2) (245)_7 = (131)_10  (5×7^0 + 4×7^1 + 2×7^2 = 5+28+98=131)`,
         sourceFile: `Lesson 3-进位制-练习册.pdf`,
         sourceSection: `Practice · 进制转十进制`
@@ -2082,7 +2082,7 @@ button, input, select, textarea {
         qtype: `进制互化`,
         isQuizEligible: true,
         stemHtml: `比较 <span class="math-inline">(2014)<sub>5</sub></span> 与 <span class="math-inline">(3321)<sub>4</sub></span>，则（　）。<br>A. <span class="math-inline">(2014)<sub>5</sub> &lt; (3321)<sub>4</sub></span>　　B. <span class="math-inline">(2014)<sub>5</sub> &gt; (3321)<sub>4</sub></span>　　C. <span class="math-inline">(2014)<sub>5</sub> = (3321)<sub>4</sub></span>`,
-        answerHtml: `<strong>B. (2014)<sub>5</sub> &gt; (3321)<sub>4</sub></strong>。<br>解析：化为十进制比较：<span class="math-inline">(2014)<sub>5</sub> = 4+5+0+250 = 259</span>；<span class="math-inline">(3321)<sub>4</sub> = 1+8+48+192 = 249</span>。因 <span class="math-inline">259 &gt; 249</span>，故选 B。`,
+        answerHtml: `<strong>B. (2014)<sub>5</sub> &gt; (3321)<sub>4</sub></strong>。<br>解析：化为十进制比较：<span class="math-inline">(2014)<sub>5</sub> = 2×5<sup>3</sup> + 0×5<sup>2</sup> + 1×5<sup>1</sup> + 4×5<sup>0</sup> = 250 + 0 + 5 + 4 = 259</span>；<span class="math-inline">(3321)<sub>4</sub> = 3×4<sup>3</sup> + 3×4<sup>2</sup> + 2×4<sup>1</sup> + 1×4<sup>0</sup> = 192 + 48 + 8 + 1 = 249</span>。因 <span class="math-inline">259 &gt; 249</span>，故选 B。`,
         quote: `Practice: 比较 (2014)_5 与 (3321)_4\n(2014)_5 = 4×5^0 + 1×5^1 + 0×5^2 + 2×5^3 = (259)_10\n(3321)_4 = 1×4^0 + 2×4^1 + 3×4^2 + 3×4^3 = (249)_10\n∴ (2014)_5 > (3321)_4`,
         sourceFile: `Lesson 3-进位制-练习册.pdf`,
         sourceSection: `Practice · 大小比较`
@@ -2097,7 +2097,7 @@ button, input, select, textarea {
         qtype: `进制互化`,
         isQuizEligible: true,
         stemHtml: `九进制的 <span class="math-inline">167</span> 化成八进制是 <span class="math-inline">(____)<sub>8</sub></span>。`,
-        answerHtml: `<strong>(216)<sub>8</sub></strong>。<br>解析：<span class="math-inline">(167)<sub>9</sub> = 7 + 54 + 81 = (142)<sub>10</sub></span>；再除 8 短除：142÷8=17余6，17÷8=2余1，2÷8=0余2，倒取余数得 <span class="math-inline">(216)<sub>8</sub></span>。`,
+        answerHtml: `<strong>(216)<sub>8</sub></strong>。<br>解析：<span class="math-inline">(167)<sub>9</sub> = 1×9<sup>2</sup> + 6×9<sup>1</sup> + 7×9<sup>0</sup> = 81 + 54 + 7 = (142)<sub>10</sub></span>；再除 8 短除：142÷8=17余6，17÷8=2余1，2÷8=0余2，倒取余数得 <span class="math-inline">(216)<sub>8</sub></span>。`,
         quote: `Practice: 九进制的167化成八进制是(216)_8。\n(167)_9 = 7×9^0 + 6×9^1 + 1×9^2 = (142)_10\n8|142 -> 17..6 -> 2..1 -> 0..2`,
         sourceFile: `Lesson 3-进位制-练习册.pdf`,
         sourceSection: `Practice · 十进制搭桥`
@@ -2172,7 +2172,7 @@ button, input, select, textarea {
         qtype: `综合与小数`,
         isQuizEligible: true,
         stemHtml: `在美洲的一个小镇中，对于 200 以下的数字读法都是采取 20 进制的。如果十进制中的 147 在 20 进制中的读音是「seyth ha seyth ugens」，而十进制中的 49 在 20 进制中的读音是「naw ha dew ugens」，那么 20 进制中读音是「dew ha naw ugens」的数指的是十进制中的哪个数？`,
-        answerHtml: `<strong>182</strong>。<br>解析：<span class="math-inline">(147)<sub>10</sub> = (77)<sub>20</sub></span>，对应「seyth ha seyth ugens」→ 7 读作 seyth；<span class="math-inline">(49)<sub>10</sub> = (29)<sub>20</sub></span>，对应「naw ha dew ugens」→ 个位 9 读作 naw、二十位 2 读作 dew（注意该读法先读个位后读二十位）。故「dew ha naw ugens」为个位 2、二十位 9，即 <span class="math-inline">(92)<sub>20</sub> = 2×20<sup>0</sup> + 9×20<sup>1</sup> = 182</span>。`,
+        answerHtml: `<strong>182</strong>。<br>解析：<span class="math-inline">(147)<sub>10</sub> = (77)<sub>20</sub></span>，对应「seyth ha seyth ugens」→ 7 读作 seyth；<span class="math-inline">(49)<sub>10</sub> = (29)<sub>20</sub></span>，对应「naw ha dew ugens」→ 个位 9 读作 naw、二十位 2 读作 dew（注意该读法先读个位后读二十位）。故「dew ha naw ugens」为个位 2、二十位 9，即 <span class="math-inline">(92)<sub>20</sub> = 9×20<sup>1</sup> + 2×20<sup>0</sup> = 180 + 2 = 182</span>。`,
         quote: `Challenge: 在美洲的一个小镇中，对于200以下的数字读法都是采取20进制的。\n(147)_10 = (77)_20 → "7"="seyth"\n(49)_10 = (29)_20 → "9"="naw", "2"="dew"\n"dew ha naw ugens" = (92)_20 = 2×20^0 + 9×20^1 = (182)_10`,
         sourceFile: `Lesson 3-进位制-练习册.pdf`,
         sourceSection: `Challenge · 20进制应用`
@@ -2187,7 +2187,7 @@ button, input, select, textarea {
         qtype: `计数排位`,
         isQuizEligible: true,
         stemHtml: `用 <span class="math-inline">0、1、2、3、4、5</span> 这六个数码可以组成许多正整数，将它们从小到大排列可得 <span class="math-inline">1、2、3、4、5、10、11、12、13……</span>，那么 <span class="math-inline">2015</span> 是这列数中的第几个数？`,
-        answerHtml: `<strong>第 443 个数</strong>。<br>解析：该数列从 1 开始，恰为六进制正整数顺序。<span class="math-inline">(2015)<sub>6</sub> = 5×6<sup>0</sup> + 1×6<sup>1</sup> + 0×6<sup>2</sup> + 2×6<sup>3</sup> = 5 + 6 + 0 + 432 = 443</span>。`,
+        answerHtml: `<strong>第 443 个数</strong>。<br>解析：该数列从 1 开始，恰为六进制正整数顺序。<span class="math-inline">(2015)<sub>6</sub> = 2×6<sup>3</sup> + 0×6<sup>2</sup> + 1×6<sup>1</sup> + 5×6<sup>0</sup> = 432 + 0 + 6 + 5 = 443</span>。`,
         quote: `Challenge: 用0、1、2、3、4、5这六个数码可以组成许多正整数，从小到大排列可得1、2、3、4、5、10、11、12、13……，那么2015是这列数中的第 443 个数。\n六进制：(2015)_6 = 5 + 6 + 0 + 432 = (443)_10`,
         sourceFile: `Lesson 3-进位制-练习册.pdf`,
         sourceSection: `Challenge · 计数排位`
@@ -2232,7 +2232,7 @@ button, input, select, textarea {
         qtype: `判断进制`,
         isQuizEligible: true,
         stemHtml: `记号 <span class="math-inline">(25)<sub>k</sub></span> 表示 k 进制的数，如果 <span class="math-inline">(52)<sub>k</sub></span> 是 <span class="math-inline">(25)<sub>k</sub></span> 的 2 倍，那么 <span class="math-inline">(123)<sub>k</sub></span> 在十进制中表示的数是多少？`,
-        answerHtml: `<strong>83</strong>。<br>解析：<span class="math-inline">2×k<sup>0</sup> + 5×k<sup>1</sup> = 2×(5×k<sup>0</sup> + 2×k<sup>1</sup>)</span>，解得 <span class="math-inline">5k + 2 = 4k + 10 → k = 8</span>。故 <span class="math-inline">(123)<sub>8</sub> = 3×8<sup>0</sup> + 2×8<sup>1</sup> + 1×8<sup>2</sup> = 3 + 16 + 64 = 83</span>。`,
+        answerHtml: `<strong>83</strong>。<br>解析：<span class="math-inline">5×k<sup>1</sup> + 2×k<sup>0</sup> = 2×(2×k<sup>1</sup> + 5×k<sup>0</sup>)</span>，解得 <span class="math-inline">5k + 2 = 4k + 10 → k = 8</span>。故 <span class="math-inline">(123)<sub>8</sub> = 1×8<sup>2</sup> + 2×8<sup>1</sup> + 3×8<sup>0</sup> = 64 + 16 + 3 = 83</span>。`,
         quote: `Extension: 记号(25)_k表示k进制的数，如果(52)_k是(25)_k的2倍，那么(123)_k在十进制中表示的数是 83。\n2+5k = 2×(5+2k) → k=8 → (123)_8 = 3+16+64 = (83)_10`,
         sourceFile: `Lesson 3-进位制-练习册.pdf`,
         sourceSection: `Extension · 方程求进制`
@@ -2247,7 +2247,7 @@ button, input, select, textarea {
         qtype: `综合与小数`,
         isQuizEligible: true,
         stemHtml: `在宇宙中有一个使用三进制的星球。小招移居到这个星球后更换身份证，要把年龄从十进制数变为三进制数表示。小招发现，只要在原来十进制年龄末尾添个「0」，就是三进制下的年龄。那么小招今年多少岁？`,
-        answerHtml: `<strong>21 岁</strong>。<br>解析：因三进制仅含数字 0, 1, 2，故原十进制年龄各位数字也必须 &lt; 3。<br>① 若为一位数 <span class="math-inline">A</span>：<span class="math-inline">A = 3A</span> 无正整数解；<br>② 若为两位数 <span class="math-inline"><span class="overline">AB</span></span>：<span class="math-inline">10A + B = 0×3<sup>0</sup> + B×3<sup>1</sup> + A×3<sup>2</sup> = 9A + 3B</span>，得 <span class="math-inline">A = 2B</span>；由 <span class="math-inline">A, B &lt; 3</span> 且 <span class="math-inline">A ≠ 0</span>，得 <span class="math-inline">B = 1, A = 2</span>，即 <span class="math-inline">21</span> 岁（检验：<span class="math-inline">(210)<sub>3</sub> = 2×9 + 1×3 = 21</span>）；<br>③ 若为三位数 <span class="math-inline"><span class="overline">ABC</span></span>：<span class="math-inline">100A + 10B + C = 27A + 9B + 3C → 73A + B = 2C</span>，左 ≥ 73 而右 ≤ 4，无解。`,
+        answerHtml: `<strong>21 岁</strong>。<br>解析：因三进制仅含数字 0, 1, 2，故原十进制年龄各位数字也必须 &lt; 3。<br>① 若为一位数 <span class="math-inline">A</span>：<span class="math-inline">A = 3A</span> 无正整数解；<br>② 若为两位数 <span class="math-inline"><span class="overline">AB</span></span>：<span class="math-inline">10A + B = A×3<sup>2</sup> + B×3<sup>1</sup> + 0×3<sup>0</sup> = 9A + 3B</span>，得 <span class="math-inline">A = 2B</span>；由 <span class="math-inline">A, B &lt; 3</span> 且 <span class="math-inline">A ≠ 0</span>，得 <span class="math-inline">B = 1, A = 2</span>，即 <span class="math-inline">21</span> 岁（检验：<span class="math-inline">(210)<sub>3</sub> = 2×3<sup>2</sup> + 1×3<sup>1</sup> + 0×3<sup>0</sup> = 21</span>）；<br>③ 若为三位数 <span class="math-inline"><span class="overline">ABC</span></span>：<span class="math-inline">100A + 10B + C = 27A + 9B + 3C → 73A + B = 2C</span>，左 ≥ 73 而右 ≤ 4，无解。`,
         quote: `Extension: 在宇宙中有一个使用三进制的星球……只要在原来十进制年龄末尾添个“0”，就是三进制下的年龄。\n①设为A岁：A=3A × ②设为AB岁(A,B<3)：10A+B = 3B+9A → A=2B → B=1, A=2, AB=21 ③设为ABC岁：73A+B=2C ×`,
         sourceFile: `Lesson 3-进位制-练习册.pdf`,
         sourceSection: `Extension · 位数位值推理`
@@ -2257,23 +2257,59 @@ button, input, select, textarea {
     const COMPARE_TABS = {
       power: {
         title: `按权展开法（n进制 → 十进制）`,
-        summary: `依据位值原理，将每位数字乘以其对应位置上的权值（n 的幂次）后求和。整数部分从右往左权值为 n⁰, n¹, n²…；小数部分从左往右权值为 n⁻¹, n⁻²…。`,
+        summaryHtml: `依据位值原理，按<strong>从高位到低位</strong>顺序将每位数字乘以对应位置上的权值（n 的幂次）后求和。整数部分位权从高位递减至 <span class="math-inline">n<sup>1</sup>、n<sup>0</sup>(=1)</span>；小数部分从小数点后第 1 位起依次乘以分数次方 <span class="math-inline">1/n<sup>1</sup>、1/n<sup>2</sup>、1/n<sup>3</sup>…</span> 后相加（小学阶段采用分数次方，不引入负指数）。`,
         rows: [
-          { base: `二进制 (2)`, digits: `0, 1`, integerEx: `(100001)₂ = 1×1 + 1×32 = 33`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制.pdf · Module 2 Exploration 6` },
-          { base: `三进制 (3)`, digits: `0, 1, 2`, integerEx: `(10111)₃ = 1×1 + 1×3 + 1×9 + 0×27 + 1×81 = 94`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制.pdf · Module 1 Exploration 1` },
-          { base: `四进制 (4)`, digits: `0, 1, 2, 3`, integerEx: `(321)₄ = 3×16 + 2×4 + 1×1 = 57；(3321)₄ = 249`, decimalEx: `(12.21)₄ = 4 + 2 + 2×(1/4) + 1×(1/16) = 6.5625`, source: `讲义 Warm Up 1 / Module 3 Extension；练习册 Practice 4` },
-          { base: `五进制 (5)`, digits: `0, 1, 2, 3, 4`, integerEx: `(324)₅ = 4×1 + 2×5 + 3×25 = 89；(2014)₅ = 259`, decimalEx: `(43.2)₅ = 4×5 + 3×1 + 2×(1/5) = 23.4`, source: `讲义 Key Points / Module 3 Extension；练习册 Practice 4` },
-          { base: `七/八/九进制`, digits: `0~(n-1)`, integerEx: `(245)₇ = 131；(463)₈ = 307；(167)₉ = 142`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制-练习册.pdf · Practice 1 & 5` },
-          { base: `二十进制 (20)`, digits: `0~19（小镇读音）`, integerEx: `(92)₂₀ = 2×20⁰ + 9×20¹ = 182`, decimalEx: `「来源未提及」`, source: `Lesson 3-进位制-练习册.pdf · Challenge 1` }
+          {
+            base: `二进制 (2)`,
+            digits: `0, 1`,
+            integerHtml: `<span class="math-inline">(100001)<sub>2</sub> = 1×2<sup>5</sup> + 1×2<sup>0</sup> = 32 + 1 = 33</span>`,
+            decimalHtml: `<span class="tag tag--yellow" style="margin-right:4px;">补充示例</span><span class="math-inline">(0.101)<sub>2</sub> = 1×(1/2<sup>1</sup>) + 0×(1/2<sup>2</sup>) + 1×(1/2<sup>3</sup>) = 1/2 + 1/8 = 0.625</span>`,
+            source: `整数：Lesson 3-进位制.pdf · Module 2 Exploration 6；小数：补充示例`
+          },
+          {
+            base: `三进制 (3)`,
+            digits: `0, 1, 2`,
+            integerHtml: `<span class="math-inline">(10111)<sub>3</sub> = 1×3<sup>4</sup> + 0×3<sup>3</sup> + 1×3<sup>2</sup> + 1×3<sup>1</sup> + 1×3<sup>0</sup> = 81 + 0 + 9 + 3 + 1 = 94</span>`,
+            decimalHtml: `<span class="tag tag--yellow" style="margin-right:4px;">补充示例</span><span class="math-inline">(0.12)<sub>3</sub> = 1×(1/3<sup>1</sup>) + 2×(1/3<sup>2</sup>) = 1/3 + 2/9 = 5/9</span>`,
+            source: `整数：Lesson 3-进位制.pdf · Module 1 Exploration 1；小数：补充示例`
+          },
+          {
+            base: `四进制 (4)`,
+            digits: `0, 1, 2, 3`,
+            integerHtml: `<span class="math-inline">(321)<sub>4</sub> = 3×4<sup>2</sup> + 2×4<sup>1</sup> + 1×4<sup>0</sup> = 48 + 8 + 1 = 57</span>；<br><span class="math-inline">(3321)<sub>4</sub> = 3×4<sup>3</sup> + 3×4<sup>2</sup> + 2×4<sup>1</sup> + 1×4<sup>0</sup> = 249</span>`,
+            decimalHtml: `<span class="math-inline">(12.21)<sub>4</sub> = 1×4<sup>1</sup> + 2×4<sup>0</sup> + 2×(1/4<sup>1</sup>) + 1×(1/4<sup>2</sup>) = 4 + 2 + 1/2 + 1/16 = 6.5625</span>`,
+            source: `讲义 Warm Up 1 / Module 3 Extension 1；练习册 Practice 4`
+          },
+          {
+            base: `五进制 (5)`,
+            digits: `0, 1, 2, 3, 4`,
+            integerHtml: `<span class="math-inline">(324)<sub>5</sub> = 3×5<sup>2</sup> + 2×5<sup>1</sup> + 4×5<sup>0</sup> = 75 + 10 + 4 = 89</span>；<br><span class="math-inline">(2014)<sub>5</sub> = 2×5<sup>3</sup> + 0×5<sup>2</sup> + 1×5<sup>1</sup> + 4×5<sup>0</sup> = 259</span>`,
+            decimalHtml: `<span class="math-inline">(43.2)<sub>5</sub> = 4×5<sup>1</sup> + 3×5<sup>0</sup> + 2×(1/5<sup>1</sup>) = 20 + 3 + 0.4 = 23.4</span>`,
+            source: `讲义 Key Points / Module 3 Extension 1；练习册 Practice 4`
+          },
+          {
+            base: `七/八/九进制`,
+            digits: `0~(n-1)`,
+            integerHtml: `<span class="math-inline">(245)<sub>7</sub> = 2×7<sup>2</sup> + 4×7<sup>1</sup> + 5×7<sup>0</sup> = 131</span>；<br><span class="math-inline">(463)<sub>8</sub> = 4×8<sup>2</sup> + 6×8<sup>1</sup> + 3×8<sup>0</sup> = 307</span>；<br><span class="math-inline">(167)<sub>9</sub> = 1×9<sup>2</sup> + 6×9<sup>1</sup> + 7×9<sup>0</sup> = 142</span>`,
+            decimalHtml: `<span class="math-inline">(24.2)<sub>8</sub> = 2×8<sup>1</sup> + 4×8<sup>0</sup> + 2×(1/8<sup>1</sup>) = 16 + 4 + 0.25 = 20.25</span>`,
+            source: `整数：练习册 Practice 1 & 5；小数：讲义 Module 3 Extension 1(3) 互逆验算`
+          },
+          {
+            base: `二十进制 (20)`,
+            digits: `0~19（小镇读音）`,
+            integerHtml: `<span class="math-inline">(92)<sub>20</sub> = 9×20<sup>1</sup> + 2×20<sup>0</sup> = 180 + 2 = 182</span>`,
+            decimalHtml: `「来源未提及」`,
+            source: `Lesson 3-进位制-练习册.pdf · Challenge 1`
+          }
         ],
-        demoTitle: `讲义实例拆解：(324)₅ → (89)₁₀`,
+        demoTitle: `按权展开分步拆解（从高位到低位）`,
         demoSteps: [
-          `第 1 步（确定各位权值）：从右往左依次为 5⁰(=1)、5¹(=5)、5²(=25)`,
-          `第 2 步（逐位按权相乘）：百位 3 个 25 (=75)，十位 2 个 5 (=10)，个位 4 个 1 (=4)`,
-          `第 3 步（按权相加）：4×1 + 2×5 + 3×25 = 89，即 (324)₅ = (89)₁₀`
+          `第 1 步（从高位到低位标位权）：5²(=25)、5¹(=5)、5⁰(=1)`,
+          `第 2 步（高位到低位逐位乘权）：3×5² = 75，2×5¹ = 10，4×5⁰ = 4`,
+          `第 3 步（按权展开求和）：(324)₅ = 3×5² + 2×5¹ + 4×5⁰ = 75 + 10 + 4 = 89`
         ],
-        quote: `1.n进制转化为十进制：位值原理，按权相加\n(324)_5 = 4×1 + 2×5 + 3×25 = 89\n(43.2)_5 = 4×5 + 3×1 + 2×(1/5) = 23.4\n(12.21)_4 = 1×4 + 2×1 + 2×(1/4) + 1×(1/16) = 6.5625`,
-        sourceText: `来源：Lesson 3-进位制.pdf · Key Points / Module 3 Extension & Lesson 3-进位制-练习册.pdf · Practice / Challenge`
+        quote: `1.n进制转化为十进制：位值原理，按权相加（以下整理为高位到低位幂次展开）\n(324)_5 = 3×5^2 + 2×5^1 + 4×5^0 = 75 + 10 + 4 = 89\n(43.2)_5 = 4×5^1 + 3×5^0 + 2×(1/5^1) = 23.4\n(12.21)_4 = 1×4^1 + 2×4^0 + 2×(1/4^1) + 1×(1/4^2) = 6.5625`,
+        sourceText: `来源：Lesson 3-进位制.pdf · Key Points / Module 3 Extension 1 & 练习册 Practice / Challenge（二进制、三进制小数为补充示例）`
       },
       short: {
         title: `短除法与乘n取整（十进制 → n进制）`,
@@ -2400,6 +2436,7 @@ button, input, select, textarea {
       openAnswerIds: [],
       openQuoteIds: [],
       activeCompareTab: `power`,
+      activePowerPreset: `p324_5`,
       demoStepIndex: 0,
       quizConfig: {
         section: `全部`,
@@ -2483,10 +2520,10 @@ button, input, select, textarea {
       'KP-06': `\\{0,1,5,6\\} \\leftrightarrow \\{0,1,2,3\\}\\text{（0是桥梁）},\\qquad (1320)_{4} = \\boxed{120}`,
       'KP-07': `n\\text{ 进制四则：满 }n\\text{ 进 }1\\text{，借 }1\\text{ 当 }n\\quad\\text{；凑整：个位凑 }n\\text{，高位凑 }(n-1)`,
       'KP-08': `\\text{① 数码下限 } n > d_{\\max} \\quad\\rightarrow\\quad \\text{② 个位差因数} \\quad\\rightarrow\\quad \\text{③ 比十进制大小}`,
-      'M1-WU1': `(121)_{4}=25,\\quad (2010)_{4}=132,\\quad (321)_{4}=3\\times 16+2\\times 4+1=\\boxed{57}`,
+      'M1-WU1': `(121)_{4}=25,\\quad (2010)_{4}=132,\\quad (321)_{4}=3\\times 4^{2}+2\\times 4^{1}+1\\times 4^{0}=\\boxed{57}`,
       'M1-EX1a': `(567)_{10} = \\boxed{(1067)_{8}} = \\boxed{(4232)_{5}} = \\boxed{(1000110111)_{2}}`,
       'M1-EX1b': `(1444)_{10} = \\boxed{(A04)_{12}}\\;(10\\rightarrow A),\\qquad (188)_{10} = \\boxed{(D6)_{14}}\\;(13\\rightarrow D)`,
-      'M1-EX1d': `(1431)_{5}=125+100+15+1=\\boxed{241},\\qquad (10111)_{3}=81+0+9+3+1=\\boxed{94}`,
+      'M1-EX1d': `(1431)_{5}=1\\times 5^{3}+4\\times 5^{2}+3\\times 5^{1}+1\\times 5^{0}=\\boxed{241},\\qquad (10111)_{3}=1\\times 3^{4}+1\\times 3^{2}+1\\times 3^{1}+1\\times 3^{0}=\\boxed{94}`,
       'M1-EX2a': `(324)_{5}=(89)_{10}=\\boxed{(131)_{8}},\\quad (423)_{5}=(113)_{10}=\\boxed{(161)_{8}},\\quad (1042)_{5}=(147)_{10}=\\boxed{(223)_{8}}`,
       'M1-EX2b': `(618)_{9}=(503)_{10}=\\boxed{(13313)_{4}},\\qquad (1111)_{5}=(156)_{10}=\\boxed{(312)_{7}}`,
       'M1-EX3': `(110101)_{2}=\\boxed{(311)_{4}}=\\boxed{(65)_{8}},\\quad (325)_{8}=\\boxed{(11010101)_{2}},\\quad (132321)_{4}=\\boxed{(3671)_{8}}`,
@@ -2498,13 +2535,13 @@ button, input, select, textarea {
       'M2-ST2': `(5467)_{8}+(4265)_{8}=\\boxed{(11754)_{8}},\\quad (12345)_{6}-(5432)_{6}=\\boxed{(2513)_{6}},\\quad (1101)_{2}\\times(101)_{2}=\\boxed{(1000001)_{2}}`,
       'M3-EX7': `4\\times 13=100:\\; d_{\\max}=4\\Rightarrow n\\ge 5,\\; 4\\times 3=12\\Rightarrow n\\in\\{6,12\\},\\; 52<100\\Rightarrow \\boxed{n=6}`,
       'M3-EX8': `(\\overline{abc})_{7}=(\\overline{cba})_{9} \\Rightarrow 49a+7b+c=81c+9b+a \\Rightarrow 24a=b+40c \\Rightarrow (503)_{7}=\\boxed{248}`,
-      'M3-EXT1': `(43.2)_{5}=\\boxed{23.4},\\quad (12.21)_{4}=\\boxed{6.5625},\\quad (20.25)_{10}=\\boxed{(24.2)_{8}},\\quad (0.856)_{10}=\\boxed{(0.412)_{5}}`,
+      'M3-EXT1': `(43.2)_{5}=4\\times 5^{1}+3\\times 5^{0}+2\\times\\frac{1}{5^{1}}=\\boxed{23.4},\\quad (12.21)_{4}=1\\times 4^{1}+2\\times 4^{0}+2\\times\\frac{1}{4^{1}}+1\\times\\frac{1}{4^{2}}=\\boxed{6.5625}`,
       'M3-EXT2': `(ade)_{5},(adc)_{5},(aab)_{5}\\text{ 连续} \\Rightarrow c=4,\\,b=0,\\,e=3,\\,d=1,\\,a=2 \\Rightarrow (413)_{5}=\\boxed{108}`,
       'M3-EXT3': `125\\times 125=16324:\\; n\\ge 7,\\; 25-4=21\\Rightarrow n\\in\\{7,21\\},\\; 15625<16324 \\Rightarrow \\boxed{\\text{七进制}}`,
       'M3-EXT4': `36a+6b+c=81c+9b+a \\Rightarrow 35a=80c+3b \\Rightarrow b=5,\\;7a=16c+3 \\Rightarrow (552)_{6}=\\boxed{212}`,
       'M3-EXT5': `988501 \\leftrightarrow (433201)_{5} = 14801,\\quad \\text{含 0 为第 1 个} \\Rightarrow 14801+1=\\boxed{14802}`,
       'M3-EXT6': `d_{\\max}=8 \\Rightarrow n>8,\\quad 7\\times 11\\times 13\\times 138 = 138138 < 157586 \\Rightarrow n<10 \\Rightarrow \\boxed{n=9}`,
-      'WB-P1': `(463)_{8}=4\\times 64+6\\times 8+3=\\boxed{307},\\qquad (245)_{7}=2\\times 49+4\\times 7+5=\\boxed{131}`,
+      'WB-P1': `(463)_{8}=4\\times 8^{2}+6\\times 8^{1}+3\\times 8^{0}=\\boxed{307},\\qquad (245)_{7}=2\\times 7^{2}+4\\times 7^{1}+5\\times 7^{0}=\\boxed{131}`,
       'WB-P2': `(107)_{10}=\\boxed{(1101011)_{2}},\\quad (69)_{10}=\\boxed{(2120)_{3}},\\quad (2896)_{10}=\\boxed{(43041)_{5}}`,
       'WB-P3': `\\text{四进制：}1,2,3,10,11 \\qquad\\text{五进制：}1,2,3,4,10`,
       'WB-P4': `(2014)_{5}=259 > (3321)_{4}=249 \\Rightarrow \\boxed{(2014)_{5} > (3321)_{4}}`,
@@ -2513,8 +2550,8 @@ button, input, select, textarea {
       'WB-P7': `(132321)_{4} = (011|110|111|001)_{2} = \\boxed{(3671)_{8}}`,
       'WB-P8': `(101101)_{2}+(10111)_{2}=\\boxed{(1000100)_{2}},\\qquad (101101)_{2}-(10111)_{2}=\\boxed{(10110)_{2}}`,
       'WB-P9': `(123456)_{8}+(654322)_{8}=(1000000)_{8},\\quad (40000)_{9}-(10000)_{9}=\\boxed{(30000)_{9}},\\quad 201+299=\\boxed{500}`,
-      'WB-C1': `(147)_{10}=(77)_{20},\\; (49)_{10}=(29)_{20} \\Rightarrow \\text{dew ha naw ugens} = (92)_{20} = 9\\times 20+2 = \\boxed{182}`,
-      'WB-C2': `(2015)_{6} = 2\\times 216 + 0\\times 36 + 1\\times 6 + 5\\times 1 = \\boxed{443}`,
+      'WB-C1': `(147)_{10}=(77)_{20},\\; (49)_{10}=(29)_{20} \\Rightarrow \\text{dew ha naw ugens} = (92)_{20} = 9\\times 20^{1}+2\\times 20^{0} = \\boxed{182}`,
+      'WB-C2': `(2015)_{6} = 2\\times 6^{3} + 0\\times 6^{2} + 1\\times 6^{1} + 5\\times 6^{0} = 432 + 0 + 6 + 5 = \\boxed{443}`,
       'WB-C3': `(1234)_{9}\\times(18)_{9}=\\boxed{(23445)_{9}},\\quad (345)_{8}\\times(273)_{8}=\\boxed{(123507)_{8}},\\quad (1210201)_{3}-(1221)_{3}=\\boxed{(1201210)_{3}}`,
       'WB-E1': `7\\times 12=106:\\; n\\ge 8,\\; 84<106\\Rightarrow n<10,\\; 2\\times 7-6=8 \\Rightarrow \\boxed{\\text{八进制}}`,
       'WB-E2': `5k+2 = 2(2k+5) \\Rightarrow k=8 \\Rightarrow (123)_{8} = 64+16+3 = \\boxed{83}`,
@@ -2962,6 +2999,82 @@ button, input, select, textarea {
       renderEntriesOnly();
     }
 
+    const POWER_DEMO_PRESETS = [
+      { id: `p324_5`, label: `(324)₅`, numStr: `324`, base: 5, badge: `讲义原题 · 整数`, sourceNote: `Lesson 3-进位制.pdf · Key Points` },
+      { id: `p100001_2`, label: `(100001)₂`, numStr: `100001`, base: 2, badge: `讲义原题 · 整数`, sourceNote: `Lesson 3-进位制.pdf · Module 2 Exploration 6` },
+      { id: `p12_21_4`, label: `(12.21)₄`, numStr: `12.21`, base: 4, badge: `讲义原题 · 小数`, sourceNote: `Lesson 3-进位制.pdf · Module 3 Extension 1` },
+      { id: `p0_101_2`, label: `(0.101)₂`, numStr: `0.101`, base: 2, badge: `补充示例 · 小数`, sourceNote: `补充示例（小学奥数经典二进制小数）` }
+    ];
+
+    function buildPowerDemoData(preset) {
+      const parts = preset.numStr.split(`.`);
+      const intPart = parts[0] || `0`;
+      const fracPart = parts[1] || ``;
+      const base = preset.base;
+
+      const weightTokens = [];
+      const mulTokens = [];
+      const exprTokens = [];
+      const valTokens = [];
+      let total = 0;
+      let omittedZeroCount = 0;
+
+      // 严格从最高位向最低位遍历整数部分
+      const hasNonZeroInt = !(intPart === `0` && fracPart.length > 0);
+      if (hasNonZeroInt) {
+        const skipZeros = intPart.length >= 5;
+        for (let i = 0; i < intPart.length; i++) {
+          const pow = intPart.length - 1 - i;
+          const d = parseInt(intPart[i], 36);
+          const w = Math.pow(base, pow);
+          weightTokens.push(`<span class="math-inline">${base}<sup>${pow}</sup>(=${w})</span>`);
+          if (skipZeros && d === 0) {
+            omittedZeroCount += 1;
+            continue;
+          }
+          const termVal = d * w;
+          total += termVal;
+          mulTokens.push(`<span class="math-inline">${d}×${base}<sup>${pow}</sup> = ${termVal}</span>`);
+          exprTokens.push(`${d}×${base}<sup>${pow}</sup>`);
+          valTokens.push(String(termVal));
+        }
+      }
+
+      // 从小数点后第 1 位起向低位遍历，使用分数次方 1/n^k（不引入负指数）
+      for (let k = 1; k <= fracPart.length; k++) {
+        const d = parseInt(fracPart[k - 1], 36);
+        const denom = Math.pow(base, k);
+        const termVal = d / denom;
+        total += termVal;
+        const valText = Number(termVal.toFixed(8)).toString();
+        weightTokens.push(`<span class="math-inline">1/${base}<sup>${k}</sup>(=1/${denom})</span>`);
+        mulTokens.push(`<span class="math-inline">${d}×(1/${base}<sup>${k}</sup>) = ${valText}</span>`);
+        exprTokens.push(`${d}×(1/${base}<sup>${k}</sup>)`);
+        valTokens.push(valText);
+      }
+
+      const totalText = Number(total.toFixed(8)).toString();
+      const zeroNote = omittedZeroCount > 0 ? `（中间 ${omittedZeroCount} 个 0 位贡献为 0，展开式可省略）` : ``;
+
+      return {
+        titleHtml: `${escapeHtml(preset.badge)}：<span class="math-inline">(${escapeHtml(preset.numStr)})<sub>${base}</sub> → (${totalText})<sub>10</sub></span>`,
+        stepsHtml: [
+          `第 1 步（从高位到低位标位权）：${weightTokens.join(`、`)}`,
+          `第 2 步（高位到低位逐位乘权）：${mulTokens.join(`，`)}${zeroNote}`,
+          `第 3 步（按权展开求和）：<span class="math-inline">(${escapeHtml(preset.numStr)})<sub>${base}</sub> = ${exprTokens.join(` + `)} = ${valTokens.join(` + `)} = <strong>${totalText}</strong></span>`
+        ],
+        sourceNote: preset.sourceNote
+      };
+    }
+
+    function selectPowerDemoPreset(presetId) {
+      if (!POWER_DEMO_PRESETS.some(function(p) { return p.id === presetId; })) return;
+      appState.activePowerPreset = presetId;
+      appState.demoStepIndex = 0;
+      renderCompareTab();
+      persistState();
+    }
+
     function switchCompareTab(tabKey) {
       if (!COMPARE_TABS[tabKey]) return;
       appState.activeCompareTab = tabKey;
@@ -2973,7 +3086,8 @@ button, input, select, textarea {
     function stepDemoNext() {
       const data = COMPARE_TABS[appState.activeCompareTab];
       if (!data) return;
-      if (appState.demoStepIndex < data.demoSteps.length - 1) {
+      const totalSteps = appState.activeCompareTab === `power` ? 3 : data.demoSteps.length;
+      if (appState.demoStepIndex < totalSteps - 1) {
         appState.demoStepIndex += 1;
       } else {
         appState.demoStepIndex = 0;
@@ -2984,7 +3098,8 @@ button, input, select, textarea {
     function stepDemoShowAll() {
       const data = COMPARE_TABS[appState.activeCompareTab];
       if (!data) return;
-      appState.demoStepIndex = data.demoSteps.length - 1;
+      const totalSteps = appState.activeCompareTab === `power` ? 3 : data.demoSteps.length;
+      appState.demoStepIndex = totalSteps - 1;
       renderCompareTab();
     }
 
@@ -3004,18 +3119,14 @@ button, input, select, textarea {
       const data = COMPARE_TABS[appState.activeCompareTab];
       if (!data) return;
 
-      if (appState.demoStepIndex >= data.demoSteps.length) {
-        appState.demoStepIndex = data.demoSteps.length - 1;
-      }
-
       let tableHeadHtml = ``;
       let tableBodyHtml = ``;
 
       if (appState.activeCompareTab === `power`) {
-        tableHeadHtml = `<tr><th>进制</th><th>可用数码</th><th>整数部分实例</th><th>小数部分实例</th><th>来源标注</th></tr>`;
+        tableHeadHtml = `<tr><th>进制</th><th>可用数码</th><th>整数部分实例（高位→低位）</th><th>小数部分实例（分数次方）</th><th>来源标注</th></tr>`;
         tableBodyHtml = data.rows.map(function(r) {
-          const decCell = r.decimalEx === `「来源未提及」` ? `<span class="not-mentioned">来源未提及</span>` : escapeHtml(r.decimalEx);
-          return `<tr><td><strong>${escapeHtml(r.base)}</strong></td><td class="num">${escapeHtml(r.digits)}</td><td class="num">${escapeHtml(r.integerEx)}</td><td class="num">${decCell}</td><td>${escapeHtml(r.source)}</td></tr>`;
+          const decCell = r.decimalHtml === `「来源未提及」` ? `<span class="not-mentioned">来源未提及</span>` : r.decimalHtml;
+          return `<tr><td><strong>${escapeHtml(r.base)}</strong></td><td class="num">${escapeHtml(r.digits)}</td><td class="num">${r.integerHtml}</td><td class="num">${decCell}</td><td>${escapeHtml(r.source)}</td></tr>`;
         }).join(``);
       } else if (appState.activeCompareTab === `short`) {
         tableHeadHtml = `<tr><th>目标进制</th><th>转化规则</th><th>整数转化实例</th><th>小数转化实例</th><th>来源标注</th></tr>`;
@@ -3041,21 +3152,47 @@ button, input, select, textarea {
         }).join(``);
       }
 
-      const stepsHtml = data.demoSteps.map(function(s, idx) {
+      let demoTitleHtml = escapeHtml(data.demoTitle);
+      let rawSteps = data.demoSteps.map(function(s) { return escapeHtml(s); });
+      let presetBarHtml = ``;
+      let demoSourceNote = ``;
+
+      if (appState.activeCompareTab === `power`) {
+        const preset = POWER_DEMO_PRESETS.find(function(p) { return p.id === appState.activePowerPreset; }) || POWER_DEMO_PRESETS[0];
+        const built = buildPowerDemoData(preset);
+        demoTitleHtml = built.titleHtml;
+        rawSteps = built.stepsHtml;
+        demoSourceNote = built.sourceNote;
+        presetBarHtml = `
+          <div class="filter-pills" style="margin-bottom:var(--space-xs);" role="group" aria-label="切换按权展开演示样例">
+            ${POWER_DEMO_PRESETS.map(function(p) {
+              const active = p.id === preset.id;
+              return `<button type="button" class="pill ${active ? `is-active` : ``}" aria-pressed="${active ? `true` : `false`}" onclick="selectPowerDemoPreset('${p.id}')">${escapeHtml(p.label)}</button>`;
+            }).join(``)}
+          </div>
+        `;
+      }
+
+      if (appState.demoStepIndex >= rawSteps.length) {
+        appState.demoStepIndex = rawSteps.length - 1;
+      }
+
+      const stepsHtml = rawSteps.map(function(sHtml, idx) {
         let cls = `demo-step-row`;
         if (idx === appState.demoStepIndex) cls += ` is-current`;
         else if (idx < appState.demoStepIndex) cls += ` is-done`;
         else cls += ` is-locked`;
-        return `<div class="${cls}">${escapeHtml(s)}</div>`;
+        return `<div class="${cls}">${sHtml}</div>`;
       }).join(``);
 
-      const isLastStep = appState.demoStepIndex >= data.demoSteps.length - 1;
+      const isLastStep = appState.demoStepIndex >= rawSteps.length - 1;
+      const summaryHtml = data.summaryHtml ? data.summaryHtml : escapeHtml(data.summary);
 
       panel.innerHTML = `
         <div class="panel-block">
           <div class="panel-intro">
             <h3>${escapeHtml(data.title)}</h3>
-            <p>${escapeHtml(data.summary)}</p>
+            <p>${summaryHtml}</p>
           </div>
           <div class="table-wrap">
             <table class="variant-table">
@@ -3067,9 +3204,10 @@ button, input, select, textarea {
 
         <aside class="sim-box" aria-label="讲义原题分步拆解演示">
           <div class="sim-stage">
+            ${presetBarHtml}
             <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-sm); flex-wrap:wrap;">
-              <strong style="font-size:0.95rem;">${escapeHtml(data.demoTitle)}</strong>
-              <span class="tag tag--blue">第 ${appState.demoStepIndex + 1} / ${data.demoSteps.length} 步</span>
+              <strong style="font-size:0.95rem;">${demoTitleHtml}</strong>
+              <span class="tag tag--blue">第 ${appState.demoStepIndex + 1} / ${rawSteps.length} 步</span>
             </div>
             <div class="demo-steps">${stepsHtml}</div>
           </div>
@@ -3087,7 +3225,7 @@ button, input, select, textarea {
           </div>
 
           <div style="font-size:0.8rem; color:var(--on-surface-variant);">
-            <strong>${escapeHtml(data.sourceText)}</strong>
+            <strong>${escapeHtml(demoSourceNote ? `当前演示来源：${demoSourceNote} ｜ ${data.sourceText}` : data.sourceText)}</strong>
           </div>
         </aside>
       `;
