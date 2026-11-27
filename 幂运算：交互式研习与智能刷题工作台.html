@@ -2504,6 +2504,21 @@ async function initApp() {
     if (Array.isArray(saved.quizMasteredIds)) appState.quizMasteredIds = saved.quizMasteredIds;
   }
 
+  const urlParams = new URLSearchParams(window.location.search || ``);
+  const urlQ = (urlParams.get(`q`) || ``).trim();
+  const urlItem = (urlParams.get(`item`) || ``).trim();
+  if (urlItem && EVIDENCE_CARDS.some(function(c) { return c.id === urlItem; })) {
+    appState.activeFilter = `all`;
+    appState.searchQuery = urlQ;
+    if (appState.expandedCards.indexOf(urlItem) === -1) appState.expandedCards.push(urlItem);
+  } else if (urlItem && QUIZ_BANK.some(function(q) { return q.id === urlItem; })) {
+    if (appState.quizQuestionIds.indexOf(urlItem) === -1) appState.quizQuestionIds.unshift(urlItem);
+    if (appState.quizOpenAnswerIds.indexOf(urlItem) === -1) appState.quizOpenAnswerIds.push(urlItem);
+  } else if (urlQ) {
+    appState.activeFilter = `all`;
+    appState.searchQuery = urlQ;
+  }
+
   const searchEl = document.getElementById(`keyword-search`);
   if (searchEl) searchEl.value = appState.searchQuery;
 
@@ -2513,6 +2528,14 @@ async function initApp() {
   renderChecklist();
   syncQuizControlsUI();
   renderQuizPaper();
+
+  if (urlItem && QUIZ_BANK.some(function(q) { return q.id === urlItem; })) {
+    const qSec = document.getElementById(`sec-quiz`);
+    if (qSec && typeof qSec.scrollIntoView === `function`) qSec.scrollIntoView({ behavior: `smooth`, block: `start` });
+  } else if (urlItem || urlQ) {
+    const eSec = document.getElementById(`sec-evidence`);
+    if (eSec && typeof eSec.scrollIntoView === `function`) eSec.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
 
   try {
     if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {

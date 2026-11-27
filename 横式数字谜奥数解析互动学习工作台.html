@@ -4837,6 +4837,25 @@ async function initApp() {
     renderQuizOutput();
   }
 
+  const urlParams = new URLSearchParams(window.location.search || ``);
+  const urlQ = (urlParams.get(`q`) || ``).trim();
+  const urlItem = (urlParams.get(`item`) || ``).trim();
+  if (window.location.hash === `#sec-missing8`) {
+    jumpToMissing8();
+  } else if (urlItem && PROBLEMS.some(function(p) { return p.id === urlItem; })) {
+    jumpToProblem(urlItem);
+  } else if (urlQ) {
+    appState.moduleFilter = `all`;
+    appState.sourceFilter = `all`;
+    appState.statusFilter = `all`;
+    appState.searchQuery = urlQ;
+    const searchEl = document.getElementById(`search-input`);
+    if (searchEl) searchEl.value = urlQ;
+    updateFilterChipsUI();
+    renderProblemsList();
+    if (searchEl && typeof searchEl.scrollIntoView === `function`) searchEl.scrollIntoView({ behavior: `smooth`, block: `center` });
+  }
+
   if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
     window.notebookAppApi.notifyAppReady();
   }

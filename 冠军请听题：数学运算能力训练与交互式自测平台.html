@@ -3555,11 +3555,32 @@ button, input, select, textarea {
         appState.quizQuestionIds = shuffleArray(pool).slice(0, Math.min(req, pool.length)).map(function (q) { return q.id; });
       }
 
+      const urlParams = new URLSearchParams(window.location.search || ``);
+      const urlQ = (urlParams.get(`q`) || ``).trim();
+      const urlItem = (urlParams.get(`item`) || ``).trim();
+      if (urlItem && SOURCE_ITEMS.some(function (x) { return x.id === urlItem; })) {
+        appState.activeStage = `all`;
+        appState.masteryFilter = `all`;
+        appState.searchQuery = urlQ;
+        if (appState.expandedIds.indexOf(urlItem) === -1) appState.expandedIds.push(urlItem);
+      } else if (urlQ) {
+        appState.activeStage = `all`;
+        appState.masteryFilter = `all`;
+        appState.searchQuery = urlQ;
+      }
+      const searchEl = document.getElementById(`search-input`);
+      if (searchEl) searchEl.value = appState.searchQuery;
+
       renderStagePills();
       renderKPIs();
       renderCards();
       switchComparisonTab(appState.activeTab);
       renderWorksheet();
+
+      if (urlItem || urlQ) {
+        const target = (urlItem && document.getElementById(`card-` + urlItem)) || document.getElementById(`search-input`);
+        if (target && typeof target.scrollIntoView === `function`) target.scrollIntoView({ behavior: `smooth`, block: `center` });
+      }
 
       if (window.lucide && typeof window.lucide.createIcons === `function`) {
         window.lucide.createIcons();

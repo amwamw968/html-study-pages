@@ -3474,9 +3474,36 @@ button, input, select, textarea {
         }
       }
 
+      const urlParams = new URLSearchParams(window.location.search || ``);
+      const urlQ = (urlParams.get(`q`) || ``).trim();
+      const urlItem = (urlParams.get(`item`) || ``).trim();
+      if (urlItem && STUDY_ITEMS.some(function(it) { return it.id === urlItem; })) {
+        appState.section = `全部`;
+        appState.base = `全部`;
+        appState.difficulty = `全部`;
+        appState.qtype = `全部`;
+        appState.status = `全部`;
+        appState.search = urlQ;
+        if (appState.openAnswerIds.indexOf(urlItem) === -1) appState.openAnswerIds.push(urlItem);
+      } else if (urlQ) {
+        appState.section = `全部`;
+        appState.base = `全部`;
+        appState.difficulty = `全部`;
+        appState.qtype = `全部`;
+        appState.status = `全部`;
+        appState.search = urlQ;
+      }
+      const searchEl = document.getElementById(`search-input`);
+      if (searchEl) searchEl.value = appState.search;
+
       syncQuizFormControls();
       renderLibraryView();
       renderCompareTab();
+
+      if (urlItem || urlQ) {
+        const sec = document.getElementById(`sec-library`);
+        if (sec && typeof sec.scrollIntoView === `function`) sec.scrollIntoView({ behavior: `smooth`, block: `start` });
+      }
 
       if (appState.quizIds && appState.quizIds.length > 0) {
         appState.quizStatusMsg = `已恢复上次本地生成的 ` + appState.quizIds.length + ` 道练习题。`;
